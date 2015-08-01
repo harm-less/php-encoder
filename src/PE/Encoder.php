@@ -1,6 +1,6 @@
 <?php
 
-namespace PH;
+namespace PE;
 
 class Encoder {
 

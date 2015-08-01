@@ -20,12 +20,12 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"PH\\": "src/PH/"
+			"PE\\": "src/PE"
 		}
 	},
 	"autoload-dev": {
 		"psr-0": {
-			"PH\\": "tests"
+			"PE\\": "tests"
 		}
 	}
 }

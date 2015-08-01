@@ -2,9 +2,9 @@
 
 namespace PH\Tests;
 
-use PH\Encoder;
+use PE\Encoder;
 
-class EncoderTest extends AbstractPHTest {
+class EncoderTest extends AbstractPETest {
 
 	public function testConstructor()
 	{

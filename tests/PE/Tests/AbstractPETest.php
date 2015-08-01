@@ -2,13 +2,13 @@
 
 namespace PH\Tests;
 
-use PH\Encoder;
+use PE\Encoder;
 use PHPUnit_Framework_TestCase;
 
 /**
  * Base test class for PHP Unit testing
  */
-abstract class AbstractPHTest extends PHPUnit_Framework_TestCase
+abstract class AbstractPETest extends PHPUnit_Framework_TestCase
 {
 
 	/**

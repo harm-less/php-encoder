@@ -1,8 +1,11 @@
 <?php
 
+error_reporting( E_ALL );
+ini_set("display_errors", 'On' );
+
 $autoloader = require('vendor/autoload.php');
 
-use PH\Encoder;
+use PE\Encoder;
 
 $encoder = new Encoder();
 pr($encoder);
