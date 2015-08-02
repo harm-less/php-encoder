@@ -14,6 +14,8 @@ use PE\Options\EncoderOptions;
 
 class Encoder implements IEncoder {
 
+
+
 	public function decode($node, EncoderOptions $options = null) {
 		$arr = array();
 		$childNodeNames = $this->decodeChildNames($node);
