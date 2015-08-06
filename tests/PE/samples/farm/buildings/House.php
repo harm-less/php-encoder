@@ -2,6 +2,6 @@
 
 namespace PE\Samples\Farm\Buildings;
 
-class Greenhouse {
+class House extends AnimalsBuilding {
 
 }

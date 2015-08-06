@@ -9,7 +9,7 @@ use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeChild;
 use PE\Options\EncoderOptions;
 
-class XmlProxy extends Encoder {
+class XmlEncoder extends Encoder {
 
 	const ROOT_NODE_NAME = 'tb';
 
