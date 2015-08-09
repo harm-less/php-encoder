@@ -8,7 +8,7 @@ require('tests/bootstrap.php');
 use PE\Encoder;
 
 $encoder = new Encoder();
-pr($encoder);
+//pr($encoder);
 
 function pr($var) {
 	$template = php_sapi_name() !== 'cli' ? '<pre>%s</pre>' : "\n%s\n";

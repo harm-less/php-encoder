@@ -6,4 +6,7 @@ use PE\Samples\Farm\Building;
 
 class Greenhouse extends Building {
 
+	function __construct() {
+		parent::__construct('greenhouse');
+	}
 }

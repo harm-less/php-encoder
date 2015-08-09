@@ -22,11 +22,7 @@ class Encoder implements IEncoder {
 		$options = $options ? $options : new EncoderOptions(null);
 
 		foreach ($childNodeNames as $childNodeName) {
-			$proxyNode = EncoderNode::getNode($childNodeName);
-			$isSingleNode = EncoderNode::isSingleNode($childNodeName);
-
 			$nodeArray = $this->decodeRawToArray($childNodeName, $node, array());
-
 			$arr[$childNodeName] = $this->_decodeNode($childNodeName, array($childNodeName => $nodeArray), $options);
 		}
 		return $arr;

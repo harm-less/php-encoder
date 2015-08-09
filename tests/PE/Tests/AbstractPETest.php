@@ -1,6 +1,6 @@
 <?php
 
-namespace PH\Tests;
+namespace PE\Tests;
 
 use PE\Encoder;
 use PHPUnit_Framework_TestCase;

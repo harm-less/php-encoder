@@ -2,9 +2,9 @@
 
 namespace PE\Encoders;
 
+use LSS\Array2XML;
 use PE\Encoder;
 use PE\Exceptions\EncoderException;
-use PE\Library\Array2XML;
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeChild;
 use PE\Options\EncoderOptions;
