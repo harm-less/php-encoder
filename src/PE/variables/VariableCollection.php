@@ -2,6 +2,8 @@
 
 namespace PE\Variables;
 
+use PE\Exceptions\VariableCollectionException;
+
 class VariableCollection {
 
 	/**
@@ -15,7 +17,7 @@ class VariableCollection {
 
 	public function processValue($name, $value) {
 		$variable = $this->getVariable($name);
-		if ($variable == null) {
+		if ($variable === null) {
 			return null;
 		}
 		return $variable->processValue($value);
@@ -70,9 +72,6 @@ class VariableCollection {
 			if ($object = $this->getVariableById($variable)) {
 				return $object;
 			}
-			else if ($object = $this->getVariableByName($variable)) {
-				return $object;
-			}
 		}
 		else if (is_object($variable)) {
 			return $variable;
@@ -89,7 +88,7 @@ class VariableCollection {
 	/**
 	 * @param bool $order
 	 * @return Variable[]
-	 * @throws \Exception
+	 * @throws VariableCollectionException
 	 */
 	public function getVariables($order = true) {
 		if ($order === true) {
@@ -99,7 +98,7 @@ class VariableCollection {
 				$orderPosition = $variable->getOrder();
 				if ($orderPosition !== null) {
 					if (array_key_exists($orderPosition, $orderedVariables)) {
-						throw new \Exception(sprintf('Cannot order variables because position "%s" is being used more than once', $orderPosition));
+						throw new VariableCollectionException(sprintf('Cannot order variables because position "%s" is being used more than once', $orderPosition));
 					}
 					$orderedVariables[$orderPosition] = $variable;
 				}
@@ -110,15 +109,6 @@ class VariableCollection {
 			return array_merge($orderedVariables, $unorderedVariables);
 		}
 		return $this->variables;
-	}
-
-	public function getVariableByName($name) {
-		foreach ($this->variables as $variable) {
-			if ($variable->containsName($name)) {
-				return $variable;
-			}
-		}
-		return null;
 	}
 
 	public function variableExists($id) {

@@ -2,7 +2,7 @@
 	"name": "harm-less/php-encoder",
 	"type": "library",
 	"description": "Encoder to intelligently convert an entire PHP object to Json or XML e.g.",
-	"keywords": ["php", "object", "encoding", "encode", "decoding", "decode", "json", "xml"],
+	"keywords": ["php", "encoding", "encode", "decoding", "decode", "conversion", "object conversion", "object", "json", "xml"],
 	"homepage": "https://github.com/harm-less/php-encoder",
 	"license": "MIT",
 	"authors": [

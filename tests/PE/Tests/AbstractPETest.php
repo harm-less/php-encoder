@@ -17,7 +17,7 @@ abstract class AbstractPETest extends PHPUnit_Framework_TestCase
 	 *
 	 * @type Encoder
 	 */
-	protected $_phApp;
+	protected $_peApp;
 
 	protected $_nonPublicMethodObject;
 
@@ -31,7 +31,7 @@ abstract class AbstractPETest extends PHPUnit_Framework_TestCase
 	{
 		// Create a new FQ app,
 		// since we need one pretty much everywhere
-		$this->_phApp = new Encoder();
+		$this->_peApp = new Encoder();
 	}
 
 	protected function nonPublicMethodObject($object = null) {

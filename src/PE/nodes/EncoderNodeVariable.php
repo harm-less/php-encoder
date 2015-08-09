@@ -4,6 +4,7 @@ namespace PE\Nodes;
 
 use PE\Exceptions\EncoderNodeVariableException;
 use PE\Enums\ActionVariable;
+use PE\Library\Inflector;
 use PE\Variables\Variable;
 
 class EncoderNodeVariable extends Variable {
@@ -175,6 +176,10 @@ class EncoderNodeVariable extends Variable {
 			self::_cache(__FUNCTION__, $result);
 		}
 		return $result;
+	}
+
+	public function camelCased($str) {
+		return ucfirst(Inflector::camelize($str, true, '-'));
 	}
 
 	public function callNodeSetterAction($node, $nodeData, $options) {

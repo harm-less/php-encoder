@@ -373,9 +373,6 @@ class EncoderNode {
 	public function getVariableById($id) {
 		return $this->variables->getVariableById($id);
 	}
-	public function getVariableByName($name) {
-		return $this->variables->getVariableByName($name);
-	}
 	public function getVariablesSetterActionByType($type) {
 		return $this->variables->getVariablesSetterActionByType($type);
 	}
