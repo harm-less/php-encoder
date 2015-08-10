@@ -49,6 +49,7 @@ class Variable {
 
 	/**
 	 * @param array|null $options Construct options
+	 * @param string|null $id Id used in collection
 	 */
 	function __construct($options = null, $id = null) {
 		$this->parseOptions($options);

@@ -10,6 +10,29 @@ class EncoderNodeVariableCollection extends VariableCollection {
 
 	private $_cachedAlwaysExecutedVariables;
 
+	public function getVariablesSetterActionByType($type) {
+		return $this->_getVariablesActionByType($type, 'getSetterAction');
+	}
+	public function getVariablesGetterActionByType($type) {
+		return $this->_getVariablesActionByType($type, 'getGetterAction');
+	}
+
+	/**
+	 * @param $type
+	 * @param $actionMethod
+	 * @return EncoderNodeVariable[]
+	 */
+	protected function _getVariablesActionByType($type, $actionMethod) {
+		$variables = array();
+		foreach ($this->getVariables() as $variable) {
+			$action = $variable->$actionMethod();
+			if (isset($action['type']) && $action['type'] == $type) {
+				$variables[$variable->getId()] = $variable;
+			}
+		}
+		return $variables;
+	}
+
 	public function addNodeVariable(EncoderNodeVariable $variable) {
 		$this->_cachedAlwaysExecutedVariables = null;
 		$variable = parent::addVariable($variable);

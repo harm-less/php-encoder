@@ -23,30 +23,6 @@ class VariableCollection {
 		return $variable->processValue($value);
 	}
 
-
-	public function getVariablesSetterActionByType($type) {
-		return $this->_getVariablesActionByType($type, 'getSetterAction');
-	}
-	public function getVariablesGetterActionByType($type) {
-		return $this->_getVariablesActionByType($type, 'getGetterAction');
-	}
-
-	/**
-	 * @param $type
-	 * @param $actionMethod
-	 * @return Variable[]
-	 */
-	protected function _getVariablesActionByType($type, $actionMethod) {
-		$variables = array();
-		foreach ($this->variables as $variable) {
-			$action = $variable->$actionMethod();
-			if (isset($action['type']) && $action['type'] == $type) {
-				$variables[$variable->getId()] = $variable;
-			}
-		}
-		return $variables;
-	}
-
 	public function addVariable(Variable $variable) {
 		$id = $variable->getId();
 		if (!$this->variableExists($id)) {

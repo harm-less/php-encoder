@@ -9,7 +9,6 @@ use PE\Variables\Variable;
 
 class EncoderNodeVariable extends Variable {
 
-	private $id;
 	private $setterAction;
 	private $getterAction;
 
@@ -27,9 +26,7 @@ class EncoderNodeVariable extends Variable {
 	function __construct($id, $options = null) {
 		$this->_cache = array();
 
-		parent::__construct($options);
-
-		$this->id = $id;
+		parent::__construct($options, $id);
 	}
 
 	public function parseOptions($options) {
@@ -147,10 +144,6 @@ class EncoderNodeVariable extends Variable {
 	}
 	public function getActionVariables($action) {
 		return (isset($action['variables']) ? $action['variables'] : null);
-	}
-
-	public function getId() {
-		return $this->id;
 	}
 
 	public function getName() {
