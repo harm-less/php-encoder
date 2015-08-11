@@ -11,11 +11,28 @@ use PE\Samples\Farm\Animals\Cat;
 use PE\Samples\Farm\Animals\Sheep;
 use PE\Samples\Farm\Animals\Chicken;
 
-abstract class Samples extends AbstractPETest
+class Samples extends AbstractPETest
 {
-	protected $farm;
-	
 	function __construct() {
+
+	}
+
+	/**
+	 * @return House
+	 */
+	public function getHouse() {
+		$cat = new Cat();
+
+		$house = new House();
+		$house->addAnimal($cat);
+
+		return $house;
+	}
+
+	/**
+	 * @return Farm
+	 */
+	public function getFarm() {
 		$cow1 = new Cow();
 		$cow2 = new Cow();
 		$chicken1 = new Chicken();
@@ -23,10 +40,6 @@ abstract class Samples extends AbstractPETest
 		$chicken3 = new Chicken();
 		$sheep1 = new Sheep();
 		$sheep2 = new Sheep();
-		$cat = new Cat();
-
-		$house = new House();
-		$house->addAnimal($cat);
 
 		$greenHouse = new Greenhouse();
 
@@ -40,8 +53,10 @@ abstract class Samples extends AbstractPETest
 		$barn->addAnimal($sheep2);
 
 		$farm = $this->farm = new Farm();
-		$farm->addBuilding($house);
+		$farm->addBuilding($this->getHouse());
 		$farm->addBuilding($greenHouse);
 		$farm->addBuilding($barn);
+
+		return $farm;
 	}
 }

@@ -10,7 +10,7 @@ class FarmTest extends Samples {
 	public function testConstructor()
 	{
 		$encode = new XmlEncoder();
-		$xml = $encode->encode($this->farm);
+		$xml = $encode->encode($this->getFarm());
 		$encodeStrFirst = $xml->saveXML();
 
 		$decode = $encode->decode(simplexml_import_dom($xml));

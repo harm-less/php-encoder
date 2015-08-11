@@ -47,18 +47,16 @@ class EncoderNodeVariableCollection extends VariableCollection {
 		foreach ($dataArray as $data) {
 			foreach ($this->getVariables() as $variable) {
 				$variableId = $variable->getId();
-				if ($variableId !== null) {
-					if (array_key_exists($variableId, $data)) {
-						$variableValue = $data[$variableId];
-						if ($variable->mustBeUnique()) {
-							if (!isset($unique[$variableId])) {
-								$unique[$variableId] = array();
-							}
-							if (array_search($variableValue, $unique[$variableId]) !== false) {
-								throw new EncoderNodeVariableException(sprintf('Variable "%s" must be unique but value "%s" is given at least twice', $variableId, $variableValue));
-							}
-							$unique[$variableId][] = $variableValue;
+				if ($variableId !== null && array_key_exists($variableId, $data)) {
+					$variableValue = $data[$variableId];
+					if ($variable->mustBeUnique()) {
+						if (!isset($unique[$variableId])) {
+							$unique[$variableId] = array();
 						}
+						if (array_search($variableValue, $unique[$variableId]) !== false) {
+							throw new EncoderNodeVariableException(sprintf('Variable "%s" must be unique but value "%s" is given at least twice', $variableId, $variableValue));
+						}
+						$unique[$variableId][] = $variableValue;
 					}
 				}
 			}
