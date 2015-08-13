@@ -60,22 +60,31 @@ class EncoderNodeVariable extends Variable {
 		}
 		return $this->_cache[$method];
 	}
+	protected function _cacheReset($method) {
+		if (array_key_exists($method, $this->_cache)) {
+			unset($this->_cache[$method]);
+			return true;
+		}
+		return false;
+	}
 
 	public function mustBeUnique($bool = null) {
 		if ($bool !== null && is_bool($bool)) {
 			$this->mustBeUnique = $bool;
 		}
-		return $this->mustBeUnique;
+		return (bool) $this->mustBeUnique;
 	}
 
 	public function alwaysExecute($bool = null) {
 		if ($bool !== null && is_bool($bool)) {
 			$this->alwaysExecute = $bool;
 		}
-		return $this->alwaysExecute;
+		return (bool) $this->alwaysExecute;
 	}
 
 	public function setSetterAction($method) {
+		$this->_cacheReset('getSetterActionMethod');
+		$this->_cacheReset('getSetterActionType');
 		$this->setterAction = $method;
 	}
 	public function getSetterAction() {
@@ -100,6 +109,8 @@ class EncoderNodeVariable extends Variable {
 	}
 
 	public function setGetterAction($method) {
+		$this->_cacheReset('getGetterActionMethod');
+		$this->_cacheReset('getGetterActionType');
 		$this->getterAction = $method;
 	}
 	public function getGetterAction() {
@@ -141,9 +152,6 @@ class EncoderNodeVariable extends Variable {
 			}
 		}
 		return $type;
-	}
-	public function getActionVariables($action) {
-		return (isset($action['variables']) ? $action['variables'] : null);
 	}
 
 	public function getName() {
@@ -204,7 +212,7 @@ class EncoderNodeVariable extends Variable {
 
 	protected function _setupNodeActionVariables($action, $required, $options) {
 
-		$variablesNames = array_merge($required, $this->getActionVariables($action));
+		$variablesNames = array_merge($required, isset($action['variables']) ? $action['variables'] : array());
 
 		$variables = array();
 		foreach ($variablesNames as $actionVariableIndex => $variableName) {
