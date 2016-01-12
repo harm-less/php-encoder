@@ -367,7 +367,7 @@ class Encoder implements IEncoder {
 					$childObjects = array($childObjects);
 				}
 				else if (!is_array($childObjects)) {
-					throw new EncoderException(sprintf('Children object for node "%s" must be an array and this can be determined by the parameter "isArray" in ', $childNodeName));
+					throw new EncoderException(sprintf('Children object for node "%s" must be an array. EncoderNodeChilds are returning an array by default. If this behavior is not desired, turn it off using "$childNode->isArray(false)" or set "isArray" as an options to the EncoderNodeChild instance', $childNodeName));
 				}
 
 				$rawChildrenInformationIteration = array();

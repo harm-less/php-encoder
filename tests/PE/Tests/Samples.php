@@ -3,6 +3,7 @@
 namespace PE\Tests;
 
 use PE\Nodes\EncoderNode;
+use PE\Nodes\Erroneous\NonArrayGetterMethodNode;
 use PE\Nodes\Farm\AnimalNode;
 use PE\Nodes\Farm\Animals\CatNode;
 use PE\Nodes\Farm\Animals\ChickenNode;
@@ -12,8 +13,12 @@ use PE\Nodes\Farm\BuildingNode;
 use PE\Nodes\Farm\Buildings\BarnNode;
 use PE\Nodes\Farm\Buildings\GreenhouseNode;
 use PE\Nodes\Farm\Buildings\HouseNode;
-use PE\Nodes\FarmNode;
-use PE\Samples\Farm;
+use PE\Nodes\Farm\FarmNode;
+use PE\Nodes\Erroneous\NoGetterMethodNode;
+use PE\Nodes\General\ThingNode;
+use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
+use PE\Samples\Erroneous\NonArrayGetterMethod;
+use PE\Samples\Farm\Farm;
 use PE\Samples\Farm\Animals\Cow;
 use PE\Samples\Farm\Buildings\Barn;
 use PE\Samples\Farm\Buildings\Greenhouse;
@@ -21,6 +26,9 @@ use PE\Samples\Farm\Buildings\House;
 use PE\Samples\Farm\Animals\Cat;
 use PE\Samples\Farm\Animals\Sheep;
 use PE\Samples\Farm\Animals\Chicken;
+use PE\Samples\Erroneous\NoGetterMethod;
+use PE\Samples\General\Thing;
+use PE\Samples\Specials\NonArrayGetterMethodOnPurpose;
 
 class Samples extends AbstractPETest
 {
@@ -106,5 +114,37 @@ class Samples extends AbstractPETest
 		EncoderNode::addNodeType(new ChickenNode(), 'chicken');
 		EncoderNode::addNodeType(new CowNode(), 'cow');
 		EncoderNode::addNodeType(new SheepNode(), 'sheep');
+	}
+
+
+	public function getThings() {
+		return new Thing();
+	}
+	public function addThingsNode() {
+		EncoderNode::addNode(new ThingNode());
+	}
+
+
+	public function getNoGetterMethod() {
+		return new NoGetterMethod();
+	}
+	public function addNoGetterMethodNode() {
+		EncoderNode::addNode(new NoGetterMethodNode());
+	}
+
+	public function getNonArrayGetterMethod() {
+		return new NonArrayGetterMethod();
+	}
+	public function addNonArrayGetterMethodNode()
+	{
+		EncoderNode::addNode(new NonArrayGetterMethodNode());
+	}
+
+
+	public function getNonArrayGetterMethodOnPurpose() {
+		return new NonArrayGetterMethodOnPurpose();
+	}
+	public function addNonArrayGetterMethodOnPurposeNode() {
+		EncoderNode::addNode(new NonArrayGetterMethodOnPurposeNode());
 	}
 }

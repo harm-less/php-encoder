@@ -1,6 +1,9 @@
 <?php
 
-namespace PE\Nodes;
+namespace PE\Nodes\Farm;
+
+use PE\Nodes\EncoderNode;
+use PE\Nodes\EncoderNodeChild;
 
 class FarmNode extends EncoderNode {
 

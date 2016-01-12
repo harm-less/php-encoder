@@ -6,6 +6,7 @@ use PE\Encoder;
 use PE\Nodes\EncoderNode;
 use PE\Options\EncoderOptions;
 use PE\Samples\Farm\Building;
+use PE\Samples\General\Thing;
 
 class EncoderTest extends Samples {
 
@@ -53,13 +54,40 @@ class EncoderTest extends Samples {
 	}
 
 	public function testEncodeWithoutChildObjectNodes() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Cannot set the node name (buildings) of a node child because it doesn\'t exist. Please add the requested node with "EncoderNode::addNode()". Current node name "farms" with class name "PE\Nodes\FarmNode"');
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Cannot set the node name (buildings) of a node child because it doesn\'t exist. Please add the requested node with "EncoderNode::addNode()". Current node name "farms" with class name "PE\Nodes\Farm\FarmNode"');
 
-		$encoder = $this->encoder();
-		$farm = $this->getFarm(false);
 		$this->addFarmNode();
 
-		$encoder->encode($farm);
+		$this->encoder()->encode($this->getFarm(false));
+	}
+	public function testEncodeWithoutGetterMethod() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Getter method "getThings" for node "things" does not exist in class "PE\Samples\Erroneous\NoGetterMethod"');
+
+		$this->addNoGetterMethodNode();
+		$this->addThingsNode();
+
+		$this->encoder()->encode($this->getNoGetterMethod());
+	}
+	public function testEncodeWithGetterMethodReturningString() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Children object for node "things" must be an array. EncoderNodeChilds are returning an array by default. If this behavior is not desired, turn it off using "$childNode->isArray(false)" or set "isArray" as an options to the EncoderNodeChild instance');
+
+		$this->addNonArrayGetterMethodNode();
+		$this->addThingsNode();
+
+		$this->encoder()->encode($this->getNonArrayGetterMethod());
+	}
+
+	public function testEncodeWithGetterMethodReturningNonArrayObject() {
+		$this->addNonArrayGetterMethodOnPurposeNode();
+		$this->addThingsNode();
+
+		$obj = $this->getNonArrayGetterMethodOnPurpose();
+		$obj->addThing(new Thing());
+
+		$encoder = $this->encoder();
+		$encoded = $encoder->encode($obj);
+
+		$this->assertArrayHasKey('thingVar', $encoded['processed']['non-array-getter-method-on-purpose']['things']);
 	}
 
 	public function testEncodeWithWrapperName() {

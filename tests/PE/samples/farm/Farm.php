@@ -1,8 +1,6 @@
 <?php
 
-namespace PE\Samples;
-
-use PE\Samples\Farm\Building;
+namespace PE\Samples\Farm;
 
 class Farm {
 
