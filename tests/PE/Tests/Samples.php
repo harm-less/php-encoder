@@ -2,6 +2,17 @@
 
 namespace PE\Tests;
 
+use PE\Nodes\EncoderNode;
+use PE\Nodes\Farm\AnimalNode;
+use PE\Nodes\Farm\Animals\CatNode;
+use PE\Nodes\Farm\Animals\ChickenNode;
+use PE\Nodes\Farm\Animals\CowNode;
+use PE\Nodes\Farm\Animals\SheepNode;
+use PE\Nodes\Farm\BuildingNode;
+use PE\Nodes\Farm\Buildings\BarnNode;
+use PE\Nodes\Farm\Buildings\GreenhouseNode;
+use PE\Nodes\Farm\Buildings\HouseNode;
+use PE\Nodes\FarmNode;
 use PE\Samples\Farm;
 use PE\Samples\Farm\Animals\Cow;
 use PE\Samples\Farm\Buildings\Barn;
@@ -13,9 +24,6 @@ use PE\Samples\Farm\Animals\Chicken;
 
 class Samples extends AbstractPETest
 {
-	function __construct() {
-
-	}
 
 	/**
 	 * @return House
@@ -30,9 +38,14 @@ class Samples extends AbstractPETest
 	}
 
 	/**
+	 * @param bool $addNodes
 	 * @return Farm
 	 */
-	public function getFarm() {
+	public function getFarm($addNodes = true) {
+		if ($addNodes) {
+			$this->addFarmNodes();
+		}
+
 		$cow1 = new Cow();
 		$cow2 = new Cow();
 		$chicken1 = new Chicken();
@@ -58,5 +71,40 @@ class Samples extends AbstractPETest
 		$farm->addBuilding($barn);
 
 		return $farm;
+	}
+
+	public function addFarmNodes() {
+		$this->addFarmNode();
+
+		$this->addBuildingNode();
+		$this->addBuildingHouseNode();
+		$this->addBuildingGreenhouseNode();
+		$this->addBuildingBarnNode();
+
+		$this->addAnimalNodes();
+	}
+	public function addFarmNode() {
+		EncoderNode::addNode(new FarmNode());
+	}
+
+	public function addBuildingNode() {
+		EncoderNode::addNode(new BuildingNode());
+	}
+	public function addBuildingHouseNode() {
+		EncoderNode::addNodeType(new HouseNode(), 'house');
+	}
+	public function addBuildingGreenhouseNode() {
+		EncoderNode::addNodeType(new GreenhouseNode(), 'greenhouse');
+	}
+	public function addBuildingBarnNode() {
+		EncoderNode::addNodeType(new BarnNode(), 'barn');
+	}
+
+	public function addAnimalNodes() {
+		EncoderNode::addNode(new AnimalNode());
+		EncoderNode::addNodeType(new CatNode(), 'cat');
+		EncoderNode::addNodeType(new ChickenNode(), 'chicken');
+		EncoderNode::addNodeType(new CowNode(), 'cow');
+		EncoderNode::addNodeType(new SheepNode(), 'sheep');
 	}
 }

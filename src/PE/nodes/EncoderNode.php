@@ -181,6 +181,11 @@ class EncoderNode {
 	public static function nodeTypeExists($nodeName, $nodeType) {
 		return self::getNodeType($nodeName, $nodeType) != null;
 	}
+	public static function clean() {
+		self::$nodes = array();
+		self::$nodesTypes = array();
+		self::$getNodeTypeByObjectCache = array();
+	}
 
 
 

@@ -250,6 +250,20 @@ class Encoder implements IEncoder {
 	}
 
 
+	/**
+	 * @param $object
+	 * @param EncoderOptions|null $options The options object that will allow you to shape the outcome of the encoding
+	 * process. The available options are as follows:
+	 * "wrapper": string - wraps the entire result in an object with a name in the form of a key. Default is the node
+	 * name of the object being send to the method
+	 * "key": string - will use one of the attributes of a resulting object as the key instead of the array being
+	 * enumerated
+	 * "value": string - similar to "key" but this time for the value. The rest of the available attributes are ignored.
+	 * "encode": boolean - determines if a node should be encoded or not. Default is true
+	 * "children": boolean - determines if a node's children should be encoded or not. By not encoding them you'll
+	 * save performance. Default is true
+	 * @return array|null
+	 */
 	public function encode($object, EncoderOptions $options = null) {
 		$node = EncoderNode::getNodeTypeByObject($object);
 		if ($node) {
@@ -304,10 +318,8 @@ class Encoder implements IEncoder {
 		$nodeMethodVariables = $node->getVariablesGetterActionByType(EncoderNodeVariable::ACTION_TYPE_NODE);
 		$attributesRaw = $this->loopNodeVariables($node, $nodeMethodVariables, $attributesRaw, $actionVariables);
 
-		$optionIteration = $options->option('iterate', $node, $nodeIterationIndex);
         $optionNodeKey = $options->option('key', $node);
         $optionNodeValue = $options->option('value', $node);
-        $optionEncode = $options->option('encode', $node);
         $optionEncodeAttributes = $options->option('attributes', $node);
         $optionEncodeChildren = $options->option('children', $node);
 
@@ -317,10 +329,6 @@ class Encoder implements IEncoder {
 		// should we encode the node's attributes or not?
         $encodeAttributes = true;
 
-		if (is_bool($optionEncode)) {
-			$encodeAttributes = $optionEncode;
-			$encodeChildren = $optionEncode;
-		}
 		if (is_bool($optionEncodeAttributes)) {
 			$encodeAttributes = $optionEncodeAttributes;
 		}
@@ -334,86 +342,88 @@ class Encoder implements IEncoder {
 		$nodesRaw = array();
 		$childrenProcessed = array();
 
-		$children = $node->getChildren();
-		foreach ($children as $childNodeName => $child) {
+		if ($encodeChildren === true) {
+			$children = $node->getChildren();
+			foreach ($children as $childNodeName => $child) {
 
-			if (!EncoderNode::nodeExists($child->getNodeName())) {
-				throw new EncoderException(sprintf('Cannot set the node name (%s) of a proxy node child because it doesn\'t exist. Please add the requested node with "ProxyNode::addNode()". Current node name "%s" with class name "%s"', $child->getNodeName(), $node->getNodeName(), get_class($node)));
-			}
-
-			$childOptionPath = $optionNodeIndex . ':' . $childNodeName;
-			$optionChildIteration = $options->option('iterate', $childOptionPath);
-			$optionChildKey = $options->option('key', $childOptionPath);
-
-			$isIterated = $optionChildIteration !== null;
-			$childIteration = $optionChildIteration === null ? 1 : $optionChildIteration;
-
-			$getChildObjectsMethod = $child->getGetterMethod();
-			if (!method_exists($object, $getChildObjectsMethod)) {
-				throw new EncoderException(sprintf('Getter method "%s" for node "%s" does not exist in class "%s"', $getChildObjectsMethod, $childNodeName, get_class($object)));
-			}
-			$childObjects = $object->$getChildObjectsMethod();
-
-			if (!$child->isArray()) {
-				$childObjects = array($childObjects);
-			}
-			else if (!is_array($childObjects)) {
-				throw new EncoderException(sprintf('Children object for node "%s" must be an array and this can be determined by the parameter "isArray" in ', $childNodeName));
-			}
-
-			$rawChildrenInformationIteration = array();
-
-			$nodeIteration = 0;
-			for($i = 0; $i < $childIteration; $i++) {
-
-				$childObjectIteration = 0;
-				foreach ($childObjects as $childObject) {
-					$childNodeType = EncoderNode::getNodeTypeByObject($childObject);
-
-					if ($childNodeType === null) {
-						throw new EncoderException(sprintf('Child node type for object "%s (child of "%s")" for node "%s" not found', get_class($childObject), $node->getNodeName(), $childNodeName));
-					}
-
-					$childNodeData = $this->_encode($childObject, $childNodeType, $options, $object, $nodeIteration, $childObjectIteration);
-
-					$rawChildNode = $childNodeData['raw'];
-					$rawChildNodeAttributes = $rawChildNode['attributes'];
-					$rawChildNodeChildren = $rawChildNode['children'];
-
-					$processedChildNode = $childNodeData['processed'];
-
-					$rawChildrenInformationIteration[$nodeIteration][$childObjectIteration] = array('attributes' => $rawChildNodeAttributes, 'children' => $rawChildNodeChildren, 'nodeName' => $childNodeName);
-
-					if ($optionChildKey !== null) {
-						if ($isIterated) {
-							$childrenProcessed[$nodeIteration][$rawChildNodeAttributes[$optionChildKey]] = $processedChildNode;
-						}
-						else {
-							$childrenProcessed[$rawChildNodeAttributes[$optionChildKey]] = $processedChildNode;
-						}
-					}
-					else {
-						if (!isset($childrenProcessed[$childNodeName])) {
-							$childrenProcessed[$childNodeName] = array();
-						}
-						$childrenProcessedTemp = array($childObjectIteration => $processedChildNode);
-						if ($isIterated) {
-							$childrenProcessed[$childNodeName] = array_merge_recursive($childrenProcessed[$childNodeName], $this->encodeNodeChildren($childNodeType, $childNodeName, $child, array($nodeIteration => $childrenProcessedTemp)));
-						}
-						else {
-							$childrenProcessed[$childNodeName] = array_merge_recursive($childrenProcessed[$childNodeName], $this->encodeNodeChildren($childNodeType, $childNodeName, $child, $childrenProcessedTemp));
-						}
-					}
-
-					$childObjectIteration++;
+				if (!EncoderNode::nodeExists($child->getNodeName())) {
+					throw new EncoderException(sprintf('Cannot set the node name (%s) of a node child because it doesn\'t exist. Please add the requested node with "EncoderNode::addNode()". Current node name "%s" with class name "%s"', $child->getNodeName(), $node->getNodeName(), get_class($node)));
 				}
 
-				$nodeIteration++;
-			}
+				$childOptionPath = $optionNodeIndex . ':' . $childNodeName;
+				$optionChildIteration = $options->option('iterate', $childOptionPath);
+				$optionChildKey = $options->option('key', $childOptionPath);
 
-			if (count($rawChildrenInformationIteration)) {
-				$rawIteratedChildren = ($isIterated ? $rawChildrenInformationIteration : $rawChildrenInformationIteration[0]);
-				$nodesRaw[$childNodeName] = $rawIteratedChildren;
+				$isIterated = $optionChildIteration !== null;
+				$childIteration = $optionChildIteration === null ? 1 : $optionChildIteration;
+
+				$getChildObjectsMethod = $child->getGetterMethod();
+				if (!method_exists($object, $getChildObjectsMethod)) {
+					throw new EncoderException(sprintf('Getter method "%s" for node "%s" does not exist in class "%s"', $getChildObjectsMethod, $childNodeName, get_class($object)));
+				}
+				$childObjects = $object->$getChildObjectsMethod();
+
+				if (!$child->isArray()) {
+					$childObjects = array($childObjects);
+				}
+				else if (!is_array($childObjects)) {
+					throw new EncoderException(sprintf('Children object for node "%s" must be an array and this can be determined by the parameter "isArray" in ', $childNodeName));
+				}
+
+				$rawChildrenInformationIteration = array();
+
+				$nodeIteration = 0;
+				for ($i = 0; $i < $childIteration; $i++) {
+
+					$childObjectIteration = 0;
+					foreach ($childObjects as $childObject) {
+						$childNodeType = EncoderNode::getNodeTypeByObject($childObject);
+
+						if ($childNodeType === null) {
+							throw new EncoderException(sprintf('Child node type for object "%s (child of "%s")" for node "%s" not found', get_class($childObject), $node->getNodeName(), $childNodeName));
+						}
+
+						$childNodeData = $this->_encode($childObject, $childNodeType, $options, $object, $nodeIteration, $childObjectIteration);
+
+						$rawChildNode = $childNodeData['raw'];
+						$rawChildNodeAttributes = $rawChildNode['attributes'];
+						$rawChildNodeChildren = $rawChildNode['children'];
+
+						$processedChildNode = $childNodeData['processed'];
+
+						$rawChildrenInformationIteration[$nodeIteration][$childObjectIteration] = array('attributes' => $rawChildNodeAttributes, 'children' => $rawChildNodeChildren, 'nodeName' => $childNodeName);
+
+						if ($optionChildKey !== null) {
+							if ($isIterated) {
+								$childrenProcessed[$nodeIteration][$rawChildNodeAttributes[$optionChildKey]] = $processedChildNode;
+							}
+							else {
+								$childrenProcessed[$rawChildNodeAttributes[$optionChildKey]] = $processedChildNode;
+							}
+						}
+						else {
+							if (!isset($childrenProcessed[$childNodeName])) {
+								$childrenProcessed[$childNodeName] = array();
+							}
+							$childrenProcessedTemp = array($childObjectIteration => $processedChildNode);
+							if ($isIterated) {
+								$childrenProcessed[$childNodeName] = array_merge_recursive($childrenProcessed[$childNodeName], $this->encodeNodeChildren($childNodeType, $childNodeName, $child, array($nodeIteration => $childrenProcessedTemp)));
+							}
+							else {
+								$childrenProcessed[$childNodeName] = array_merge_recursive($childrenProcessed[$childNodeName], $this->encodeNodeChildren($childNodeType, $childNodeName, $child, $childrenProcessedTemp));
+							}
+						}
+
+						$childObjectIteration++;
+					}
+
+					$nodeIteration++;
+				}
+
+				if (count($rawChildrenInformationIteration)) {
+					$rawIteratedChildren = ($isIterated ? $rawChildrenInformationIteration : $rawChildrenInformationIteration[0]);
+					$nodesRaw[$childNodeName] = $rawIteratedChildren;
+				}
 			}
 		}
 
