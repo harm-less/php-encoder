@@ -9,10 +9,10 @@ use PE\Variables\Variable;
 
 class EncoderNodeVariable extends Variable {
 
+	private $_cache;
+
 	private $setterAction;
 	private $getterAction;
-
-	private $_cache;
 
 	private $alwaysExecute;
 	private $mustBeUnique;

@@ -12,6 +12,11 @@ use PE\Enums\ActionVariable;
 use PE\Exceptions\EncoderException;
 use PE\Options\EncoderOptions;
 
+/**
+ * Class Encoder
+ * @package PE
+ * @todo Fix the "$encodeChildren" from the encoder
+ */
 class Encoder implements IEncoder {
 
 	public function decode($node, EncoderOptions $options = null) {
@@ -72,17 +77,17 @@ class Encoder implements IEncoder {
 		return $childrenArr;
 	}
 
-    protected function decodeRawNode($nodeData, EncoderNode $nodeProxy, $isSingle) {
-        $nodeData = (array) $nodeData;
-        $arr = (array) ($isSingle ? $nodeData[$nodeProxy->getNodeNameSingle()] : $nodeData[$nodeProxy->getNodeName()]);
-        return $arr;
-    }
-	protected function decodeNode($node) {
-        return (array) $node;
+	protected function decodeRawNode($nodeData, EncoderNode $nodeProxy, $isSingle) {
+		$nodeData = (array) $nodeData;
+		$arr = (array) ($isSingle ? $nodeData[$nodeProxy->getNodeNameSingle()] : $nodeData[$nodeProxy->getNodeName()]);
+		return $arr;
 	}
-    protected function decodeChildNames($structure) {
-        return array_keys((array)$structure);
-    }
+	protected function decodeNode($node) {
+		return (array) $node;
+	}
+	protected function decodeChildNames($structure) {
+		return array_keys((array)$structure);
+	}
 
 	protected function _decodeNode($nodeName, $nodeData, EncoderOptions $options, EncoderNode $parentNode = null, $parentObject = null, $parentNodeData = null) {
 
@@ -254,10 +259,8 @@ class Encoder implements IEncoder {
 			$objectNode = EncoderNode::getNodeTypeByObject($object);
 
 			$wrapperName = $objectNode->getNodeNameSingle();
-			if ($options) {
-				if ($options->hasOption('wrapper')) {
-					$wrapperName = $options->option('wrapper');
-				}
+			if ($options && $options->hasOption('wrapper')) {
+				$wrapperName = $options->option('wrapper');
 			}
 			if ($wrapperName !== false) {
 				$processedArray = array($wrapperName => $processedArray);
@@ -290,14 +293,6 @@ class Encoder implements IEncoder {
 			}
 		}
 
-		/*// execute variables that are required to execute before the object is made
-		$alwaysExecutedVariables = $node->getAlwaysExecutedVariables();
-		foreach ($alwaysExecutedVariables as $variableId => $variable) {
-			if (!array_key_exists($variableId, $nodeData)) {
-				$nodeData[$variableId] = $variable->getDefaultValue();
-			}
-		}*/
-
 		$actionVariables = array(
 			ActionVariable::GETTER_OBJECT => $object,
 			ActionVariable::GETTER_PARENT => $parent,
@@ -316,22 +311,25 @@ class Encoder implements IEncoder {
         $optionEncodeAttributes = $options->option('attributes', $node);
         $optionEncodeChildren = $options->option('children', $node);
 
+		// should we encode the node's children or not?
         $encodeChildren = true;
+
+		// should we encode the node's attributes or not?
         $encodeAttributes = true;
 
-        if (is_bool($optionEncode)) {
-            $encodeAttributes = $optionEncode;
-            $encodeChildren = $optionEncode;
-        }
-        if (is_bool($optionEncodeAttributes)) {
-            $encodeAttributes = $optionEncodeAttributes;
-        }
-        if (is_bool($optionEncodeChildren)) {
-            $encodeChildren = $optionEncodeChildren;
-        }
-        if ($optionNodeValue !== null || $optionNodeKey !== null) {
-            $encodeAttributes = false;
-        }
+		if (is_bool($optionEncode)) {
+			$encodeAttributes = $optionEncode;
+			$encodeChildren = $optionEncode;
+		}
+		if (is_bool($optionEncodeAttributes)) {
+			$encodeAttributes = $optionEncodeAttributes;
+		}
+		if (is_bool($optionEncodeChildren)) {
+			$encodeChildren = $optionEncodeChildren;
+		}
+		if ($optionNodeValue !== null || $optionNodeKey !== null) {
+			$encodeAttributes = false;
+		}
 
 		$nodesRaw = array();
 		$childrenProcessed = array();
@@ -343,12 +341,12 @@ class Encoder implements IEncoder {
 				throw new EncoderException(sprintf('Cannot set the node name (%s) of a proxy node child because it doesn\'t exist. Please add the requested node with "ProxyNode::addNode()". Current node name "%s" with class name "%s"', $child->getNodeName(), $node->getNodeName(), get_class($node)));
 			}
 
-            $childOptionPath = $optionNodeIndex . ':' . $childNodeName;
+			$childOptionPath = $optionNodeIndex . ':' . $childNodeName;
 			$optionChildIteration = $options->option('iterate', $childOptionPath);
-            $optionChildKey = $options->option('key', $childOptionPath);
+			$optionChildKey = $options->option('key', $childOptionPath);
 
-            $isIterated = $optionChildIteration !== null;
-            $childIteration = $optionChildIteration === null ? 1 : $optionChildIteration;
+			$isIterated = $optionChildIteration !== null;
+			$childIteration = $optionChildIteration === null ? 1 : $optionChildIteration;
 
 			$getChildObjectsMethod = $child->getGetterMethod();
 			if (!method_exists($object, $getChildObjectsMethod)) {
