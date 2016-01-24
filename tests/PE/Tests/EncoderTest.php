@@ -6,7 +6,9 @@ use PE\Encoder;
 use PE\Nodes\EncoderNode;
 use PE\Options\EncoderOptions;
 use PE\Samples\Farm\Building;
+use PE\Samples\Farm\Buildings\House;
 use PE\Samples\General\Thing;
+use PE\Samples\General\Things;
 
 class EncoderTest extends Samples {
 
@@ -29,6 +31,114 @@ class EncoderTest extends Samples {
 		$this->assertNotNull($encoder);
 		$this->assertTrue($encoder instanceof Encoder);
 	}
+
+
+
+	public function testDecode() {
+		$house = $this->getHouse();
+		$this->addFarmNodes();
+		$encoded = $this->encoder()->encode($house);
+
+		$this->assertEquals(array(
+			'processed' => array(
+				'building' => array(
+					'type' => 'house',
+					'animals' => array(
+						array(
+							'type' => 'cat',
+							'name' => 'Cat'
+						)
+					)
+				)
+			),
+			'raw' => array(
+				'attributes' => array(
+					'type' => 'house'
+				),
+				'children' => array(
+					'animals' => array(
+						array(
+							'attributes' => array(
+								'type' => 'cat',
+								'name' => 'Cat'
+							),
+							'children' => array(),
+							'nodeName' => 'animals'
+						)
+					)
+				),
+				'nodeName' => 'buildings'
+			)
+		), $encoded);
+
+		$decoded = $this->encoder()->decode($encoded['processed']);
+		$this->assertArrayHasKey('building', $decoded);
+
+		/** @var House $houseDecoded */
+		$houseDecoded = $decoded['building'];
+		$this->assertCount(1, $houseDecoded->getAnimals());
+	}
+
+	public function testDecodeWhenNodeDoesNotExist() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Node name "unknownNodeName" is not specified');
+		$this->encoder()->decode(array(
+			'unknownNodeName' => array()
+		));
+	}
+	public function testDecodeWhenNodeTypeDoesNotExist() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Trying to decode node, but encoder type "house" in parent "buildings" is not found. Make sure it has been loaded.');
+
+		$this->addBuildingNode();
+
+		$this->encoder()->decode(array(
+			'building' => array(
+				'type' => 'house'
+			)
+		));
+	}
+	public function testDecodeWhenChildNodeTypeDoesNotExist() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Trying to decode node, but child node "unknownVariable" doesn\'t seem to be configured or you are trying to save an array into an attribute which is illegal (imploded value: ""). Make sure you either register this node or to encode the value to something other than an array.');
+
+		$this->addBuildingNode();
+
+		$this->encoder()->decode(array(
+			'building' => array(
+				'unknownVariable' => array()
+			)
+		));
+	}
+
+	public function testDecodeWithCamelCaseVariableName() {
+		$encoder = $this->encoder();
+		$this->addThingNode();
+		$this->assertNotEmpty($encodedThings = $encoder->decode(array(
+			'thing' => array(
+				'thingVar' => 'Hello world'
+			)
+		)));
+	}
+
+	public function testDecodeWithCamelCaseVariableNae() {
+		$encoder = $this->encoder();
+		$this->addFarmNodes();
+		$encodedThings = $encoder->decode(array(
+			'farm' => array(
+				'buildings' => array(
+					array(
+						'type' => 'house',
+						'animals' => array()
+					)
+				)
+			)
+		));
+	}
+
+
+
+
+
+
+
 
 	public function testEncode() {
 		$encoder = $this->encoder();

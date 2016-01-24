@@ -25,6 +25,9 @@ class Encoder implements IEncoder {
 		$options = $options ? $options : new EncoderOptions(null);
 
 		foreach ($childNodeNames as $childNodeName) {
+			if (!EncoderNode::nodeExists($childNodeName)) {
+				throw new EncoderException(sprintf('Node name "%s" is not specified', $childNodeName));
+			}
 			$nodeArray = $this->decodeRawToArray($childNodeName, $node, array());
 			$arr[$childNodeName] = $this->_decodeNode($childNodeName, array($childNodeName => $nodeArray), $options);
 		}
@@ -50,7 +53,7 @@ class Encoder implements IEncoder {
 
 			$nodeType = $proxyNode->getType($nodeTypeStr);
 			if ($nodeType === null) {
-				throw new EncoderException(sprintf('Can\'t find proxy type "%s". Make sure it has been loaded.', $nodeTypeStr));
+				throw new EncoderException(sprintf('Trying to decode node, but encoder type "%s" in parent "%s" is not found. Make sure it has been loaded.', $nodeTypeStr, $proxyNode->getNodeName()));
 			}
 
 			$childArr = array();
@@ -91,9 +94,6 @@ class Encoder implements IEncoder {
 
 	protected function _decodeNode($nodeName, $nodeData, EncoderOptions $options, EncoderNode $parentNode = null, $parentObject = null, $parentNodeData = null) {
 
-		if (!EncoderNode::nodeExists($nodeName)) {
-			throw new EncoderException(sprintf('Node name "%s" is not specified', $nodeName));
-		}
 		$proxyNode = EncoderNode::getNode($nodeName);
 		$isSingleNode = EncoderNode::isSingleNode($nodeName);
 
@@ -120,6 +120,7 @@ class Encoder implements IEncoder {
 
 			$nodeChildType = $proxyNode->getObjectType($parentObject, $nodeDataItem);
 			$nodeType = ($nodeChildType !== null && !empty($nodeChildType) ? $nodeChildType : $proxyNode->getDefaultType());
+			$type = $proxyNode->getType($nodeType);
 
 			foreach ($nodeDataItem as $nodeDataName => $nodeDataValue) {
 				$nodeDataNameDashed = Inflector::underscore($nodeDataName, '-');
@@ -127,11 +128,6 @@ class Encoder implements IEncoder {
 					$nodeDataItem[$nodeDataNameDashed] = $nodeDataValue;
 					unset($nodeDataItem[$nodeDataName]);
 				}
-			}
-
-			$type = $proxyNode->getType($nodeType);
-			if ($type === null) {
-				throw new EncoderException(sprintf('Proxy node type "%s" in node "%s" could not be found. Presumably is has not been loaded', $nodeType, $nodeName));
 			}
 
 			// execute variables that are required to execute before the object is made
