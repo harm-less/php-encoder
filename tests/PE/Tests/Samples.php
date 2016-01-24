@@ -18,7 +18,10 @@ use PE\Nodes\Farm\FarmNode;
 use PE\Nodes\Erroneous\NoGetterMethodNode;
 use PE\Nodes\General\ThingNode;
 use PE\Nodes\General\ThingsNode;
+use PE\Nodes\Specials\ClassLoaderNode;
 use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
+use PE\Nodes\Specials\RequiredConstructorVariablesNode;
+use PE\Nodes\Specials\SetterMethodActionTypeNodeNode;
 use PE\Samples\Erroneous\NonArrayGetterMethod;
 use PE\Samples\Erroneous\NoVariableGetterMethod;
 use PE\Samples\Farm\Farm;
@@ -33,6 +36,8 @@ use PE\Samples\Erroneous\NoGetterMethod;
 use PE\Samples\General\Thing;
 use PE\Samples\General\Things;
 use PE\Samples\Specials\NonArrayGetterMethodOnPurpose;
+use PE\Samples\Specials\RequiredConstructorVariables;
+use PE\Samples\Specials\SetterMethodActionTypeNode;
 
 class Samples extends AbstractPETest
 {
@@ -165,5 +170,20 @@ class Samples extends AbstractPETest
 	}
 	public function addNonArrayGetterMethodOnPurposeNode() {
 		EncoderNode::addNode(new NonArrayGetterMethodOnPurposeNode());
+	}
+
+	public function getSetterMethodActionTypeNode() {
+		return new SetterMethodActionTypeNode();
+	}
+	public function addSetterMethodActionTypeNodeNode() {
+		EncoderNode::addNode(new SetterMethodActionTypeNodeNode());
+	}
+
+	public function addRequiredConstructorVariablesNode($addVariables = true) {
+		EncoderNode::addNode(new RequiredConstructorVariablesNode($addVariables));
+	}
+
+	public function addClassLoaderNode($setupLoader) {
+		EncoderNode::addNode(new ClassLoaderNode($setupLoader));
 	}
 }

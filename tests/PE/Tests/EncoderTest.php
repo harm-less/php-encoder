@@ -9,6 +9,8 @@ use PE\Samples\Farm\Building;
 use PE\Samples\Farm\Buildings\House;
 use PE\Samples\General\Thing;
 use PE\Samples\General\Things;
+use PE\Samples\Specials\RequiredConstructorVariables;
+use PE\Samples\Specials\SetterMethodActionTypeNode;
 
 class EncoderTest extends Samples {
 
@@ -35,43 +37,19 @@ class EncoderTest extends Samples {
 
 
 	public function testDecode() {
-		$house = $this->getHouse();
 		$this->addFarmNodes();
-		$encoded = $this->encoder()->encode($house);
 
-		$this->assertEquals(array(
-			'processed' => array(
-				'building' => array(
-					'type' => 'house',
-					'animals' => array(
-						array(
-							'type' => 'cat',
-							'name' => 'Cat'
-						)
+		$decoded = $this->encoder()->decode(array(
+			'building' => array(
+				'type' => 'house',
+				'animals' => array(
+					array(
+						'type' => 'cat',
+						'name' => 'Cat'
 					)
 				)
-			),
-			'raw' => array(
-				'attributes' => array(
-					'type' => 'house'
-				),
-				'children' => array(
-					'animals' => array(
-						array(
-							'attributes' => array(
-								'type' => 'cat',
-								'name' => 'Cat'
-							),
-							'children' => array(),
-							'nodeName' => 'animals'
-						)
-					)
-				),
-				'nodeName' => 'buildings'
 			)
-		), $encoded);
-
-		$decoded = $this->encoder()->decode($encoded['processed']);
+		));
 		$this->assertArrayHasKey('building', $decoded);
 
 		/** @var House $houseDecoded */
@@ -118,19 +96,78 @@ class EncoderTest extends Samples {
 		)));
 	}
 
-	public function testDecodeWithCamelCaseVariableNae() {
+	public function testDecodeSetterMethodActionTypeNode() {
 		$encoder = $this->encoder();
-		$this->addFarmNodes();
-		$encodedThings = $encoder->decode(array(
-			'farm' => array(
-				'buildings' => array(
-					array(
-						'type' => 'house',
-						'animals' => array()
-					)
-				)
+		$this->addSetterMethodActionTypeNodeNode();
+
+		$decoded = $encoder->decode(array(
+			'setter-method-action-type-node' => array(
+				'special' => 'value',
+				'node' => 'hello world'
 			)
 		));
+		/** @var SetterMethodActionTypeNode $obj */
+		$obj = $decoded['setter-method-action-type-node'];
+		$this->assertEquals('hello world', $obj->getSpecial());
+	}
+
+	public function testDecodeClassLoaderWhenSetupLoaderIsSetToFalse() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Tried loading class "\PE\Samples\Loader\ClassLoader" so it can be decoded, this failed however because it\'s not available. You either mistyped the name of the class in the node or the "loadObject()" method didn\'t load the correct file with the class');
+
+		$encoder = $this->encoder();
+		$this->addClassLoaderNode(false);
+
+		$encoder->decode(array(
+			'class-loader' => array()
+		));
+	}
+	public function testDecodeClassLoader() {
+		$encoder = $this->encoder();
+		$this->addClassLoaderNode(true);
+
+		$decoded = $encoder->decode(array(
+			'class-loader' => array()
+		));
+		/** @var ClassLoader $obj */
+		$obj = $decoded['class-loader'];
+		$this->assertTrue(is_a($obj, '\\PE\\Samples\\Loader\\ClassLoader'));
+	}
+
+	public function testDecodeObjectWithRequiredConstructorVariablesWhenOneOfTheVariablesIsNotAvailable() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" does not exist but is required to create an object for node "required-constructor-variables" (Node type: "required-constructors-variables") at index "0"');
+		$encoder = $this->encoder();
+		$this->addRequiredConstructorVariablesNode();
+
+		$encoder->decode(array(
+			'required-constructor-variables' => array()
+		));
+	}
+	public function testDecodeObjectWithRequiredConstructorVariablesButOneRequiredVariableIsNotProperlySetup() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" cannot process its value (awesomeType). Presumably because the NodeType does not recognize the variable');
+		$encoder = $this->encoder();
+		$this->addRequiredConstructorVariablesNode(false);
+
+		$encoder->decode(array(
+			'required-constructor-variables' => array(
+				'name' => 'awesomeType'
+			)
+		));
+	}
+	public function testDecodeObjectWithRequiredConstructorVariables() {
+		$encoder = $this->encoder();
+		$this->addRequiredConstructorVariablesNode();
+
+		$decoded = $encoder->decode(array(
+			'required-constructor-variables' => array(
+				'name' => 'awesomeName',
+				'variableCategory' => 'awesomeCategory'
+			)
+		));
+		/** @var RequiredConstructorVariables $obj */
+		$obj = $decoded['required-constructor-variables'];
+		$this->assertEquals('awesomeName', $obj->getName());
+		$this->assertEquals('awesomeCategory', $obj->getVariableCategory());
+		$this->assertTrue($obj->getOptional());
 	}
 
 
@@ -151,6 +188,45 @@ class EncoderTest extends Samples {
 		$this->assertArrayHasKey('attributes', $rawEncoded);
 		$this->assertArrayHasKey('children', $rawEncoded);
 		$this->assertArrayHasKey('nodeName', $rawEncoded);
+	}
+
+	public function testEncodeRaw()
+	{
+		$house = $this->getHouse();
+		$this->addFarmNodes();
+		$encoded = $this->encoder()->encode($house);
+
+		$this->assertEquals(array(
+			'processed' => array(
+				'building' => array(
+					'type' => 'house',
+					'animals' => array(
+						array(
+							'type' => 'cat',
+							'name' => 'Cat'
+						)
+					)
+				)
+			),
+			'raw' => array(
+				'attributes' => array(
+					'type' => 'house'
+				),
+				'children' => array(
+					'animals' => array(
+						array(
+							'attributes' => array(
+								'type' => 'cat',
+								'name' => 'Cat'
+							),
+							'children' => array(),
+							'nodeName' => 'animals'
+						)
+					)
+				),
+				'nodeName' => 'buildings'
+			)
+		), $encoded);
 	}
 
 	public function testEncodeUnknownObject() {

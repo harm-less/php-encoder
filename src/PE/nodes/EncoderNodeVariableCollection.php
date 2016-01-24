@@ -43,9 +43,10 @@ class EncoderNodeVariableCollection extends VariableCollection {
 	}
 
 	public function variablesAreValidWithData($dataArray) {
+		$variables = $this->getVariables();
 		$unique = array();
 		foreach ($dataArray as $data) {
-			foreach ($this->getVariables() as $variable) {
+			foreach ($variables as $variable) {
 				$variableId = $variable->getId();
 				if ($variableId !== null && array_key_exists($variableId, $data)) {
 					$variableValue = $data[$variableId];

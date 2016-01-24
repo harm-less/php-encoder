@@ -369,18 +369,44 @@ class EncoderNode {
 	public function addVariable(EncoderNodeVariable $variable) {
 		return $this->variables->addNodeVariable($variable);
 	}
+
+	/**
+	 * @param $variable
+	 * @param $options
+	 * @return bool
+	 */
 	public function alterVariable($variable, $options) {
 		return $this->variables->alterVariable($variable, $options);
 	}
+
+	/**
+	 * @param $variable
+	 * @return Variable
+	 */
 	public function getVariable($variable) {
 		return $this->variables->getVariable($variable);
 	}
+
+	/**
+	 * @param $id
+	 * @return null|Variable
+	 */
 	public function getVariableById($id) {
 		return $this->variables->getVariableById($id);
 	}
+
+	/**
+	 * @param $type
+	 * @return EncoderNodeVariable[]
+	 */
 	public function getVariablesSetterActionByType($type) {
 		return $this->variables->getVariablesSetterActionByType($type);
 	}
+
+	/**
+	 * @param $type
+	 * @return EncoderNodeVariable[]
+	 */
 	public function getVariablesGetterActionByType($type) {
 		return $this->variables->getVariablesGetterActionByType($type);
 	}

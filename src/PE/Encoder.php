@@ -122,6 +122,7 @@ class Encoder implements IEncoder {
 			$nodeType = ($nodeChildType !== null && !empty($nodeChildType) ? $nodeChildType : $proxyNode->getDefaultType());
 			$type = $proxyNode->getType($nodeType);
 
+			// make sure the variables are all dashed as this is the default
 			foreach ($nodeDataItem as $nodeDataName => $nodeDataValue) {
 				$nodeDataNameDashed = Inflector::underscore($nodeDataName, '-');
 				if ($nodeDataName !== $nodeDataNameDashed) {
@@ -130,15 +131,8 @@ class Encoder implements IEncoder {
 				}
 			}
 
-			// execute variables that are required to execute before the object is made
-			$alwaysExecutedVariables = $type->getAlwaysExecutedVariables();
-			foreach ($alwaysExecutedVariables as $variableId => $variable) {
-				if (!array_key_exists($variableId, $nodeDataItem)) {
-					$nodeDataItem[$variableId] = $variable->getDefaultValue();
-				}
-			}
-
-			// call node methods
+			// call node methods. It can be useful when you want to change the outcome of the node data in the node
+			// that does not have a certain setter but is used in other ways
 			$nodeMethodVariables = $type->getVariablesSetterActionByType(EncoderNodeVariable::ACTION_TYPE_NODE);
 			foreach ($nodeMethodVariables as $variableId => $nodeMethodVariable) {
 				if (isset($nodeDataItem[$variableId])) {
@@ -173,10 +167,8 @@ class Encoder implements IEncoder {
 				$requiredVariableValues = array();
 				foreach ($requiredVariables as $variable) {
 
-					$processedVariable = $variable;
-					if ($options->option('keyCamelCase') === true) {
-						$processedVariable = Inflector::underscore($variable, '-');
-					}
+					// make sure the variable is underscored
+					$processedVariable = Inflector::underscore($variable, '-');
 
 					if (!array_key_exists($processedVariable, $nodeDataItem)) {
 						throw new EncoderException(sprintf('Variable "%s" for "%s" does not exist but is required to create an object for node "%s" (Node type: "%s") at index "%s"', $processedVariable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
@@ -195,8 +187,7 @@ class Encoder implements IEncoder {
 				$rc = new \ReflectionClass($nodeClassName);
 				$nodeInstance = $rc->newInstanceArgs($requiredVariableValues);
 
-				// get the key of the object, but if it isn't set or is empty, use the index. Afterwards, add it to a children array
-				$typeKey = $type->getKey();
+				// add the new object to the children array
 				$objects[$nodeIndex] = $nodeInstance;
 
 				if (!$addAfterDecode && !$addAfterAttributes) {
@@ -224,7 +215,7 @@ class Encoder implements IEncoder {
 			$nodeIndex++;
 		}
 		// this broke, perhaps this can be fixed some time
-		//$proxyNode->variablesAreValid($decodedChildren);
+		$proxyNode->variablesAreValid($decodedChildren);
 
 		if ($isSingleNode) {
 			foreach ($objects as $object) {

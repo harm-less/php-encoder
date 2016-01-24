@@ -32,12 +32,6 @@ class XmlEncoder extends Encoder {
 
 
 	public function decode($node, EncoderOptions $options = null) {
-		if (!$options) {
-			$options = new EncoderOptions(array());
-		}
-		if (!$options->hasOption('keyCamelCase')) {
-			$options->setOptions(array('keyCamelCase' => true));
-		}
 		return parent::decode($node, $options);
 	}
 	protected function decodeChildNames($structure) {

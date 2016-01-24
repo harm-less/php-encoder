@@ -16,7 +16,7 @@ class BuildingNode extends EncoderNode {
 		$this->addVariable(new EncoderNodeVariable('type', array(
 			'setterAction' => array(
 				'type' => EncoderNodeVariable::ACTION_TYPE_OBJECT,
-				'method' => 'setType',
+				'method' => 'setBuildingType',
 				'variables' => array(ActionVariable::SETTER_VALUE, ActionVariable::SETTER_NODE_DATA)
 			),
 			'getterAction' => array(
@@ -28,7 +28,8 @@ class BuildingNode extends EncoderNode {
 		)));
 	}
 
-	function setType(Building $building, $value, $nodeData) {
+	function setBuildingType($building, $value, $nodeData) {
+
 		$building->setType($value);
 	}
 	public function getBuildingType($nodeData, Building $building) {
