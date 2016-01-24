@@ -168,6 +168,9 @@ class Encoder implements IEncoder {
 				// load the class object this node should decode into
 				if (!class_exists($nodeClassName)) {
 					$type->loadObject();
+					if (!class_exists($nodeClassName)) {
+						throw new EncoderException(sprintf('Tried loading class "%s" so it can be decoded, this failed however because it\'s not available. You either mistyped the name of the class in the node or the "loadObject()" method didn\'t load the correct file with the class', $nodeClassName));
+					}
 				}
 
 				$requiredVariables = $this->getRequiredConstructorVariables($nodeClassName);
@@ -452,7 +455,6 @@ class Encoder implements IEncoder {
 	}
 
 	protected function encodeNodeChildren(EncoderNode $node, $nodeName, EncoderNodeChild $child, $objects) {
-
 		$childrenTemp = $objects;
 		if (!$child->isArray()) {
 			$childrenTemp = $childrenTemp[0];
@@ -483,11 +485,5 @@ class Encoder implements IEncoder {
 			}
 		}
 		return $temp;
-	}
-
-
-
-	protected function errorNoTemplate($extra = null) {
-		throw new EncoderException("No template has been found in the structure." . ($extra ? ' ' . $extra : ''));
 	}
 }

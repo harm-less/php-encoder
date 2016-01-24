@@ -10,11 +10,6 @@ use PE\Samples\General\Thing;
 
 class EncoderTest extends Samples {
 
-	protected function tearDown()
-	{
-
-	}
-
 	protected function setUp()
 	{
 		EncoderNode::clean();

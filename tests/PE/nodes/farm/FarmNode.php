@@ -8,7 +8,7 @@ use PE\Nodes\EncoderNodeChild;
 class FarmNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('farms', 'farm', '\\PE\\Samples');
+		parent::__construct('farms', 'farm', '\\PE\\Samples\\Farm');
 
 		$this->addChildNode(new EncoderNodeChild('buildings', array(
 			'setter' => 'addBuilding',
