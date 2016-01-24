@@ -64,22 +64,57 @@ class EncoderTest extends Samples {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Getter method "getThings" for node "things" does not exist in class "PE\Samples\Erroneous\NoGetterMethod"');
 
 		$this->addNoGetterMethodNode();
-		$this->addThingsNode();
+		$this->addThingNode();
 
 		$this->encoder()->encode($this->getNoGetterMethod());
+	}
+	public function testEncodeWithoutVariableGetterMethod() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Getter method "getNonExistent" does not exist in object "PE\Samples\Erroneous\NoVariableGetterMethod" for node type "default" (PE\Nodes\Erroneous\NoVariableGetterMethodNode) and variable with id "nonExistent".');
+
+		$this->addVariableNoGetterMethodNode();
+
+		$this->encoder()->encode($this->getVariableNoGetterMethod());
 	}
 	public function testEncodeWithGetterMethodReturningString() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Children object for node "things" must be an array. EncoderNodeChilds are returning an array by default. If this behavior is not desired, turn it off using "$childNode->isArray(false)" or set "isArray" as an options to the EncoderNodeChild instance');
 
 		$this->addNonArrayGetterMethodNode();
-		$this->addThingsNode();
+		$this->addThingNode();
 
 		$this->encoder()->encode($this->getNonArrayGetterMethod());
+	}
+	public function testEncodeWhenChildNodeTypeDoesNotExist() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Child node type for object "PE\Samples\Farm\Animals\Cat (child of "buildings")" for node "animals" not found');
+
+		$house = $this->getHouse();
+		$this->addBuildingNode();
+		$this->addBuildingHouseNode();
+		$this->addAnimalNodes(false);
+
+		$this->encoder()->encode($house);
+	}
+	public function testEncodeNodeByValueButItDoesNotExist() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Option "value" cannot be mapped to "type" because it does not exist in "things"');
+
+		$encoder = $this->encoder();
+		$things = $this->getThings();
+		$thing = $this->getThing();
+		$thing->setThingVar('hello world');
+		$things->addThing($thing);
+
+		$this->addThingNode();
+		$this->addThingsNode();
+
+		$encoder->encode($things, new EncoderOptions(array(
+			'things' => array(
+				'value' => 'type'
+			)
+		)));
 	}
 
 	public function testEncodeWithGetterMethodReturningNonArrayObject() {
 		$this->addNonArrayGetterMethodOnPurposeNode();
-		$this->addThingsNode();
+		$this->addThingNode();
 
 		$obj = $this->getNonArrayGetterMethodOnPurpose();
 		$obj->addThing(new Thing());
@@ -120,6 +155,54 @@ class EncoderTest extends Samples {
 		$this->assertArrayHasKey('house', $encodedFarm['processed']['farm']);
 		$this->assertArrayHasKey('greenhouse', $encodedFarm['processed']['farm']);
 		$this->assertArrayHasKey('barn', $encodedFarm['processed']['farm']);
+	}
+
+	public function testEncodeNodeByValue() {
+		$encoder = $this->encoder();
+		$things = $this->getThings();
+		$thing = $this->getThing();
+		$thing->setThingVar('hello world');
+		$things->addThing($thing);
+
+		$this->addThingNode();
+		$this->addThingsNode();
+
+		$encodedThings = $encoder->encode($things, new EncoderOptions(array(
+			'things' => array(
+				'value' => 'thingVar'
+			)
+		)));
+
+		$this->assertTrue(is_string($encodedThings['processed']['thingContainer']['things'][0]));
+		$this->assertEquals($encodedThings['processed']['thingContainer']['things'][0], 'hello world');
+	}
+
+	public function testEncodeIteratedNode() {
+		$encoder = $this->encoder();
+		$this->addFarmNodes();
+		$encodedHouse = $encoder->encode($this->getHouse(), new EncoderOptions(array(
+			'animals' => array(
+				'iterate' => 2,
+			)
+		)));
+
+		$this->assertArrayNotHasKey('type', $encodedHouse['processed']['building']['animals'][0]);
+		$this->assertArrayHasKey(0, $encodedHouse['processed']['building']['animals'][0]);
+		$this->assertCount(2, $encodedHouse['processed']['building']['animals']);
+	}
+
+	public function testEncodeIteratedNodeWithChildKey() {
+		$encoder = $this->encoder();
+		$this->addFarmNodes();
+		$encodedHouse = $encoder->encode($this->getHouse(), new EncoderOptions(array(
+			'animals' => array(
+				'iterate' => 2,
+				'key' => 'type'
+			)
+		)));
+
+		$this->assertArrayNotHasKey('animals', $encodedHouse['processed']['building']);
+		$this->assertArrayHasKey('cat', $encodedHouse['processed']['building'][0]);
 	}
 
 	public function testEncodeWithoutNodeChildren() {

@@ -1,18 +1,19 @@
 <?php
 
-namespace PE\Nodes\Erroneous;
+namespace PE\Nodes\General;
 
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeChild;
 
-class NonArrayGetterMethodNode extends EncoderNode {
+class ThingsNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('non-array-getter-methods', 'non-array-getter-method', '\\PE\\Samples\\Erroneous');
+		parent::__construct('thingsContainer', 'thingContainer', '\\PE\\Samples\General');
 
 		$this->addChildNode(new EncoderNodeChild('things', array(
 			'setter' => 'addThing',
 			'getter' => 'getThings'
 		)));
 	}
+
 }

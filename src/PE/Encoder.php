@@ -300,7 +300,7 @@ class Encoder implements IEncoder {
 				if (method_exists($object, $getAttributeMethod)) {
 					$attributeValue = $object->$getAttributeMethod();
 				} else {
-					//throw new ProxyException(sprintf('Getter method "%s" does not exist in object "%s" for node type "%s" (%s) and variable with id "%s".', $getAttributeMethod, get_class($object), $node->getTypeName(), get_class($node), $variableId));
+					throw new EncoderException(sprintf('Getter method "%s" does not exist in object "%s" for node type "%s" (%s) and variable with id "%s".', $getAttributeMethod, get_class($object), $node->getTypeName(), get_class($node), $variableId));
 				}
 
 				$attributesRaw[$variableId] = $attributeValue;
@@ -430,14 +430,6 @@ class Encoder implements IEncoder {
 		$attributesProcessed = $this->encodeAttributes($attributesRaw);
 		if (!$encodeAttributes) {
 			$attributesProcessed = array();
-		}
-
-		if ($options->option('keyCamelCase', $node) === true) {
-			$attributesCamelCased = array();
-			foreach($attributesProcessed as $attrKey => $attrValue) {
-				$attributesCamelCased[Inflector::camelize($attrKey, true, '-')] = $attrValue;
-			}
-			$attributesProcessed = $attributesCamelCased;
 		}
 
 		$nodeData = array_merge($attributesProcessed, $childrenProcessed);

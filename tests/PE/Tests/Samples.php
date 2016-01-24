@@ -4,6 +4,7 @@ namespace PE\Tests;
 
 use PE\Nodes\EncoderNode;
 use PE\Nodes\Erroneous\NonArrayGetterMethodNode;
+use PE\Nodes\Erroneous\NoVariableGetterMethodNode;
 use PE\Nodes\Farm\AnimalNode;
 use PE\Nodes\Farm\Animals\CatNode;
 use PE\Nodes\Farm\Animals\ChickenNode;
@@ -16,8 +17,10 @@ use PE\Nodes\Farm\Buildings\HouseNode;
 use PE\Nodes\Farm\FarmNode;
 use PE\Nodes\Erroneous\NoGetterMethodNode;
 use PE\Nodes\General\ThingNode;
+use PE\Nodes\General\ThingsNode;
 use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
 use PE\Samples\Erroneous\NonArrayGetterMethod;
+use PE\Samples\Erroneous\NoVariableGetterMethod;
 use PE\Samples\Farm\Farm;
 use PE\Samples\Farm\Animals\Cow;
 use PE\Samples\Farm\Buildings\Barn;
@@ -28,6 +31,7 @@ use PE\Samples\Farm\Animals\Sheep;
 use PE\Samples\Farm\Animals\Chicken;
 use PE\Samples\Erroneous\NoGetterMethod;
 use PE\Samples\General\Thing;
+use PE\Samples\General\Things;
 use PE\Samples\Specials\NonArrayGetterMethodOnPurpose;
 
 class Samples extends AbstractPETest
@@ -108,19 +112,27 @@ class Samples extends AbstractPETest
 		EncoderNode::addNodeType(new BarnNode(), 'barn');
 	}
 
-	public function addAnimalNodes() {
+	public function addAnimalNodes($children = true) {
 		EncoderNode::addNode(new AnimalNode());
-		EncoderNode::addNodeType(new CatNode(), 'cat');
-		EncoderNode::addNodeType(new ChickenNode(), 'chicken');
-		EncoderNode::addNodeType(new CowNode(), 'cow');
-		EncoderNode::addNodeType(new SheepNode(), 'sheep');
+		if ($children) {
+			EncoderNode::addNodeType(new CatNode(), 'cat');
+			EncoderNode::addNodeType(new ChickenNode(), 'chicken');
+			EncoderNode::addNodeType(new CowNode(), 'cow');
+			EncoderNode::addNodeType(new SheepNode(), 'sheep');
+		}
 	}
 
 
 	public function getThings() {
-		return new Thing();
+		return new Things();
 	}
 	public function addThingsNode() {
+		EncoderNode::addNode(new ThingsNode());
+	}
+	public function getThing() {
+		return new Thing();
+	}
+	public function addThingNode() {
 		EncoderNode::addNode(new ThingNode());
 	}
 
@@ -130,6 +142,13 @@ class Samples extends AbstractPETest
 	}
 	public function addNoGetterMethodNode() {
 		EncoderNode::addNode(new NoGetterMethodNode());
+	}
+
+	public function getVariableNoGetterMethod() {
+		return new NoVariableGetterMethod();
+	}
+	public function addVariableNoGetterMethodNode() {
+		EncoderNode::addNode(new NoVariableGetterMethodNode());
 	}
 
 	public function getNonArrayGetterMethod() {
