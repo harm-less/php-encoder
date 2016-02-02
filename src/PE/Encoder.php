@@ -103,7 +103,6 @@ class Encoder implements IEncoder {
 			$nodeDataChild = array($nodeDataChild);
 		}
 
-		$childNode = null;
 		$addAfterDecode = true;
 		$addAfterAttributes = true;
 		if ($parentNode) {
@@ -188,7 +187,7 @@ class Encoder implements IEncoder {
 				$nodeInstance = $rc->newInstanceArgs($requiredVariableValues);
 
 				// add the new object to the children array
-				$objects[$nodeIndex] = $nodeInstance;
+				array_push($objects, $nodeInstance);
 
 				if (!$addAfterDecode && !$addAfterAttributes) {
 					$parentNode->addChildrenToObject($nodeName, $parentObject, array($nodeInstance));
@@ -207,7 +206,9 @@ class Encoder implements IEncoder {
 					if ($type->isChild($childName)) {
 						$children = $this->_decodeNode($childName, $nodeDataItem, $options, $type, $nodeInstance, $nodeDataItem);
 
-						$type->addChildrenToObject($childName, $nodeInstance, $children);
+						if ($type->getChild($childName)->setAfterChildren()) {
+							$type->addChildrenToObject($childName, $nodeInstance, $children);
+						}
 					}
 				}
 			}

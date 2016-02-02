@@ -9,6 +9,7 @@ use PE\Samples\Farm\Building;
 use PE\Samples\Farm\Buildings\House;
 use PE\Samples\General\Thing;
 use PE\Samples\General\Things;
+use PE\Samples\Specials\AddAfterDecodeParent;
 use PE\Samples\Specials\RequiredConstructorVariables;
 use PE\Samples\Specials\SetterMethodActionTypeNode;
 
@@ -168,6 +169,35 @@ class EncoderTest extends Samples {
 		$this->assertEquals('awesomeName', $obj->getName());
 		$this->assertEquals('awesomeCategory', $obj->getVariableCategory());
 		$this->assertTrue($obj->getOptional());
+	}
+
+	public function xtestDecodeWithSetAfterChildrenTrue() {
+		$this->addAddAfterDecodeNodes();
+
+		$decoded = $this->encoder()->decode(array(
+			'add-after-decode-parent' => array(
+				'add-after-decode-children-require' => array(
+					array(
+						'name' => 'Cat'
+					)
+				),
+				'add-after-decode-children' => array(
+					array(
+						'name' => 'Cat'
+					)
+				)
+			)
+		));
+
+		/** @var AddAfterDecodeParent $specialDecoded */
+		$specialDecoded = $decoded['add-after-decode-parent'];
+
+		$children = $specialDecoded->getChildren();
+		//$children[0]->setName('gg');
+
+		print_r($children);
+
+		$this->assertCount(1, $children);
 	}
 
 

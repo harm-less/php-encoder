@@ -4,7 +4,6 @@ namespace PE\Nodes\Specials;
 
 use PE\Enums\ActionVariable;
 use PE\Nodes\EncoderNode;
-use PE\Nodes\EncoderNodeChild;
 use PE\Nodes\EncoderNodeVariable;
 
 class SetterMethodActionTypeNodeNode extends EncoderNode {

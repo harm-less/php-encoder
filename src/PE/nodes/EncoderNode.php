@@ -26,6 +26,9 @@ class EncoderNode {
 
 	private $nodeOptions;
 
+	/**
+	 * @var EncoderNodeChildren
+	 */
 	private $children;
 
 	/**

@@ -18,6 +18,9 @@ use PE\Nodes\Farm\FarmNode;
 use PE\Nodes\Erroneous\NoGetterMethodNode;
 use PE\Nodes\General\ThingNode;
 use PE\Nodes\General\ThingsNode;
+use PE\Nodes\Specials\AddAfterDecodeChildNode;
+use PE\Nodes\Specials\AddAfterDecodeChildRequiresNode;
+use PE\Nodes\Specials\AddAfterDecodeParentNode;
 use PE\Nodes\Specials\ClassLoaderNode;
 use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
 use PE\Nodes\Specials\RequiredConstructorVariablesNode;
@@ -185,5 +188,11 @@ class Samples extends AbstractPETest
 
 	public function addClassLoaderNode($setupLoader) {
 		EncoderNode::addNode(new ClassLoaderNode($setupLoader));
+	}
+
+	public function addAddAfterDecodeNodes() {
+		EncoderNode::addNode(new AddAfterDecodeParentNode());
+		EncoderNode::addNode(new AddAfterDecodeChildNode());
+		EncoderNode::addNode(new AddAfterDecodeChildRequiresNode());
 	}
 }
