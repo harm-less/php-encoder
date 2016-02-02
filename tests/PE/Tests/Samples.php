@@ -190,8 +190,8 @@ class Samples extends AbstractPETest
 		EncoderNode::addNode(new ClassLoaderNode($setupLoader));
 	}
 
-	public function addAddAfterDecodeNodes() {
-		EncoderNode::addNode(new AddAfterDecodeParentNode());
+	public function addAddAfterDecodeNodes($addAfterAttributes = true) {
+		EncoderNode::addNode(new AddAfterDecodeParentNode($addAfterAttributes));
 		EncoderNode::addNode(new AddAfterDecodeChildNode());
 		EncoderNode::addNode(new AddAfterDecodeChildRequiresNode());
 	}

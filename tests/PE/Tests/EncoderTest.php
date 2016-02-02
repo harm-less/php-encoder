@@ -171,19 +171,17 @@ class EncoderTest extends Samples {
 		$this->assertTrue($obj->getOptional());
 	}
 
-	public function xtestDecodeWithSetAfterChildrenTrue() {
+	public function testDecodeWithSetAfterChildrenFalse() {
 		$this->addAddAfterDecodeNodes();
 
 		$decoded = $this->encoder()->decode(array(
 			'add-after-decode-parent' => array(
+				'add-after-decode-child' => array(
+					'name' => 'child'
+				),
 				'add-after-decode-children-require' => array(
 					array(
-						'name' => 'Cat'
-					)
-				),
-				'add-after-decode-children' => array(
-					array(
-						'name' => 'Cat'
+						'name' => 'child-require'
 					)
 				)
 			)
@@ -192,12 +190,65 @@ class EncoderTest extends Samples {
 		/** @var AddAfterDecodeParent $specialDecoded */
 		$specialDecoded = $decoded['add-after-decode-parent'];
 
-		$children = $specialDecoded->getChildren();
-		//$children[0]->setName('gg');
+		$child = $specialDecoded->getChild();
 
-		print_r($children);
+		$this->assertNotEmpty($child);
+		$this->assertEquals('It worked!', $child->getName());
+	}
 
-		$this->assertCount(1, $children);
+	public function testDecodeWithSetAfterChildrenAndSetAfterAttributesFalse() {
+		$this->addAddAfterDecodeNodes(false);
+
+		$decoded = $this->encoder()->decode(array(
+			'add-after-decode-parent' => array(
+				'name' => 'parent',
+				'add-after-decode-child' => array(
+					'name' => 'child'
+				),
+				'add-after-decode-children-require' => array(
+					array(
+						'name' => 'child-require'
+					)
+				)
+			)
+		));
+
+		/** @var AddAfterDecodeParent $specialDecoded */
+		$specialDecoded = $decoded['add-after-decode-parent'];
+
+		$child = $specialDecoded->getChild();
+
+		$this->assertNotEmpty($child);
+		$this->assertEquals('It worked and it has a name: parent!', $child->getName());
+	}
+
+	public function testDecodeWithSetAfterChildrenTrueAndChildrenInverted() {
+		$this->markTestSkipped(
+			'This test cannot be created yet. setAfterChildren doesn\'t work when it has the wrong order like described below, so perhaps I need to build a sorting mechanism. Perhaps in "decodeRawToArray"?'
+		);
+
+		$this->addAddAfterDecodeNodes();
+
+		$decoded = $this->encoder()->decode(array(
+			'add-after-decode-parent' => array(
+				'add-after-decode-children-require' => array(
+					array(
+						'name' => 'child-require'
+					)
+				),
+				'add-after-decode-child' => array(
+					'name' => 'child'
+				)
+			)
+		));
+
+		/** @var AddAfterDecodeParent $specialDecoded */
+		$specialDecoded = $decoded['add-after-decode-parent'];
+
+		$child = $specialDecoded->getChild();
+
+		$this->assertNotEmpty($child);
+		$this->assertEquals('It worked!', $child->getName());
 	}
 
 

@@ -4,22 +4,31 @@ namespace PE\Samples\Specials;
 
 class AddAfterDecodeParent {
 
-	private $children;
+	private $name;
+
+	private $child;
 	private $childrenRequire;
 	function __construct() {
-		$this->children = array();
+		$this->child = array();
 		$this->childrenRequire = array();
 	}
 
+	public function setName($value) {
+		$this->name = $value;
+	}
+	public function getName() {
+		return $this->name;
+	}
+
 	public function addChild($value) {
-		array_push($this->children, $value);
+		$this->child = $value;
 	}
 
 	/**
-	 * @return AddAfterDecodeChild[]
+	 * @return AddAfterDecodeChild
 	 */
-	public function getChildren() {
-		return $this->children;
+	public function getChild() {
+		return $this->child;
 	}
 
 

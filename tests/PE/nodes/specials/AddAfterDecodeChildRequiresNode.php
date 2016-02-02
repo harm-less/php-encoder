@@ -24,14 +24,11 @@ class AddAfterDecodeChildRequiresNode extends EncoderNode {
 
 	public function nodeSetName($nodeData, $value, AddAfterDecodeParent $parent) {
 
-		print_r($nodeData);
-		print_r($value);
-		print_r($parent);
-		$children = $parent->getChildren();
-		print_r($children);
-		//$children[0]->setName('It worked!');
-
-		//$
+		$child = $parent->getChild();
+		if ($child) {
+			$name = $parent->getName();
+			$child->setName('It worked' . ($name ? ' and it has a name: ' . $name : '') .'!');
+		}
 
 		return $nodeData;
 	}

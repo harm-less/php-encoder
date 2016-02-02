@@ -92,6 +92,17 @@ class Encoder implements IEncoder {
 		return array_keys((array)$structure);
 	}
 
+	/**
+	 * @param string $nodeName
+	 * @param array $nodeData
+	 * @param EncoderOptions $options
+	 * @param EncoderNode|null $parentNode
+	 * @param array $parentObject
+	 * @param array $parentNodeData
+	 * @return array[]
+	 *
+	 * @todo setAfterChildren doesn't work when it has the wrong order, so perhaps I need to build a sorting mechanism. Perhaps in "decodeRawToArray"?
+	 */
 	protected function _decodeNode($nodeName, $nodeData, EncoderOptions $options, EncoderNode $parentNode = null, $parentObject = null, $parentNodeData = null) {
 
 		$proxyNode = EncoderNode::getNode($nodeName);
@@ -215,13 +226,11 @@ class Encoder implements IEncoder {
 
 			$nodeIndex++;
 		}
-		// this broke, perhaps this can be fixed some time
-		$proxyNode->variablesAreValid($decodedChildren);
+		// @todo this broke, perhaps this can be fixed some time
+		//$proxyNode->variablesAreValid($decodedChildren);
 
 		if ($isSingleNode) {
-			foreach ($objects as $object) {
-				return $object;
-			}
+			return $objects[0];
 		}
 
 		return $objects;
