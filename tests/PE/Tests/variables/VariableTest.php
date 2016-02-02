@@ -9,6 +9,7 @@ class VariableTest extends AbstractPETest {
 
 	protected function setUp()
 	{
+		parent::setUp();
 		$this->_peApp = new Variable();
 	}
 

@@ -3,23 +3,16 @@
 namespace PE\Tests;
 
 use PE\Encoder;
-use PE\Nodes\EncoderNode;
 use PE\Options\EncoderOptions;
 use PE\Samples\Farm\Building;
 use PE\Samples\Farm\Buildings\House;
 use PE\Samples\General\Thing;
-use PE\Samples\General\Things;
+use PE\Samples\Loader\ClassLoader;
 use PE\Samples\Specials\AddAfterDecodeParent;
 use PE\Samples\Specials\RequiredConstructorVariables;
 use PE\Samples\Specials\SetterMethodActionTypeNode;
 
 class EncoderTest extends Samples {
-
-	protected function setUp()
-	{
-		EncoderNode::clean();
-		$this->_peApp = new Encoder();
-	}
 
 	/**
 	 * @return Encoder
@@ -66,9 +59,7 @@ class EncoderTest extends Samples {
 	}
 	public function testDecodeWhenNodeTypeDoesNotExist() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Trying to decode node, but encoder type "house" in parent "buildings" is not found. Make sure it has been loaded.');
-
 		$this->addBuildingNode();
-
 		$this->encoder()->decode(array(
 			'building' => array(
 				'type' => 'house'
@@ -77,9 +68,7 @@ class EncoderTest extends Samples {
 	}
 	public function testDecodeWhenChildNodeTypeDoesNotExist() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Trying to decode node, but child node "unknownVariable" doesn\'t seem to be configured or you are trying to save an array into an attribute which is illegal (imploded value: ""). Make sure you either register this node or to encode the value to something other than an array.');
-
 		$this->addBuildingNode();
-
 		$this->encoder()->decode(array(
 			'building' => array(
 				'unknownVariable' => array()
@@ -88,9 +77,8 @@ class EncoderTest extends Samples {
 	}
 
 	public function testDecodeWithCamelCaseVariableName() {
-		$encoder = $this->encoder();
 		$this->addThingNode();
-		$this->assertNotEmpty($encodedThings = $encoder->decode(array(
+		$this->assertNotEmpty($encodedThings = $this->encoder()->decode(array(
 			'thing' => array(
 				'thingVar' => 'Hello world'
 			)
@@ -98,10 +86,9 @@ class EncoderTest extends Samples {
 	}
 
 	public function testDecodeSetterMethodActionTypeNode() {
-		$encoder = $this->encoder();
 		$this->addSetterMethodActionTypeNodeNode();
 
-		$decoded = $encoder->decode(array(
+		$decoded = $this->encoder()->decode(array(
 			'setter-method-action-type-node' => array(
 				'special' => 'value',
 				'node' => 'hello world'
@@ -114,32 +101,25 @@ class EncoderTest extends Samples {
 
 	public function testDecodeClassLoaderWhenSetupLoaderIsSetToFalse() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Tried loading class "\PE\Samples\Loader\ClassLoader" so it can be decoded, this failed however because it\'s not available. You either mistyped the name of the class in the node or the "loadObject()" method didn\'t load the correct file with the class');
-
-		$encoder = $this->encoder();
 		$this->addClassLoaderNode(false);
-
-		$encoder->decode(array(
+		$this->encoder()->decode(array(
 			'class-loader' => array()
 		));
 	}
 	public function testDecodeClassLoader() {
-		$encoder = $this->encoder();
 		$this->addClassLoaderNode(true);
 
-		$decoded = $encoder->decode(array(
+		$decoded = $this->encoder()->decode(array(
 			'class-loader' => array()
 		));
-		/** @var ClassLoader $obj */
 		$obj = $decoded['class-loader'];
 		$this->assertTrue(is_a($obj, '\\PE\\Samples\\Loader\\ClassLoader'));
 	}
 
 	public function testDecodeObjectWithRequiredConstructorVariablesWhenOneOfTheVariablesIsNotAvailable() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" does not exist but is required to create an object for node "required-constructor-variables" (Node type: "required-constructors-variables") at index "0"');
-		$encoder = $this->encoder();
 		$this->addRequiredConstructorVariablesNode();
-
-		$encoder->decode(array(
+		$this->encoder()->decode(array(
 			'required-constructor-variables' => array()
 		));
 	}

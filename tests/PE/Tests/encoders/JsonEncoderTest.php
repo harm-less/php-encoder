@@ -9,6 +9,7 @@ class JsonEncoderTest extends CoreEncoder {
 
 	protected function setUp()
 	{
+		parent::setUp();
 		$this->_peApp = new JsonEncoder();
 	}
 
@@ -27,6 +28,8 @@ class JsonEncoderTest extends CoreEncoder {
 	}
 
 	public function testEncodeDecode() {
+		$this->addHouseNodes();
+
 		$house = $this->getHouse();
 		$encoded = $this->encoder()->encode($house);
 		$jsonString = trim(preg_replace('/\s+/', ' ', $encoded));

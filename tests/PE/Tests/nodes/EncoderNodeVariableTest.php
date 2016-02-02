@@ -10,6 +10,7 @@ class EncoderNodeVariableTest extends AbstractPETest {
 
 	protected function setUp()
 	{
+		parent::setUp();
 		$this->_peApp = new EncoderNodeVariable('var');
 	}
 

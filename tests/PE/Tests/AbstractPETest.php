@@ -3,6 +3,7 @@
 namespace PE\Tests;
 
 use PE\Encoder;
+use PE\Nodes\EncoderNode;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -29,6 +30,9 @@ abstract class AbstractPETest extends PHPUnit_Framework_TestCase
 	 */
 	protected function setUp()
 	{
+		// make sure we delete all the added nodes before we create a new TestCase
+		EncoderNode::clean();
+
 		// Create a new FQ app,
 		// since we need one pretty much everywhere
 		$this->_peApp = new Encoder();

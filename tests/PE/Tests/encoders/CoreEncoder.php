@@ -2,14 +2,9 @@
 
 namespace PE\Tests\Encoders;
 
-use PE\Tests\AbstractPETest;
 use PE\Tests\Samples;
 
-class CoreEncoder extends AbstractPETest {
+class CoreEncoder extends Samples {
 
-	public function getHouse() {
-		$samples = new Samples();
-		return $samples->getHouse();
-	}
 
 }

@@ -9,6 +9,7 @@ class XmlEncoderTest extends CoreEncoder {
 
 	protected function setUp()
 	{
+		parent::setUp();
 		$this->_peApp = new XmlEncoder();
 	}
 
@@ -27,6 +28,8 @@ class XmlEncoderTest extends CoreEncoder {
 	}
 
 	public function testEncodeDecode() {
+		$this->addHouseNodes();
+
 		$house = $this->getHouse();
 		$encoded = $this->encoder()->encode($house);
 		$xmlString = trim(preg_replace('/\s+/', ' ', $encoded->saveXML()));

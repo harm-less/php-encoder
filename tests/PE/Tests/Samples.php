@@ -57,6 +57,13 @@ class Samples extends AbstractPETest
 		return $house;
 	}
 
+	public function addHouseNodes() {
+		$this->addBuildingNode();
+		$this->addBuildingHouseNode();
+		$this->addAnimalNodes(false);
+		$this->addAnimalCatNode();
+	}
+
 	/**
 	 * @param bool $addNodes
 	 * @return Farm
@@ -123,11 +130,24 @@ class Samples extends AbstractPETest
 	public function addAnimalNodes($children = true) {
 		EncoderNode::addNode(new AnimalNode());
 		if ($children) {
-			EncoderNode::addNodeType(new CatNode(), 'cat');
-			EncoderNode::addNodeType(new ChickenNode(), 'chicken');
-			EncoderNode::addNodeType(new CowNode(), 'cow');
-			EncoderNode::addNodeType(new SheepNode(), 'sheep');
+			$this->addAnimalCatNode();
+			$this->addAnimalChickenNode();
+			$this->addAnimalCowNode();
+			$this->addAnimalSheepNode();
 		}
+	}
+
+	public function addAnimalCatNode() {
+		EncoderNode::addNodeType(new CatNode(), 'cat');
+	}
+	public function addAnimalChickenNode() {
+		EncoderNode::addNodeType(new ChickenNode(), 'chicken');
+	}
+	public function addAnimalCowNode() {
+		EncoderNode::addNodeType(new CowNode(), 'cow');
+	}
+	public function addAnimalSheepNode() {
+		EncoderNode::addNodeType(new SheepNode(), 'sheep');
 	}
 
 
