@@ -218,7 +218,8 @@ class Encoder implements IEncoder {
 						$children = $this->_decodeNode($childName, $nodeDataItem, $options, $type, $nodeInstance, $nodeDataItem);
 
 						if ($type->getChild($childName)->setAfterChildren()) {
-							$type->addChildrenToObject($childName, $nodeInstance, $children);
+							$isSingleChildNode = $type->isSingleNode($childName);
+							$type->addChildrenToObject($childName, $nodeInstance, $isSingleChildNode ? array($children) : $children);
 						}
 					}
 				}

@@ -32,6 +32,7 @@ class XmlEncoder extends Encoder {
 
 
 	public function decode($node, EncoderOptions $options = null) {
+		$node = is_string($node) ? simplexml_load_string($node) : $node;
 		return parent::decode($node, $options);
 	}
 	protected function decodeChildNames($structure) {
@@ -41,7 +42,7 @@ class XmlEncoder extends Encoder {
 		}
 		return $names;
 	}
-	protected function decodeRawNode($nodeData, EncoderNode $nodeProxy, $isSingle) {
+	protected function decodeRawNode(\SimpleXMLElement $nodeData, EncoderNode $nodeProxy, $isSingle) {
 		$path = $nodeProxy->getNodeNameSingle();
 		if (!$isSingle) {
 			$path = $nodeProxy->getNodeName() . '/' . $path;

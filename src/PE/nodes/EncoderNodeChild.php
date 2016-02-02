@@ -28,6 +28,7 @@ class EncoderNodeChild extends EncoderNodeVariable {
 		return $this->nodeName;
 	}
 
+	// @todo Figure out if this feature is still necessary. Because if you use a single node, can't we simply assume it isn't an array?
 	public function isArray($bool = null) {
 		if ($bool !== null) {
 			$this->isArray = $bool;

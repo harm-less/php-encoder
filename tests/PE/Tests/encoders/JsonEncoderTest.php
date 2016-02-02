@@ -4,6 +4,7 @@ namespace PE\Tests\Encoders;
 
 use PE\Encoders\JsonEncoder;
 use PE\Samples\Farm\Buildings\House;
+use PE\Samples\Specials\SingleChild;
 
 class JsonEncoderTest extends CoreEncoder {
 
@@ -53,5 +54,34 @@ class JsonEncoderTest extends CoreEncoder {
 		/** @var House $houseDecoded */
 		$houseDecoded = $decoded['building'];
 		$this->assertCount(1, $houseDecoded->getAnimals());
+	}
+
+	public function testEncodeDecoded() {
+		$this->addSingleChildNode();
+		$this->addThingNode();
+
+		$singleChild = $this->getSingleChild();
+		$thing = $this->getThing();
+		$thing->setThingVar('hello world');
+		$singleChild->setThing($thing);
+
+		$encoded = $this->encoder()->encode($singleChild);
+		$jsonString = trim(preg_replace('/\s+/', ' ', $encoded));
+
+		$this->assertEquals('{'
+			. '"single-child":'
+			.   '{'
+			.     '"thing":{'
+			.       '"thingVar":"hello world"'
+			.     '}'
+			.   '}'
+			. '}', $jsonString);
+
+		$decoded = $this->encoder()->decode($jsonString);
+		$this->assertArrayHasKey('single-child', $decoded);
+
+		/** @var SingleChild $singleChildDecoded */
+		$singleChildDecoded = $decoded['single-child'];
+		$this->assertNotEmpty($singleChildDecoded->getThing());
 	}
 }

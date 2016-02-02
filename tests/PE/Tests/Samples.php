@@ -25,6 +25,7 @@ use PE\Nodes\Specials\ClassLoaderNode;
 use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
 use PE\Nodes\Specials\RequiredConstructorVariablesNode;
 use PE\Nodes\Specials\SetterMethodActionTypeNodeNode;
+use PE\Nodes\Specials\SingleChildNode;
 use PE\Samples\Erroneous\NonArrayGetterMethod;
 use PE\Samples\Erroneous\NoVariableGetterMethod;
 use PE\Samples\Farm\Farm;
@@ -41,6 +42,7 @@ use PE\Samples\General\Things;
 use PE\Samples\Specials\NonArrayGetterMethodOnPurpose;
 use PE\Samples\Specials\RequiredConstructorVariables;
 use PE\Samples\Specials\SetterMethodActionTypeNode;
+use PE\Samples\Specials\SingleChild;
 
 class Samples extends AbstractPETest
 {
@@ -194,6 +196,15 @@ class Samples extends AbstractPETest
 	public function addNonArrayGetterMethodOnPurposeNode() {
 		EncoderNode::addNode(new NonArrayGetterMethodOnPurposeNode());
 	}
+
+
+	public function getSingleChild() {
+		return new SingleChild();
+	}
+	public function addSingleChildNode() {
+		EncoderNode::addNode(new SingleChildNode());
+	}
+
 
 	public function getSetterMethodActionTypeNode() {
 		return new SetterMethodActionTypeNode();

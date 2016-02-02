@@ -8,7 +8,7 @@ use PE\Nodes\EncoderNodeChild;
 class NonArrayGetterMethodOnPurposeNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('non-array-getter-methods-on-purpose', 'non-array-getter-method-on-purpose', '\\PE\\Samples\\Erroneous');
+		parent::__construct('non-array-getter-methods-on-purpose', 'non-array-getter-method-on-purpose', '\\PE\\Samples\\Specials');
 
 		$this->addChildNode(new EncoderNodeChild('things', array(
 			'setter' => 'addThing',

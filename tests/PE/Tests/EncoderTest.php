@@ -6,11 +6,11 @@ use PE\Encoder;
 use PE\Options\EncoderOptions;
 use PE\Samples\Farm\Building;
 use PE\Samples\Farm\Buildings\House;
-use PE\Samples\General\Thing;
 use PE\Samples\Loader\ClassLoader;
 use PE\Samples\Specials\AddAfterDecodeParent;
 use PE\Samples\Specials\RequiredConstructorVariables;
 use PE\Samples\Specials\SetterMethodActionTypeNode;
+use PE\Samples\Specials\SingleChild;
 
 class EncoderTest extends Samples {
 
@@ -26,6 +26,78 @@ class EncoderTest extends Samples {
 		$encoder = new Encoder();
 		$this->assertNotNull($encoder);
 		$this->assertTrue($encoder instanceof Encoder);
+	}
+
+
+
+	public function testEncodeThenDecodeAndReEncode() {
+		$this->addHouseNodes();
+
+		$house = $this->getHouse();
+		$encoded = $this->encoder()->encode($house);
+		$encodedProcessed = $encoded['processed'];
+
+		$this->assertEquals(array(
+			'building' => array(
+				'type' => 'house',
+				'animals' => array(
+					array(
+						'type' => 'cat',
+						'name' => 'Cat'
+					)
+				)
+			)
+		), $encodedProcessed);
+
+		$decoded = $this->encoder()->decode($encodedProcessed);
+		$this->assertArrayHasKey('building', $decoded);
+
+		/** @var House $houseDecoded */
+		$houseDecoded = $decoded['building'];
+		$this->assertCount(1, $houseDecoded->getAnimals());
+
+		$reEncodedHouse = $this->encoder()->encode($house);
+		$reEncodedHouseProcessed = $reEncodedHouse['processed'];
+
+		$this->assertEquals(array(
+			'building' => array(
+				'type' => 'house',
+				'animals' => array(
+					array(
+						'type' => 'cat',
+						'name' => 'Cat'
+					)
+				)
+			)
+		), $reEncodedHouseProcessed);
+	}
+
+	public function testEncodeDecodedSingleChild() {
+		$this->addSingleChildNode();
+		$this->addThingNode();
+
+		$singleChild = $this->getSingleChild();
+		$thing = $this->getThing();
+		$thing->setThingVar('hello world');
+		$singleChild->setThing($thing);
+
+		$encoded = $this->encoder()->encode($singleChild);
+		$encodedProcessed = $encoded['processed'];
+
+		$this->assertEquals(array(
+			'single-child' => array(
+				'thing' => array(
+					'thingVar' => 'hello world'
+				)
+			)
+		), $encodedProcessed);
+
+		$decoded = $this->encoder()->decode($encodedProcessed);
+		$this->assertArrayHasKey('single-child', $decoded);
+
+		/** @var SingleChild $singleChildDecoded */
+		$singleChildDecoded = $decoded['single-child'];
+		$this->assertNotEmpty($singleChildDecoded->getThing());
 	}
 
 
@@ -359,7 +431,7 @@ class EncoderTest extends Samples {
 		$this->addThingNode();
 
 		$obj = $this->getNonArrayGetterMethodOnPurpose();
-		$obj->addThing(new Thing());
+		$obj->addThing($this->getThing());
 
 		$encoder = $this->encoder();
 		$encoded = $encoder->encode($obj);
