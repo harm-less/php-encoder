@@ -18,13 +18,13 @@ use PE\Nodes\Farm\FarmNode;
 use PE\Nodes\Erroneous\NoGetterMethodNode;
 use PE\Nodes\General\ThingNode;
 use PE\Nodes\General\ThingsNode;
+use PE\Nodes\Specials\AccessorMethodActionTypeNodeNode;
 use PE\Nodes\Specials\AddAfterDecodeChildNode;
 use PE\Nodes\Specials\AddAfterDecodeChildRequiresNode;
 use PE\Nodes\Specials\AddAfterDecodeParentNode;
 use PE\Nodes\Specials\ClassLoaderNode;
 use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
 use PE\Nodes\Specials\RequiredConstructorVariablesNode;
-use PE\Nodes\Specials\SetterMethodActionTypeNodeNode;
 use PE\Nodes\Specials\SingleChildNode;
 use PE\Samples\Erroneous\NonArrayGetterMethod;
 use PE\Samples\Erroneous\NoVariableGetterMethod;
@@ -40,8 +40,7 @@ use PE\Samples\Erroneous\NoGetterMethod;
 use PE\Samples\General\Thing;
 use PE\Samples\General\Things;
 use PE\Samples\Specials\NonArrayGetterMethodOnPurpose;
-use PE\Samples\Specials\RequiredConstructorVariables;
-use PE\Samples\Specials\SetterMethodActionTypeNode;
+use PE\Samples\Specials\AccessorMethodActionTypeNode;
 use PE\Samples\Specials\SingleChild;
 
 class Samples extends AbstractPETest
@@ -207,10 +206,13 @@ class Samples extends AbstractPETest
 
 
 	public function getSetterMethodActionTypeNode() {
-		return new SetterMethodActionTypeNode();
+		return new AccessorMethodActionTypeNode();
 	}
-	public function addSetterMethodActionTypeNodeNode() {
-		EncoderNode::addNode(new SetterMethodActionTypeNodeNode());
+	public function getAccessorMethodActionTypeNodeNode() {
+		return new AccessorMethodActionTypeNodeNode();
+	}
+	public function addAccessorMethodActionTypeNodeNode() {
+		EncoderNode::addNode(new AccessorMethodActionTypeNodeNode());
 	}
 
 	public function addRequiredConstructorVariablesNode($addVariables = true) {

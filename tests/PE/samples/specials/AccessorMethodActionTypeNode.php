@@ -2,7 +2,7 @@
 
 namespace PE\Samples\Specials;
 
-class SetterMethodActionTypeNode {
+class AccessorMethodActionTypeNode {
 
 	private $special;
 	function __construct() {

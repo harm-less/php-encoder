@@ -147,11 +147,12 @@ class Encoder implements IEncoder {
 			foreach ($nodeMethodVariables as $variableId => $nodeMethodVariable) {
 				if (isset($nodeDataItem[$variableId])) {
 					$setterOptions = array(
+						ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
 						ActionVariable::SETTER_NAME => $variableId,
 						ActionVariable::SETTER_PARENT => $parentObject,
 						ActionVariable::SETTER_VALUE => $nodeDataItem[$variableId]
 					);
-					if ($newNode = $nodeMethodVariable->callNodeSetterAction($type, $nodeDataItem, $setterOptions)) {
+					if ($newNode = $nodeMethodVariable->callNodeSetterAction($type, $setterOptions)) {
 						$nodeDataItem = $newNode;
 					}
 				}
@@ -472,10 +473,11 @@ class Encoder implements IEncoder {
 			$hasVariable = array_key_exists($variableId, $data);
 			if ($hasVariable || $nodeMethodVariable->alwaysExecute()) {
 				$actionOptions = array_merge(array(
+					ActionVariable::GETTER_NODE_DATA => $data,
 					ActionVariable::GETTER_NAME => $variableId,
 					ActionVariable::GETTER_VALUE => $hasVariable ? $data[$variableId] : null,
 				), $actionOptions);
-				if ($newAttributeData = $nodeMethodVariable->callNodeGetterAction($node, $data, $actionOptions)) {
+				if ($newAttributeData = $nodeMethodVariable->callNodeGetterAction($node, $actionOptions)) {
 					if (is_array($newAttributeData)) {
 						$temp = $newAttributeData;
 					}

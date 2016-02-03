@@ -9,7 +9,7 @@ use PE\Samples\Farm\Buildings\House;
 use PE\Samples\Loader\ClassLoader;
 use PE\Samples\Specials\AddAfterDecodeParent;
 use PE\Samples\Specials\RequiredConstructorVariables;
-use PE\Samples\Specials\SetterMethodActionTypeNode;
+use PE\Samples\Specials\AccessorMethodActionTypeNode;
 use PE\Samples\Specials\SingleChild;
 
 class EncoderTest extends Samples {
@@ -158,16 +158,16 @@ class EncoderTest extends Samples {
 	}
 
 	public function testDecodeSetterMethodActionTypeNode() {
-		$this->addSetterMethodActionTypeNodeNode();
+		$this->addAccessorMethodActionTypeNodeNode();
 
 		$decoded = $this->encoder()->decode(array(
-			'setter-method-action-type-node' => array(
+			'accessor-method-action-type-node' => array(
 				'special' => 'value',
 				'node' => 'hello world'
 			)
 		));
-		/** @var SetterMethodActionTypeNode $obj */
-		$obj = $decoded['setter-method-action-type-node'];
+		/** @var AccessorMethodActionTypeNode $obj */
+		$obj = $decoded['accessor-method-action-type-node'];
 		$this->assertEquals('hello world', $obj->getSpecial());
 	}
 

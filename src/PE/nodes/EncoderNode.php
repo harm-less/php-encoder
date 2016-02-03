@@ -384,7 +384,7 @@ class EncoderNode {
 
 	/**
 	 * @param $variable
-	 * @return Variable
+	 * @return EncoderNodeVariable
 	 */
 	public function getVariable($variable) {
 		return $this->variables->getVariable($variable);
@@ -392,7 +392,7 @@ class EncoderNode {
 
 	/**
 	 * @param $id
-	 * @return null|Variable
+	 * @return null|EncoderNodeVariable
 	 */
 	public function getVariableById($id) {
 		return $this->variables->getVariableById($id);

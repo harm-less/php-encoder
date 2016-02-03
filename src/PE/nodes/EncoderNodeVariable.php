@@ -68,6 +68,12 @@ class EncoderNodeVariable extends Variable {
 		return false;
 	}
 
+	/**
+	 * This node variable value must unique in relation to other nodes in a series
+	 *
+	 * @param null|bool $bool Set to true to enable the this variable to be unique. Leave empty to retrieve the current value
+	 * @return bool Default is false
+	 */
 	public function mustBeUnique($bool = null) {
 		if ($bool !== null && is_bool($bool)) {
 			$this->mustBeUnique = $bool;
@@ -75,6 +81,13 @@ class EncoderNodeVariable extends Variable {
 		return (bool) $this->mustBeUnique;
 	}
 
+	/**
+	 * This node variable is always executed even though there is not value set. This way you can force a value
+	 * to be set manually
+	 *
+	 * @param null|bool $bool Set to true to enable the this variable to always be executed. Leave empty to retrieve the current value
+	 * @return bool Default is false
+	 */
 	public function alwaysExecute($bool = null) {
 		if ($bool !== null && is_bool($bool)) {
 			$this->alwaysExecute = $bool;
@@ -82,43 +95,106 @@ class EncoderNodeVariable extends Variable {
 		return (bool) $this->alwaysExecute;
 	}
 
+	/**
+	 * Set the setter action method. The way the variable knows how to set the value when it's his turn
+	 *
+	 * ```php
+	 * $variable = new EncoderNodeVariable('variableName');
+	 * // string
+	 * $variable->setSetterAction('methodName');
+	 *
+	 * // array - available options: method (required), type, variables
+	 * $variable->setSetterAction(array(
+	 *   'method' => 'methodName',
+	 *   'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
+	 *   'variable' => array(ActionVariable::SETTER_VALUE, ActionVariable::SETTER_PARENT);
+	 * ));
+	 * ```
+	 * @param string|array $method Can either be the name of the method in the object as a string or an array like
+	 * in the example
+	 */
 	public function setSetterAction($method) {
+		if (!(is_string($method) || (is_array($method) && isset($method['method']) && is_string($method['method'])))) {
+			throw new EncoderNodeVariableException('Either method must be a string or an array with a "method" key being a string');
+		}
 		$this->_cacheReset('getSetterActionMethod');
 		$this->_cacheReset('getSetterActionType');
 		$this->setterAction = $method;
 	}
+
+	/**
+	 * @return string|array Get the current setter action
+	 */
 	public function getSetterAction() {
 		return $this->setterAction;
 	}
+
+	/**
+	 * @return bool Does it have a setter action or not?
+	 */
 	public function hasSetterAction() {
 		return $this->getSetterAction() != null;
 	}
+
+	/**
+	 * Specifically get the method of the setter action
+	 * @return false|string Either returns false if no setter action method has been set or returns the string of the method
+	 */
 	public function getSetterActionMethod() {
 		if (($result = self::_cache(__FUNCTION__)) === false) {
+			// it's being cached because it is requested a lot
 			$result = $this->getActionMethod($this->getSetterAction());
 			self::_cache(__FUNCTION__, $result);
 		}
 		return $result;
 	}
+
+	/**
+	 * Specifically get the type of the setter action
+	 * @return false|string Either returns false if no setter action type has been set or returns the type of method
+	 */
 	public function getSetterActionType() {
 		if (($result = self::_cache(__FUNCTION__)) === false) {
+			// it's being cached because it is requested a lot
 			$result = $this->getActionType($this->getSetterAction());
 			self::_cache(__FUNCTION__, $result);
 		}
 		return $result;
 	}
 
+	/**
+	 * Set the getter action method. The way the variable knows how to get the value for this variable
+	 *
+	 * @param string|array $method Can either be the name of the method in the object as a string or an array like
+	 * @see EncoderNodeVariable::setSetterAction() It shows what to provide to this method
+	 */
 	public function setGetterAction($method) {
+		if (!(is_string($method) || (is_array($method) && isset($method['method']) && is_string($method['method'])))) {
+			throw new EncoderNodeVariableException('Either method must be a string or an array with a "method" key being a string');
+		}
 		$this->_cacheReset('getGetterActionMethod');
 		$this->_cacheReset('getGetterActionType');
 		$this->getterAction = $method;
 	}
+
+	/**
+	 * @return string|array Get the current getter action
+	 */
 	public function getGetterAction() {
 		return $this->getterAction;
 	}
+
+	/**
+	 * @return bool Does it have a getter action or not?
+	 */
 	public function hasGetterAction() {
 		return $this->getGetterAction() != null;
 	}
+
+	/**
+	 * Specifically get the method of the getter action
+	 * @return false|string Either returns false if no getter action method has been set or returns the string of the method
+	 */
 	public function getGetterActionMethod() {
 		if (($result = self::_cache(__FUNCTION__)) === false) {
 			$result = $this->getActionMethod($this->getGetterAction());
@@ -126,6 +202,11 @@ class EncoderNodeVariable extends Variable {
 		}
 		return $result;
 	}
+
+	/**
+	 * Specifically get the type of the getter action
+	 * @return false|string Either returns false if no getter action type has been set or returns the type of method
+	 */
 	public function getGetterActionType() {
 		if (($result = self::_cache(__FUNCTION__)) === false) {
 			$result = $this->getActionType($this->getGetterAction());
@@ -134,7 +215,13 @@ class EncoderNodeVariable extends Variable {
 		return $result;
 	}
 
-	public function getActionMethod($action) {
+	/**
+	 * Generic method to get the action method
+	 *
+	 * @param string|array $action Action object or string
+	 * @return null|string Returns null if nothing has been found or the string if it has
+	 */
+	protected function getActionMethod($action) {
 		if (is_array($action) && isset($action['method'])) {
 			return $action['method'];
 		}
@@ -143,7 +230,15 @@ class EncoderNodeVariable extends Variable {
 		}
 		return null;
 	}
-	public function getActionType($action) {
+
+	/**
+	 * Generic method to get the action type
+	 *
+	 * @param string|array $action Action object or string
+	 * @return null|string Returns null if nothing has been found or the type if it has. If no type has been set but
+	 * there is an action object, the default is "object"
+	 */
+	protected function getActionType($action) {
 		$type = null;
 		if ($action) {
 			$type = self::ACTION_TYPE_OBJECT;
@@ -154,10 +249,20 @@ class EncoderNodeVariable extends Variable {
 		return $type;
 	}
 
+	/**
+	 * Returns the name of the variable
+	 *
+	 * @return string The id supplied to this instance is the name
+	 */
 	public function getName() {
 		return $this->getId();
 	}
 
+	/**
+	 * @return false|string Returns the setter method if available. Otherwise it returns false
+	 *
+	 * @todo Figure out if this is still necessary because the actions have this feature too
+	 */
 	public function getSetterMethod() {
 		if (($result = self::_cache(__FUNCTION__)) === false) {
 			$result = parent::getSetterMethod();
@@ -168,6 +273,12 @@ class EncoderNodeVariable extends Variable {
 		}
 		return $result;
 	}
+
+	/**
+	 * @return false|string Returns the getter method if available. Otherwise it returns false
+	 *
+	 * @todo Figure out if this is still necessary because the actions have this feature too
+	 */
 	public function getGetterMethod() {
 		if (($result = self::_cache(__FUNCTION__)) === false) {
 			$result = parent::getGetterMethod();
@@ -179,43 +290,64 @@ class EncoderNodeVariable extends Variable {
 		return $result;
 	}
 
-	public function camelCased($str) {
+	/**
+	 * @param string $str Spinal cased string
+	 * @return string Camel cased string
+	 */
+	protected function camelCased($str) {
 		return ucfirst(Inflector::camelize($str, true, '-'));
 	}
 
-	public function callNodeSetterAction($node, $nodeData, $options) {
+	/**
+	 * Call the setter action of the node. The setter action type must be set to "node", otherwise it will not execute.
+	 *
+	 * @param EncoderNode $node The EncoderNode of which you wish to call the setter action from
+	 * @param array $options All the available options
+	 * @return mixed|null Returns null if setter action type is not "node". Returns an array with the possibly altered node data
+	 */
+	public function callNodeSetterAction(EncoderNode $node, $options) {
 		if ($this->getSetterActionType() != self::ACTION_TYPE_NODE) {
 			return null;
 		}
 		$required = array(
 			self::ACTION_VARIABLE_SETTER_NODE_DATA
 		);
-		if (!isset($options[self::ACTION_VARIABLE_SETTER_NODE_DATA])) {
-			$options[self::ACTION_VARIABLE_SETTER_NODE_DATA] = $nodeData;
-		}
 		$variables = $this->_setupNodeActionVariables($this->getSetterAction(), $required, $options);
-		return $this->_callNodeAction($node, $this->getSetterActionMethod(), $nodeData, $variables);
+		return $this->_callNodeAction($node, $this->getSetterActionMethod(), $variables);
 	}
-	public function callNodeGetterAction($node, $nodeData, $options) {
+
+	/**
+	 * Call the getter action of the node. The getter action type must be set to "node", otherwise it will not execute.
+	 *
+	 * @param EncoderNode $node The EncoderNode of which you wish to call the getter action from
+	 * @param array $options All the available options
+	 * @return mixed|null Returns null if getter action type is not "node". Returns an array with the possibly altered node data
+	 */
+	public function callNodeGetterAction(EncoderNode $node, $options) {
 		if ($this->getGetterActionType() != self::ACTION_TYPE_NODE) {
 			return null;
 		}
 		$required = array(
 			self::ACTION_VARIABLE_GETTER_NODE_DATA
 		);
-		if (!isset($options[self::ACTION_VARIABLE_GETTER_NODE_DATA])) {
-			$options[self::ACTION_VARIABLE_GETTER_NODE_DATA] = $nodeData;
-		}
 		$variables = $this->_setupNodeActionVariables($this->getGetterAction(), $required, $options);
-		return $this->_callNodeAction($node, $this->getGetterActionMethod(), $nodeData, $variables);
+		return $this->_callNodeAction($node, $this->getGetterActionMethod(), $variables);
 	}
 
+	/**
+	 * Prepares the variables so they can be used
+	 *
+	 * @param array $action Action object
+	 * @param array $required Will be used to determine if options are missing or not
+	 * @param array $options All available options. If options are missing an error will be thrown
+	 * @return array The prepared array of variables
+	 */
 	protected function _setupNodeActionVariables($action, $required, $options) {
 
 		$variablesNames = array_merge($required, isset($action['variables']) ? $action['variables'] : array());
 
 		$variables = array();
-		foreach ($variablesNames as $actionVariableIndex => $variableName) {
+		foreach ($variablesNames as $variableName) {
 			if (array_key_exists($variableName, $options)) {
 				$variables[] = $options[$variableName];
 			}
@@ -226,15 +358,19 @@ class EncoderNodeVariable extends Variable {
 		return $variables;
 	}
 
-	protected function _callNodeAction($node, $actionMethodName, $nodeData, $actionVariables) {
-		if ($actionMethodName) {
-			return call_user_func_array(array($node, $actionMethodName), $actionVariables);
-		}
-		return $nodeData;
+	/**
+	 * Makes a call to the actual node method
+	 *
+	 * @param EncoderNode $node Node being used to make the call
+	 * @param string $actionMethodName The method name from the node being called
+	 * @param array $actionVariables All variables being set to the node in the order they are supplied
+	 * @return mixed
+	 */
+	protected function _callNodeAction(EncoderNode $node, $actionMethodName, $actionVariables) {
+		return call_user_func_array(array($node, $actionMethodName), $actionVariables);
 	}
 
-
-	public function setToObject($node, $nodeData, $parent, $object, $value) {
+	public function setToObject(EncoderNode $node, $nodeData, $parent, $object, $value) {
 
         $variableAction = $this->getSetterAction();
 

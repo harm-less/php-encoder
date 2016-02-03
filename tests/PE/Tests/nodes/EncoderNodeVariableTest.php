@@ -2,11 +2,11 @@
 
 namespace PE\Tests\Nodes;
 
+use PE\Enums\ActionVariable;
 use PE\Nodes\EncoderNodeVariable;
-use PE\Tests\AbstractPETest;
-use PE\Variables\Variable;
+use PE\Tests\Samples;
 
-class EncoderNodeVariableTest extends AbstractPETest {
+class EncoderNodeVariableTest extends Samples {
 
 	protected function setUp()
 	{
@@ -140,5 +140,87 @@ class EncoderNodeVariableTest extends AbstractPETest {
 		));
 		$this->assertEquals('methodNameArray', $variable->getGetterActionMethod());
 		$this->assertEquals(EncoderNodeVariable::ACTION_TYPE_NODE, $variable->getGetterActionType());
+	}
+
+	public function testCallNodeSetterAction() {
+		$node = $this->getAccessorMethodActionTypeNodeNode();
+		$variable = $node->getVariable('node');
+
+		$this->assertEquals(array(
+			'node' => 'hello world',
+			'special' => 'hello world',
+		), $variable->callNodeSetterAction($node, array(
+			ActionVariable::GETTER_NODE_DATA => array(
+				'node' => 'hello world',
+			),
+			ActionVariable::GETTER_NAME => 'node'
+		)));
+	}
+
+	public function testCallNodeSetterActionWithActionTypeNotNode() {
+		$node = $this->getAccessorMethodActionTypeNodeNode();
+		$variable = $node->getVariable('node');
+		$setterAction = $variable->getSetterAction();
+		$setterAction['type'] = 'not-node';
+		$variable->setSetterAction($setterAction);
+
+		$this->assertNull($variable->callNodeSetterAction($node, array(
+			ActionVariable::GETTER_NODE_DATA => array(
+				'node' => 'hello world',
+			),
+			ActionVariable::GETTER_NAME => 'node'
+		)));
+	}
+
+	public function testCallNodeSetterActionWithMissingVariable() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableException', 'Action variable "node_data" is not known');
+		$node = $this->getAccessorMethodActionTypeNodeNode();
+		$this->getAccessorMethodActionTypeNodeNode()->getVariable('node')->callNodeSetterAction($node, array());
+	}
+
+	public function testCallNodeSetterActionWithoutMethod() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableException', 'Either method must be a string or an array with a "method" key being a string');
+		$node = $this->getAccessorMethodActionTypeNodeNode();
+		$variable = $node->getVariable('node');
+		$setterAction = $variable->getSetterAction();
+		unset($setterAction['method']);
+		$variable->setSetterAction($setterAction);
+
+		$variable->callNodeSetterAction($node, array(
+			ActionVariable::GETTER_NODE_DATA => array(
+				'node' => 'hello world',
+			),
+			ActionVariable::GETTER_NAME => 'node'
+		));
+	}
+
+	public function testCallNodeGetterAction() {
+		$node = $this->getAccessorMethodActionTypeNodeNode();
+		$variable = $node->getVariable('node');
+
+		$this->assertEquals(array(
+			'node' => 'hello world',
+			'special' => 'hello world getter',
+		), $variable->callNodeGetterAction($node, array(
+			ActionVariable::GETTER_NODE_DATA => array(
+				'node' => 'hello world',
+			),
+			ActionVariable::GETTER_NAME => 'node'
+		)));
+	}
+
+	public function testCallNodeGetterActionWithActionTypeNotNode() {
+		$node = $this->getAccessorMethodActionTypeNodeNode();
+		$variable = $node->getVariable('node');
+		$setterAction = $variable->getGetterAction();
+		$setterAction['type'] = 'not-node';
+		$variable->setGetterAction($setterAction);
+
+		$this->assertNull($variable->callNodeGetterAction($node, array(
+			ActionVariable::GETTER_NODE_DATA => array(
+				'node' => 'hello world',
+			),
+			ActionVariable::GETTER_NAME => 'node'
+		)));
 	}
 }
