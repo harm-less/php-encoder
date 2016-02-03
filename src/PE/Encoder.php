@@ -56,21 +56,21 @@ class Encoder implements IEncoder {
 				throw new EncoderException(sprintf('Trying to decode node, but encoder type "%s" in parent "%s" is not found. Make sure it has been loaded.', $nodeTypeStr, $proxyNode->getNodeName()));
 			}
 
-			$childArr = array();
-
-			foreach ($decodedData as $childName => $childData) {
-				if ($nodeType->isChild($childName)) {
-					$childArr[$childName] = $this->decodeRawToArray($childName, $nodeChildData, $array);
+			foreach ($decodedData as $decodedName => $data) {
+				// if data belongs to a child
+				if ($nodeType->isChild($decodedName)) {
+					// decode it, unset it and add it back into the array at the correct place
+					$childArrDecoded = $this->decodeRawToArray($decodedName, $nodeChildData, $array);
+					unset($decodedData[$decodedName]);
+					$decodedData = $nodeType->getChild($decodedName)->setAfterChildren() === false ? array($decodedName => $childArrDecoded) + $decodedData : array_merge($decodedData, array($decodedName => $childArrDecoded));
 				}
-				else {
-					if (is_array($childData)) {
-						throw new EncoderException(sprintf('Trying to decode node, but child node "%s" doesn\'t seem to be configured or you are trying to save an array into an attribute which is illegal (imploded value: "%s"). Make sure you either register this node or to encode the value to something other than an array.', $childName, implode(', ', $childData)));
-					}
-					$childArr[$childName] = $childData;
+				// if data belongs to an attribute simply
+				else if (is_array($data)) {
+					throw new EncoderException(sprintf('Trying to decode node, but child node "%s" doesn\'t seem to be configured or you are trying to save an array into an attribute which is illegal (imploded value: "%s"). Make sure you either register this node or to encode the value to something other than an array.', $decodedName, implode(', ', $data)));
 				}
 			}
 
-			array_push($childrenArr, $childArr);
+			array_push($childrenArr, $decodedData);
 		}
 
 		if ($isSingleNode) {

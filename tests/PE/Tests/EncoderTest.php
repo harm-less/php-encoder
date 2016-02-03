@@ -275,14 +275,15 @@ class EncoderTest extends Samples {
 	}
 
 	public function testDecodeWithSetAfterChildrenTrueAndChildrenInverted() {
-		$this->markTestSkipped(
-			'This test cannot be created yet. setAfterChildren doesn\'t work when it has the wrong order like described below, so perhaps I need to build a sorting mechanism. Perhaps in "decodeRawToArray"?'
-		);
+		//$this->markTestSkipped(
+		//	'This test cannot be created yet. setAfterChildren doesn\'t work when it has the wrong order like described below, so perhaps I need to build a sorting mechanism. Perhaps in "decodeRawToArray"?'
+		//);
 
-		$this->addAddAfterDecodeNodes();
+		$this->addAddAfterDecodeNodes(false);
 
 		$decoded = $this->encoder()->decode(array(
 			'add-after-decode-parent' => array(
+				'name' => 'parent',
 				'add-after-decode-children-require' => array(
 					array(
 						'name' => 'child-require'
@@ -300,7 +301,7 @@ class EncoderTest extends Samples {
 		$child = $specialDecoded->getChild();
 
 		$this->assertNotEmpty($child);
-		$this->assertEquals('It worked!', $child->getName());
+		$this->assertEquals('It worked and it has a name: parent!', $child->getName());
 	}
 
 
