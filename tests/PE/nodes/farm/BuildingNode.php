@@ -14,11 +14,6 @@ class BuildingNode extends EncoderNode {
 		parent::__construct('buildings', 'building', $classPrepend !== null ? $classPrepend : '\\PE\\Samples\\Farm');
 
 		$this->addVariable(new EncoderNodeVariable('type', array(
-			'setterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_OBJECT,
-				'method' => 'setBuildingType',
-				'variables' => array(ActionVariable::SETTER_VALUE, ActionVariable::SETTER_NODE_DATA)
-			),
 			'getterAction' => array(
 				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
 				'method' => 'getBuildingType',
@@ -28,10 +23,6 @@ class BuildingNode extends EncoderNode {
 		)));
 	}
 
-	function setBuildingType($building, $value, $nodeData) {
-
-		$building->setType($value);
-	}
 	public function getBuildingType($nodeData, Building $building) {
 		$nodeData['type'] = $building->getType();
 		return $nodeData;

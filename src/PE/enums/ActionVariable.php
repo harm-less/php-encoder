@@ -9,6 +9,7 @@ class ActionVariable {
 	const SETTER_NODE_DATA = EncoderNodeVariable::ACTION_VARIABLE_SETTER_NODE_DATA;
 	const SETTER_NAME = 'name';
 	const SETTER_VALUE = 'value';
+	const SETTER_OBJECT = 'object';
     const SETTER_PARENT = 'parent';
 
 	const GETTER_NODE_DATA = EncoderNodeVariable::ACTION_VARIABLE_GETTER_NODE_DATA;

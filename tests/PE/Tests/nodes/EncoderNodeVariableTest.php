@@ -120,6 +120,14 @@ class EncoderNodeVariableTest extends Samples {
 
 		$this->assertTrue($variable->hasGetterAction());
 	}
+	public function testGetterActionWhenWrongDataType() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableException', 'Either method must be a string or an array with a "method" key being a string');
+		$this->variable()->setGetterAction(1);
+	}
+	public function testGetterActionWhenEmptyArray() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableException', 'Either method must be a string or an array with a "method" key being a string');
+		$this->variable()->setGetterAction(array());
+	}
 	public function testGetterActionMethod() {
 		$variable = $this->variable();
 
@@ -222,5 +230,118 @@ class EncoderNodeVariableTest extends Samples {
 			),
 			ActionVariable::GETTER_NAME => 'node'
 		)));
+	}
+
+
+	public function testApplyToSetterNodeSimple() {
+		$node = $this->getEncoderNodeVariableApplyToSetterNode();
+
+		$object = $this->getEncoderNodeVariableApplyToSetter();
+		$var = $node->getVariableById('node-simple');
+
+		$this->assertEquals(array(
+			'node' => 'test',
+			'copied' => 'test',
+		), $var->applyToSetter($node, array(
+			ActionVariable::SETTER_OBJECT => $object,
+			ActionVariable::SETTER_NODE_DATA => array(
+				'node' => 'test'
+			),
+			ActionVariable::SETTER_NAME => 'node',
+			ActionVariable::SETTER_VALUE => 'test'
+		)));
+
+		$this->assertNull($object->getVar());
+	}
+
+	public function testApplyToSetterNodeFull() {
+		$node = $this->getEncoderNodeVariableApplyToSetterNode();
+
+		$object = $this->getEncoderNodeVariableApplyToSetter();
+		$parent = $this->getThing();
+		$var = $node->getVariableById('node-full');
+
+		$this->assertEquals(array(
+			'node' => 'test',
+			'name' => 'node',
+			'value' => 'test',
+			'object' => $object,
+			'parent' => $parent,
+		), $var->applyToSetter($node, array(
+			ActionVariable::SETTER_OBJECT => $object,
+			ActionVariable::SETTER_PARENT => $parent,
+			ActionVariable::SETTER_NODE_DATA => array(
+				'node' => 'test'
+			),
+			ActionVariable::SETTER_NAME => 'node',
+			ActionVariable::SETTER_VALUE => 'test'
+		)));
+	}
+
+	public function testApplyToSetterNodeWithoutVariables() {
+		$this->_applyToSetterNodeWithoutVariables('node-without-variables');
+		$this->_applyToSetterNodeWithoutVariables('node-without-variables-empty');
+		$this->_applyToSetterNodeWithoutVariables('node-without-variables-null');
+	}
+	protected function _applyToSetterNodeWithoutVariables($variable)
+	{
+		$node = $this->getEncoderNodeVariableApplyToSetterNode();
+
+		$object = $this->getEncoderNodeVariableApplyToSetter();
+		$var = $node->getVariableById($variable);
+
+		$this->assertEquals(array(
+			'test' => 'altered',
+		), $var->applyToSetter($node, array(
+			ActionVariable::SETTER_OBJECT => $object,
+			ActionVariable::SETTER_NODE_DATA => array(
+				'test' => 'test'
+			),
+			ActionVariable::SETTER_NAME => 'node',
+			ActionVariable::SETTER_VALUE => 'test'
+		)));
+
+		$this->assertNull($object->getVar());
+	}
+
+	public function testApplyToSetterNodeUnknownVariable() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableException', 'Action variable id "unknown_variable" is not known');
+		$node = $this->getEncoderNodeVariableApplyToSetterNode();
+
+		$object = $this->getEncoderNodeVariableApplyToSetter();
+		$var = $node->getVariableById('node-unknown-variable');
+
+		$var->applyToSetter($node, array(
+			ActionVariable::SETTER_OBJECT => $object,
+			ActionVariable::SETTER_NODE_DATA => array(
+				'node' => 'test'
+			),
+			ActionVariable::SETTER_NAME => 'node',
+			ActionVariable::SETTER_VALUE => 'test'
+		));
+	}
+
+	public function testApplyToSetterObjectWithSetterMethod() {
+		$this->_applyToSetterObject('var');
+		$this->_applyToSetterObject('object-using-setter-action');
+		$this->_applyToSetterObject('object-using-setter-method');
+	}
+
+	public function testApplyToSetterObjectWithUnknownSetterMethod() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableException', 'Method "unknownMethod" does not exist for class PE\Samples\Specials\EncoderNodeVariableApplyToSetter does not exist');
+		$this->_applyToSetterObject('object-using-unknown-setter-method');
+	}
+
+	protected function _applyToSetterObject($variable) {
+		$node = $this->getEncoderNodeVariableApplyToSetterNode();
+
+		$object = $this->getEncoderNodeVariableApplyToSetter();
+		$var = $node->getVariableById($variable);
+
+		$this->assertTrue($var->applyToSetter($node, array(
+			ActionVariable::SETTER_OBJECT => $object,
+			ActionVariable::SETTER_VALUE => 'test'
+		)));
+		$this->assertEquals('test', $object->getVar());
 	}
 }

@@ -23,6 +23,7 @@ use PE\Nodes\Specials\AddAfterDecodeChildNode;
 use PE\Nodes\Specials\AddAfterDecodeChildRequiresNode;
 use PE\Nodes\Specials\AddAfterDecodeParentNode;
 use PE\Nodes\Specials\ClassLoaderNode;
+use PE\Nodes\Specials\EncoderNodeVariableApplyToSetterNode;
 use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
 use PE\Nodes\Specials\RequiredConstructorVariablesNode;
 use PE\Nodes\Specials\SingleChildNode;
@@ -39,6 +40,7 @@ use PE\Samples\Farm\Animals\Chicken;
 use PE\Samples\Erroneous\NoGetterMethod;
 use PE\Samples\General\Thing;
 use PE\Samples\General\Things;
+use PE\Samples\Specials\EncoderNodeVariableApplyToSetter;
 use PE\Samples\Specials\NonArrayGetterMethodOnPurpose;
 use PE\Samples\Specials\AccessorMethodActionTypeNode;
 use PE\Samples\Specials\SingleChild;
@@ -213,6 +215,16 @@ class Samples extends AbstractPETest
 	}
 	public function addAccessorMethodActionTypeNodeNode() {
 		EncoderNode::addNode(new AccessorMethodActionTypeNodeNode());
+	}
+
+	public function getEncoderNodeVariableApplyToSetter() {
+		return new EncoderNodeVariableApplyToSetter();
+	}
+	public function getEncoderNodeVariableApplyToSetterNode() {
+		return new EncoderNodeVariableApplyToSetterNode();
+	}
+	public function addEncoderNodeVariableApplyToSetterNodeNode() {
+		EncoderNode::addNode(new EncoderNodeVariableApplyToSetterNode());
 	}
 
 	public function addRequiredConstructorVariablesNode($addVariables = true) {

@@ -60,8 +60,9 @@ class VariableTest extends AbstractPETest {
 		$this->assertNull($variable->getSetterMethod());
 	}
 	public function testSetSetterMethodNoValue() {
-		$this->setExpectedException('PE\\Exceptions\\VariableException', 'Setter method name cannot be empty');
+		$this->setExpectedException('PE\\Exceptions\\VariableException', 'A setter method for (id) cannot be set because it has the wrong data type');
 		$variable = $this->variable();
+		$variable->setId('id');
 		$variable->setSetterMethod('');
 	}
 
@@ -73,8 +74,9 @@ class VariableTest extends AbstractPETest {
 		$this->assertNull($variable->getGetterMethod());
 	}
 	public function testSetGetterMethodNoValue() {
-		$this->setExpectedException('PE\\Exceptions\\VariableException', 'Getter method name cannot be empty');
+		$this->setExpectedException('PE\\Exceptions\\VariableException', 'A getter method for (id) cannot be set because it has the wrong data type');
 		$variable = $this->variable();
+		$variable->setId('id');
 		$variable->setGetterMethod('');
 	}
 

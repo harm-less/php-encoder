@@ -363,72 +363,62 @@ class EncoderNodeVariable extends Variable {
 	 *
 	 * @param EncoderNode $node Node being used to make the call
 	 * @param string $actionMethodName The method name from the node being called
-	 * @param array $actionVariables All variables being set to the node in the order they are supplied
+	 * @param array $parameters All variables being set to the node in the order they are supplied
 	 * @return mixed
 	 */
-	protected function _callNodeAction(EncoderNode $node, $actionMethodName, $actionVariables) {
-		return call_user_func_array(array($node, $actionMethodName), $actionVariables);
+	protected function _callNodeAction(EncoderNode $node, $actionMethodName, $parameters) {
+		return call_user_func_array(array($node, $actionMethodName), $parameters);
 	}
 
-	public function setToObject(EncoderNode $node, $nodeData, $parent, $object, $value) {
-
-        $variableAction = $this->getSetterAction();
-
-        $methodResult = null;
-        $methodName = $this->getSetterMethod();
-		if ($methodName !== false) {
-			if ($methodName === null) {
-				throw new EncoderNodeVariableException(sprintf('A setter method (%s) for class %s has not been set. Please set it with "setSetterMethod" or with the "setter" key.', $this->getName(), get_class($object)));
-			}
-			if (method_exists($object, $methodName)) {
-				$methodResult = $object->$methodName($this->processValue($value));
-			}
-			else {
-				//throw new ProxyNodeVariableException(sprintf('Method "%s" does not exist for class %s does not exist', $methodName, get_class($object)));
-			}
+	public function applyToSetter(EncoderNode $node, $parameters) {
+		if ($this->hasSetterAction() && $this->getSetterActionType() === EncoderNodeVariable::ACTION_TYPE_NODE) {
+			return $this->applyToNodeSetter($node, $parameters);
 		}
-
-		$actionType = $this->getSetterActionType();
-		if ($actionType != null && $actionType != self::ACTION_TYPE_OBJECT) {
-			return $methodResult;
+		else {
+			return $this->applyToObjectSetter($parameters[ActionVariable::SETTER_OBJECT], $parameters[ActionVariable::SETTER_VALUE]);
 		}
+	}
 
-		// call a custom action if one is set
-		if ($variableAction) {
-			$actionVariables = array($object, $value);
+	protected function applyToObjectSetter($object, $value) {
+		$methodName = $this->getSetterActionMethod() ? $this->getSetterActionMethod() : $this->getSetterMethod();
+		if (method_exists($object, $methodName)) {
+			return $object->$methodName($this->processValue($value));
+		}
+		else {
+			throw new EncoderNodeVariableException(sprintf('Method "%s" does not exist for class %s does not exist', $methodName, get_class($object)));
+		}
+	}
 
-			if (!is_array($variableAction)) {
-				$actionMethod = $variableAction;
-			}
-			else {
-				$actionMethod = $variableAction['method'];
+	protected function applyToNodeSetter(EncoderNode $node, $parameters) {
 
-				if (isset($variableAction['variables'])) {
-					$actionVariables = array($object);
+		$nodeData = $parameters[ActionVariable::SETTER_NODE_DATA];
 
-					foreach ($variableAction['variables'] as $actionVariable => $actionVariableId) {
-						switch ($actionVariableId) {
-							case ActionVariable::SETTER_PARENT :
-								$actionVariables[] = $parent;
-								break;
-							case ActionVariable::SETTER_NAME :
-								$actionVariables[] = $this->getName();
-								break;
-							case ActionVariable::SETTER_VALUE :
-								$actionVariables[] = $value;
-								break;
-							case ActionVariable::SETTER_NODE_DATA :
-								$actionVariables[] = $nodeData;
-								break;
-							default :
-								throw new EncoderNodeVariableException(sprintf('Action variable id "%s" is not known', $actionVariableId));
-								break;
-						}
-					}
+		$actionMethod = $this->getSetterActionMethod();
+
+		// get custom parameters and prepend the object in front of it
+		$customParameters = $this->gatherAccessorParameters($parameters);
+		if ($customParameters) {
+			array_unshift($customParameters, $nodeData);
+		}
+		// if it fails to get any kind of custom object, create a default one
+		$methodParameters = $customParameters ? $customParameters : array($nodeData, $parameters[ActionVariable::SETTER_VALUE]);
+
+		// using those parameters, call the node action method
+		return $this->_callNodeAction($node, $actionMethod, $methodParameters);
+	}
+
+	protected function gatherAccessorParameters($parameters) {
+		$variableAction = $this->getSetterAction();
+		if (isset($variableAction['variables']) && count($variableAction['variables'])) {
+			$actionVariables = array();
+			foreach ($variableAction['variables'] as $actionVariableId) {
+				if (!isset($parameters[$actionVariableId])) {
+					throw new EncoderNodeVariableException(sprintf('Action variable id "%s" is not known', $actionVariableId));
 				}
+				array_push($actionVariables, $parameters[$actionVariableId]);
 			}
-			return call_user_func_array(array($node, $actionMethod), $actionVariables);
+			return $actionVariables;
 		}
-		return false;
+		return null;
 	}
 }

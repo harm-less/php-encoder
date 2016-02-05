@@ -2,6 +2,7 @@
 
 namespace PE\Nodes;
 
+use PE\Enums\ActionVariable;
 use ReflectionClass;
 use PE\Exceptions\EncoderNodeException;
 use PE\Variables\Variable;
@@ -361,12 +362,12 @@ class EncoderNode {
 
 
 
-	public function setToObject($parent, $nodeData, $object, $name, $value) {
+	public function applyToVariable($name, $parameters) {
 		$variable = $this->getVariable($name);
 		if ($variable == null) {
 			return false;
 		}
-		return $variable->setToObject($this, $nodeData, $parent, $object, $value);
+		return $variable->applyToSetter($this, $parameters);
 	}
 
 	public function addVariable(EncoderNodeVariable $variable) {

@@ -52,8 +52,8 @@ class Variable {
 	 * @param string|null $id Id used in collection
 	 */
 	function __construct($options = null, $id = null) {
-		$this->parseOptions($options);
 		$this->setId($id);
+		$this->parseOptions($options);
 	}
 
 	/**
@@ -109,8 +109,8 @@ class Variable {
 	 * @param string $setterMethodName
 	 */
 	public function setSetterMethod($setterMethodName) {
-		if ($setterMethodName === '') {
-			throw new VariableException('Setter method name cannot be empty');
+		if ($setterMethodName !== null && (!$setterMethodName || empty($setterMethodName))) {
+			throw new VariableException(sprintf('A setter method for (%s) cannot be set because it has the wrong data type', $this->getId()));
 		}
 		$this->setterMethod = $setterMethodName;
 	}
@@ -126,8 +126,8 @@ class Variable {
 	 * @param string $getterMethodName
 	 */
 	public function setGetterMethod($getterMethodName) {
-		if ($getterMethodName === '') {
-			throw new VariableException('Getter method name cannot be empty');
+		if ($getterMethodName !== null && (!$getterMethodName || empty($getterMethodName))) {
+			throw new VariableException(sprintf('A getter method for (%s) cannot be set because it has the wrong data type', $this->getId()));
 		}
 		$this->getterMethod = $getterMethodName;
 	}

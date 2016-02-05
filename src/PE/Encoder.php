@@ -206,7 +206,13 @@ class Encoder implements IEncoder {
 				}
 
 				foreach ($nodeDataItem as $name => $value) {
-					$type->setToObject($parentObject, $nodeDataItem, $nodeInstance, $name, $value);
+					$type->applyToVariable($name, array(
+						ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
+						ActionVariable::SETTER_OBJECT => $nodeInstance,
+						ActionVariable::SETTER_PARENT => $parentObject,
+						ActionVariable::SETTER_NAME => $name,
+						ActionVariable::SETTER_VALUE => $value
+					));
 				}
 
 				if (!$addAfterDecode && $addAfterAttributes) {
