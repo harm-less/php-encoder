@@ -158,7 +158,9 @@ class Samples extends AbstractPETest
 		return new Things();
 	}
 	public function addThingsNode() {
-		EncoderNode::addNode(new ThingsNode());
+		$thingsNode = new ThingsNode();
+		EncoderNode::addNode($thingsNode);
+		return $thingsNode;
 	}
 	public function getThing() {
 		return new Thing();

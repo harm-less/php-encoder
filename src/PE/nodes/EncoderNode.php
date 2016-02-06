@@ -2,7 +2,6 @@
 
 namespace PE\Nodes;
 
-use PE\Enums\ActionVariable;
 use ReflectionClass;
 use PE\Exceptions\EncoderNodeException;
 use PE\Variables\Variable;
@@ -21,6 +20,7 @@ class EncoderNode {
 	/**
 	 * @var EncoderNode[]
 	 */
+	private static $getNodeByObjectCache = array();
 	private static $getNodeTypeByObjectCache = array();
 
 	private $_nodeIsObjectCache;
@@ -65,35 +65,43 @@ class EncoderNode {
 		$this->classPrepend = $classPrepend;
 	}
 
+	/**
+	 * Adds a node
+	 *
+	 * This method is essential for using this library because it will instruct it what to do and how to do it.
+	 *
+	 * @param EncoderNode $node
+	 * @return bool Will return true if the node had been successfully added
+	 */
 	public static function addNode(EncoderNode $node) {
 		$nodeName = $node->getNodeName();
 		$nodeNameSingle = $node->getNodeNameSingle();
-		if ($nodeName == null) {
-			throw new EncoderNodeException('Node without a name has been added');
+		if ($nodeName === null || empty($nodeName) || !is_string($nodeName)) {
+			throw new EncoderNodeException('Node without a name has been added. It must be a string and it cannot be empty.');
 		}
-		if ($nodeName != null && self::nodeExists($nodeName)) {
-			return false;
+		if (self::nodeExists($nodeName)) {
+			throw new EncoderNodeException(sprintf('Node with name "%s" already exists', $nodeName));
 		}
-		if ($nodeNameSingle != null && self::nodeExists($nodeName)) {
-			return false;
+		else if ($nodeNameSingle != null) {
+			if (self::nodeExists($nodeNameSingle)) {
+				throw new EncoderNodeException(sprintf('Node with single name "%s" already exists', $nodeNameSingle));
+			}
+			self::$nodes[$nodeNameSingle] = $node;
 		}
-		self::$nodes[$nodeName] = self::$nodes[$nodeNameSingle] = $node;
+		self::$nodes[$nodeName] = $node;
 
 		// make this node the default one if no type has yet been specified
 		if (count(self::getNodeTypes($nodeName)) == 0) {
 			self::addNodeType($node, self::DEFAULT_TYPE);
 		}
-		return true;
-	}
 
-	public static function isSingleNode($nodeName) {
-		$node = self::getNode($nodeName);
-		return $node && $node->getNodeNameSingle() == $nodeName;
+		self::softCleanNodeCache();
+		return true;
 	}
 
 	/**
 	 * @param string $nodeName
-	 * @return EncoderNode
+	 * @return EncoderNode|null Returns the EncoderNode if found. If no node is found it returns null
 	 */
 	public static function getNode($nodeName) {
 		if (isset(self::$nodes[$nodeName])) {
@@ -104,57 +112,101 @@ class EncoderNode {
 
 	/**
 	 * @param object $object
-	 * @return EncoderNode
+	 * @return EncoderNode|null Returns a node if the object matches any of the existing nodes. Returns null if no nodes are found
 	 */
 	public static function getNodeByObject($object) {
+		$cache = self::$getNodeByObjectCache;
+		$className = get_class($object);
+		if (isset($cache[$className])) {
+			return $cache[$className];
+		}
+		$nodeTemp = null;
 		foreach (self::getNodes() as $node) {
 			if ($node->nodeIsObject($object)) {
-				return $node;
+				$nodeTemp = $node;
 			}
 		}
-		return null;
-	}
-	public static function nodeExists($nodeName) {
-		return self::getNode($nodeName) != null;
+		self::$getNodeByObjectCache[$className] = $nodeTemp;
+		return $nodeTemp;
 	}
 
+	/**
+	 * @return EncoderNode[] Returns a list of all the registered nodes
+	 */
 	public static function getNodes() {
 		return self::$nodes;
 	}
 
-	public static function getNodeTypeId($nodeName, $nodeType) {
-		return strtolower($nodeName) . ':' . lcfirst($nodeType);
+	/**
+	 * @param string $nodeName
+	 * @return bool Returns true if the node name is a single one
+	 */
+	public static function isSingleNode($nodeName) {
+		$node = self::getNode($nodeName);
+		return $node && $node->getNodeNameSingle() === $nodeName;
 	}
-	public static function addNodeType(EncoderNode $nodeType, $nodeTypeName) {
 
-		if (self::nodeTypeExists($nodeType->getNodeName(), $nodeTypeName)) {
-			return false;
+	/**
+	 * @param string $nodeName
+	 * @return bool Returns true if the node exists
+	 */
+	public static function nodeExists($nodeName) {
+		return self::getNode($nodeName) != null;
+	}
+
+	/**
+	 * Adds a node type
+	 *
+	 * Adding a node type will give the ability to a node to have different kind of properties based on the original
+	 * node. You can compare it with inheriting functions from a parent class.
+	 *
+	 * @param EncoderNode $nodeType
+	 * @param string $nodeTypeName
+	 * @return bool Returns true if the node type was successfully added
+	 */
+	public static function addNodeType(EncoderNode $nodeType, $nodeTypeName) {
+		$nodeName = $nodeType->getNodeName();
+		if (self::nodeTypeExists($nodeName, $nodeTypeName)) {
+			throw new EncoderNodeException(sprintf('Node type with name "%s" and node type name "%s" already exists', $nodeName, $nodeTypeName));
 		}
 		$nodeType->typeName = $nodeTypeName;
 		$nodeTypeId = self::getNodeTypeId($nodeType->getNodeName(), $nodeTypeName);
 		self::$nodesTypes[$nodeTypeId] = $nodeType;
+
+		self::softCleanNodeTypeCache();
 		return true;
 	}
 
+	/**
+	 * Get node type by object
+	 *
+	 * Does the same as getNodeByObject but with the node type
+	 *
+	 * @param object $object
+	 * @return null|EncoderNode Returns
+	 *
+	 * @see EncoderNode::getNodeByObject()
+	 */
 	public static function getNodeTypeByObject($object) {
 		$cache = self::$getNodeTypeByObjectCache;
 		$className = get_class($object);
 		if (isset($cache[$className])) {
 			return $cache[$className];
 		}
+		$nodeTemp = null;
 		foreach (self::getNodeTypes() as $node) {
 			if ($node->nodeIsObject($object)) {
-				self::$getNodeTypeByObjectCache[$className] = $node;
-				return $node;
+				$nodeTemp = $node;
 			}
 		}
-		self::$getNodeTypeByObjectCache[$className] = null;
-		return null;
+		self::$getNodeTypeByObjectCache[$className] = $nodeTemp;
+		return $nodeTemp;
 	}
 
 	/**
-	 * @param string $nodeName
-	 * @return EncoderNode[]
+	 * @param string $nodeName Leave empty to return all available node types. Provide a node name to return all node
+	 * types based on the same node
+	 * @return EncoderNode[] Returns all node type objects fitting the query
 	 */
 	public static function getNodeTypes($nodeName = null) {
 		if ($nodeName === null) {
@@ -174,7 +226,13 @@ class EncoderNode {
 		}
 	}
 
-
+	/**
+	 * Get a single node type
+	 *
+	 * @param string $nodeName
+	 * @param string $nodeType
+	 * @return null|EncoderNode Returns the found node type. Otherwise returns null
+	 */
 	public static function getNodeType($nodeName, $nodeType = EncoderNode::DEFAULT_TYPE) {
 		$nodeTypeId = self::getNodeTypeId($nodeName, $nodeType);
 		if (isset(self::$nodesTypes[$nodeTypeId])) {
@@ -182,12 +240,47 @@ class EncoderNode {
 		}
 		return null;
 	}
+
+	/**
+	 * @param string $nodeName
+	 * @param string $nodeType
+	 * @return bool Return true if the node type exists
+	 */
 	public static function nodeTypeExists($nodeName, $nodeType) {
 		return self::getNodeType($nodeName, $nodeType) != null;
 	}
+
+	/**
+	 * Used for generating a full node type id that is used for storing node type
+	 *
+	 * @param string $nodeName
+	 * @param string $nodeType
+	 * @return string Returns the id for a certain node type
+	 */
+	protected static function getNodeTypeId($nodeName, $nodeType) {
+		return strtolower($nodeName) . ':' . lcfirst($nodeType);
+	}
+
+	/**
+	 * Cleans the node cache by filtering out all null values
+	 */
+	protected static function softCleanNodeCache() {
+		self::$getNodeByObjectCache = array_filter(self::$getNodeByObjectCache, 'strlen');
+	}
+	/**
+	 * Cleans the node type cache by filtering out all null values
+	 */
+	protected static function softCleanNodeTypeCache() {
+		self::$getNodeTypeByObjectCache = array_filter(self::$getNodeTypeByObjectCache, 'strlen');
+	}
+
+	/**
+	 * Resets all registered node and node types
+	 */
 	public static function clean() {
 		self::$nodes = array();
 		self::$nodesTypes = array();
+		self::$getNodeByObjectCache = array();
 		self::$getNodeTypeByObjectCache = array();
 	}
 
