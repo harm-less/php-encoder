@@ -25,8 +25,6 @@ class EncoderNode {
 
 	private $_nodeIsObjectCache;
 
-	private $nodeOptions;
-
 	/**
 	 * @var EncoderNodeChildren
 	 */
@@ -56,12 +54,11 @@ class EncoderNode {
 		$this->_nodeIsObjectCache = array();
 
 		$this->children = new EncoderNodeChildren();
-		$this->nodeOptions = new Variable();
 		$this->variables = new EncoderNodeVariableCollection();
 
 		$this->setNodeName($nodeName, $nodeNameSingle);
 
-		$this->needsObject(true);
+		$this->setNeedsObject(true);
 		$this->classPrepend = $classPrepend;
 		$this->typeName = $nodeTypeName;
 	}
@@ -294,11 +291,22 @@ class EncoderNode {
 	}
 
 
-
+	/**
+	 * In name-spaced projects it would be a lot of work to supply the full class names all the time.
+	 * This variable allows for a shortcut that will prepend the repeated part of a class name.
+	 *
+	 * @return string Class name it will prepend
+	 */
 	public function classPrepend() {
 		return $this->classPrepend;
 	}
 
+	/**
+	 * Returns the
+	 *
+	 * @return string
+	 * @see classPrepend() This will get prepended this this value
+	 */
 	public function getNodeObjectName() {
 		return $this->_getNodeIsolatedClassName();
 	}
@@ -327,11 +335,6 @@ class EncoderNode {
 		$this->_nodeIsObjectCache[$className] = $nodeIsObject;
 		return $nodeIsObject;
 	}
-	public function objectIsNodeObject($object) {
-		$objectClass = new ReflectionClass($object);
-		$objectClassShortName = $objectClass->getShortName();
-		return $objectClassShortName === $this->getNodeObjectName();
-	}
 
 	protected function setNodeName($nodeName, $nodeNameSingle) {
 		$this->nodeName = $nodeName;
@@ -348,17 +351,13 @@ class EncoderNode {
 		return $this->typeName;
 	}
 
-	public function addOptions($options) {
-		$this->nodeOptions->parseOptions($options);
-	}
-
 	public function getDefaultType() {
 		return EncoderNode::DEFAULT_TYPE;
 	}
-	public function needsObject($bool = null) {
-		if ($bool !== null && is_bool($bool)) {
-			$this->needsClass = $bool;
-		}
+	protected function setNeedsObject($bool) {
+		$this->needsClass = $bool;
+	}
+	public function needsObject() {
 		return $this->needsClass;
 	}
 

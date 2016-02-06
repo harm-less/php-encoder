@@ -118,10 +118,17 @@ class Samples extends AbstractPETest
 	}
 
 	public function addBuildingNode() {
+		$node = new BuildingNode();
 		EncoderNode::addNode(new BuildingNode());
+		return $node;
+	}
+	public function getBuildingHouse() {
+		return new House();
 	}
 	public function addBuildingHouseNode() {
-		EncoderNode::addNodeType(new HouseNode());
+		$node = new HouseNode();
+		EncoderNode::addNodeType($node);
+		return $node;
 	}
 	public function addBuildingGreenhouseNode() {
 		EncoderNode::addNodeType(new GreenhouseNode());
