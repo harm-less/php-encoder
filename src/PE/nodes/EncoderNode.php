@@ -41,7 +41,7 @@ class EncoderNode {
 	private $nodeName;
 	private $nodeNameSingle;
 	private $isolatedNodeName;
-	public $typeName;
+	private $typeName;
 
 	private $needsClass;
 	private $classPrepend;
@@ -50,7 +50,7 @@ class EncoderNode {
 
 	const NODE_EXTENSION = 'Node';
 
-	function __construct($nodeName, $nodeNameSingle, $classPrepend) {
+	function __construct($nodeName, $nodeNameSingle, $classPrepend, $nodeTypeName = null) {
 
 		$this->nodeClasses = array();
 		$this->_nodeIsObjectCache = array();
@@ -63,6 +63,7 @@ class EncoderNode {
 
 		$this->needsObject(true);
 		$this->classPrepend = $classPrepend;
+		$this->typeName = $nodeTypeName;
 	}
 
 	/**
@@ -79,6 +80,9 @@ class EncoderNode {
 		if ($nodeName === null || empty($nodeName) || !is_string($nodeName)) {
 			throw new EncoderNodeException('Node without a name has been added. It must be a string and it cannot be empty.');
 		}
+		if ($node->getNodeTypeName() !== null) {
+			throw new EncoderNodeException('The node you\'re trying to add seems to be a node type because it has a type name');
+		}
 		if (self::nodeExists($nodeName)) {
 			throw new EncoderNodeException(sprintf('Node with name "%s" already exists', $nodeName));
 		}
@@ -92,7 +96,9 @@ class EncoderNode {
 
 		// make this node the default one if no type has yet been specified
 		if (count(self::getNodeTypes($nodeName)) == 0) {
-			self::addNodeType($node, self::DEFAULT_TYPE);
+			// set the default type name so it can be registered as a type
+			$node->typeName = $node->getDefaultType();
+			self::addNodeType($node);
 		}
 
 		self::softCleanNodeCache();
@@ -161,11 +167,14 @@ class EncoderNode {
 	 * node. You can compare it with inheriting functions from a parent class.
 	 *
 	 * @param EncoderNode $nodeType
-	 * @param string $nodeTypeName
-	 * @return bool Returns true if the node type was successfully added
+	 * @return true Returns true if the node type was successfully added
 	 */
-	public static function addNodeType(EncoderNode $nodeType, $nodeTypeName) {
+	public static function addNodeType(EncoderNode $nodeType) {
+		if ($nodeType->getNodeTypeName() === null) {
+			throw new EncoderNodeException('The node type you\'re trying to add seems to be a regular node because it has a no type name. Make sure you try to add an EncoderNode with a type name');
+		}
 		$nodeName = $nodeType->getNodeName();
+		$nodeTypeName = $nodeType->getNodeTypeName();
 		if (self::nodeTypeExists($nodeName, $nodeTypeName)) {
 			throw new EncoderNodeException(sprintf('Node type with name "%s" and node type name "%s" already exists', $nodeName, $nodeTypeName));
 		}
@@ -335,7 +344,7 @@ class EncoderNode {
 		return $this->nodeNameSingle;
 	}
 
-	public function getTypeName() {
+	public function getNodeTypeName() {
 		return $this->typeName;
 	}
 
@@ -383,10 +392,6 @@ class EncoderNode {
 
 	public function loadPlugin($pluginName) {
 		throw new EncoderNodeException('Must be overwritten by subclasses');
-	}
-
-	public function type() {
-		return $this->typeName;
 	}
 
 	/**

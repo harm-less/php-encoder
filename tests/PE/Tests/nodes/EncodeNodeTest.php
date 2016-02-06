@@ -12,6 +12,7 @@ class EncoderNodeTest extends Samples
 
 	const DEFAULT_NODE_NAME = 'nodes';
 	const DEFAULT_NODE_NAME_SINGLE = 'node';
+	const DEFAULT_NODE_TYPE_NAME = null;
 	const DEFAULT_CLASS_PREPEND = null;
 
 	const DEFAULT_NODE_TYPE = 'type';
@@ -24,11 +25,20 @@ class EncoderNodeTest extends Samples
 	/**
 	 * @param string $nodeName
 	 * @param string $nodeNameSingle
-	 * @param null $classPrepend
+	 * @param string $classPrepend
+	 * @param string $nodeTypeName
 	 * @return EncoderNode
 	 */
-	protected function node($nodeName = self::DEFAULT_NODE_NAME, $nodeNameSingle = self::DEFAULT_NODE_NAME_SINGLE, $classPrepend = self::DEFAULT_CLASS_PREPEND) {
-		return new EncoderNode($nodeName, $nodeNameSingle, $classPrepend);
+	protected function node($nodeName = self::DEFAULT_NODE_NAME, $nodeNameSingle = self::DEFAULT_NODE_NAME_SINGLE, $classPrepend = self::DEFAULT_CLASS_PREPEND, $nodeTypeName = self::DEFAULT_NODE_TYPE_NAME) {
+		return new EncoderNode($nodeName, $nodeNameSingle, $classPrepend, $nodeTypeName);
+	}
+
+	/**
+	 * @param string $nodeTypeName
+	 * @return EncoderNode
+	 */
+	protected function nodeType($nodeTypeName = self::DEFAULT_NODE_TYPE_NAME) {
+		return new EncoderNode(self::DEFAULT_NODE_NAME, self::DEFAULT_NODE_NAME_SINGLE, self::DEFAULT_CLASS_PREPEND, $nodeTypeName);
 	}
 
 	public function testConstructor() {
@@ -51,6 +61,10 @@ class EncoderNodeTest extends Samples
 	public function testStaticAddNodeWithNonStringNodeName() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Node without a name has been added. It must be a string and it cannot be empty.');
 		EncoderNode::addNode($this->node(null));
+	}
+	public function testStaticAddNodeWithNodeType() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'The node you\'re trying to add seems to be a node type because it has a type name');
+		EncoderNode::addNode($this->nodeType('cannot-be-a-type'));
 	}
 	public function testStaticAddNodeWithEmptyNodeName() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Node without a name has been added. It must be a string and it cannot be empty.');
@@ -103,10 +117,14 @@ class EncoderNodeTest extends Samples
 		$this->assertTrue(EncoderNode::nodeExists(self::DEFAULT_NODE_NAME_SINGLE));
 		$this->assertFalse(EncoderNode::nodeExists('unknown'));
 	}
-	public function testStaticAddNodeType() {
+	public function testStaticAddNodeTypeTwice() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Node type with name "buildings" and node type name "house" already exists');
 		$this->addBuildingNode();
 		$this->addBuildingHouseNode();
 		$this->addBuildingHouseNode();
+	}
+	public function testStaticAddNodeTypeWithoutNodeType() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'The node type you\'re trying to add seems to be a regular node because it has a no type name. Make sure you try to add an EncoderNode with a type name');
+		EncoderNode::addNodeType($this->nodeType());
 	}
 }

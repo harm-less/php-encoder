@@ -9,9 +9,9 @@ use PE\Samples\Farm\Building;
 
 class BuildingNode extends EncoderNode {
 
-	function __construct($classPrepend = null) {
+	function __construct($classPrepend = null, $nodeTypeName = null) {
 
-		parent::__construct('buildings', 'building', $classPrepend !== null ? $classPrepend : '\\PE\\Samples\\Farm');
+		parent::__construct('buildings', 'building', $classPrepend !== null ? $classPrepend : '\\PE\\Samples\\Farm', $nodeTypeName);
 
 		$this->addVariable(new EncoderNodeVariable('type', array(
 			'getterAction' => array(

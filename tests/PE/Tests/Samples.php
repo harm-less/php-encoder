@@ -121,13 +121,13 @@ class Samples extends AbstractPETest
 		EncoderNode::addNode(new BuildingNode());
 	}
 	public function addBuildingHouseNode() {
-		EncoderNode::addNodeType(new HouseNode(), 'house');
+		EncoderNode::addNodeType(new HouseNode());
 	}
 	public function addBuildingGreenhouseNode() {
-		EncoderNode::addNodeType(new GreenhouseNode(), 'greenhouse');
+		EncoderNode::addNodeType(new GreenhouseNode());
 	}
 	public function addBuildingBarnNode() {
-		EncoderNode::addNodeType(new BarnNode(), 'barn');
+		EncoderNode::addNodeType(new BarnNode());
 	}
 
 	public function addAnimalNodes($children = true) {
@@ -141,16 +141,16 @@ class Samples extends AbstractPETest
 	}
 
 	public function addAnimalCatNode() {
-		EncoderNode::addNodeType(new CatNode(), 'cat');
+		EncoderNode::addNodeType(new CatNode());
 	}
 	public function addAnimalChickenNode() {
-		EncoderNode::addNodeType(new ChickenNode(), 'chicken');
+		EncoderNode::addNodeType(new ChickenNode());
 	}
 	public function addAnimalCowNode() {
-		EncoderNode::addNodeType(new CowNode(), 'cow');
+		EncoderNode::addNodeType(new CowNode());
 	}
 	public function addAnimalSheepNode() {
-		EncoderNode::addNodeType(new SheepNode(), 'sheep');
+		EncoderNode::addNodeType(new SheepNode());
 	}
 
 

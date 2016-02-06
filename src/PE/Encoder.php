@@ -308,7 +308,7 @@ class Encoder implements IEncoder {
 				if (method_exists($object, $getAttributeMethod)) {
 					$attributeValue = $object->$getAttributeMethod();
 				} else {
-					throw new EncoderException(sprintf('Getter method "%s" does not exist in object "%s" for node type "%s" (%s) and variable with id "%s".', $getAttributeMethod, get_class($object), $node->getTypeName(), get_class($node), $variableId));
+					throw new EncoderException(sprintf('Getter method "%s" does not exist in object "%s" for node type "%s" (%s) and variable with id "%s".', $getAttributeMethod, get_class($object), $node->getNodeTypeName(), get_class($node), $variableId));
 				}
 
 				$attributesRaw[$variableId] = $attributeValue;
