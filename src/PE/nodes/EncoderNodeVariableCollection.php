@@ -55,9 +55,10 @@ class EncoderNodeVariableCollection extends VariableCollection {
 
 	/**
 	 * @param $dataArray
+	 * @param bool $throwErrorIfFails Set to true if you want it to throw an error if it fails
 	 * @return bool Returns true if all requirements are met
 	 */
-	public function variablesAreValidWithData($dataArray) {
+	public function variablesAreValidWithData($dataArray, $throwErrorIfFails = false) {
 		$variables = $this->getVariables();
 		$unique = array();
 		foreach ($dataArray as $data) {
@@ -70,7 +71,12 @@ class EncoderNodeVariableCollection extends VariableCollection {
 						}
 						$variableValue = $data[$variableId];
 						if (array_search($variableValue, $unique[$variableId]) !== false) {
-							throw new EncoderNodeVariableException(sprintf('Variable "%s" must be unique but value "%s" is given at least twice', $variableId, $variableValue));
+							if ($throwErrorIfFails) {
+								throw new EncoderNodeVariableException(sprintf('Variable "%s" must be unique but value "%s" is given at least twice', $variableId, $variableValue));
+							}
+							else {
+								return false;
+							}
 						}
 						$unique[$variableId][] = $variableValue;
 					}

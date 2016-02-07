@@ -549,12 +549,13 @@ class EncoderNode {
 
 	/**
 	 * @param array $nodeDataArray
-	 * @return bool
+	 * @param bool $throwErrorIfFails Set to true if you want it to throw an error if it fails
+	 * @return bool Returns true if all requirements are met
 	 *
 	 * @see EncoderNodeVariable::variablesAreValidWithData()
 	 */
-	public function variablesAreValid($nodeDataArray) {
-		return $this->variables->variablesAreValidWithData($nodeDataArray);
+	public function variablesAreValid($nodeDataArray, $throwErrorIfFails = false) {
+		return $this->variables->variablesAreValidWithData($nodeDataArray, $throwErrorIfFails);
 	}
 
 	/**
@@ -622,7 +623,7 @@ class EncoderNode {
 				throw new EncoderNodeException('Object for loading cannot be null');
 			}
 		}
-		return $this->_loadObject($object);
+		$this->_loadObject($object);
 	}
 
 	/**

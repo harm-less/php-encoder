@@ -71,6 +71,7 @@ class EncoderNodeVariableCollectionTest extends AbstractPETest {
 		$variable->mustBeUnique(true);
 
 		$this->assertTrue($collection->variablesAreValidWithData(array(array('var' => 'Test'))));
+		$this->assertFalse($collection->variablesAreValidWithData(array(array('var' => 'Test'), array('var' => 'Test'))));
 	}
 
 	public function testVariablesAreNotValidWithData() {
@@ -80,7 +81,7 @@ class EncoderNodeVariableCollectionTest extends AbstractPETest {
 		$variable = $this->collectionAddVariable(new EncoderNodeVariable('var'));
 		$variable->mustBeUnique(true);
 
-		$collection->variablesAreValidWithData(array(array('var' => 'Test'), array('var' => 'Test')));
+		$collection->variablesAreValidWithData(array(array('var' => 'Test'), array('var' => 'Test')), true);
 	}
 
 	public function testGetAlwaysExecutedVariables() {
