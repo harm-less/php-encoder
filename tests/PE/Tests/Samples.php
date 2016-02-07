@@ -3,6 +3,7 @@
 namespace PE\Tests;
 
 use PE\Nodes\EncoderNode;
+use PE\Nodes\Erroneous\EncoderNodeLoaderNode;
 use PE\Nodes\Erroneous\NonArrayGetterMethodNode;
 use PE\Nodes\Erroneous\NoVariableGetterMethodNode;
 use PE\Nodes\Farm\AnimalNode;
@@ -27,6 +28,7 @@ use PE\Nodes\Specials\EncoderNodeVariableApplyToSetterNode;
 use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
 use PE\Nodes\Specials\RequiredConstructorVariablesNode;
 use PE\Nodes\Specials\SingleChildNode;
+use PE\Samples\Erroneous\EncoderNodeLoader;
 use PE\Samples\Erroneous\NonArrayGetterMethod;
 use PE\Samples\Erroneous\NoVariableGetterMethod;
 use PE\Samples\Farm\Farm;
@@ -71,34 +73,37 @@ class Samples extends AbstractPETest
 	 * @param bool $addNodes
 	 * @return Farm
 	 */
-	public function getFarm($addNodes = true) {
+	public function getFarm($addNodes = true, $addObjects = true) {
 		if ($addNodes) {
 			$this->addFarmNodes();
 		}
 
-		$cow1 = new Cow();
-		$cow2 = new Cow();
-		$chicken1 = new Chicken();
-		$chicken2 = new Chicken();
-		$chicken3 = new Chicken();
-		$sheep1 = new Sheep();
-		$sheep2 = new Sheep();
+		$farm = new Farm();
 
-		$greenHouse = new Greenhouse();
+		if ($addObjects) {
+			$cow1 = new Cow();
+			$cow2 = new Cow();
+			$chicken1 = new Chicken();
+			$chicken2 = new Chicken();
+			$chicken3 = new Chicken();
+			$sheep1 = new Sheep();
+			$sheep2 = new Sheep();
 
-		$barn = new Barn();
-		$barn->addAnimal($cow1);
-		$barn->addAnimal($cow2);
-		$barn->addAnimal($chicken1);
-		$barn->addAnimal($chicken2);
-		$barn->addAnimal($chicken3);
-		$barn->addAnimal($sheep1);
-		$barn->addAnimal($sheep2);
+			$greenHouse = new Greenhouse();
 
-		$farm = $this->farm = new Farm();
-		$farm->addBuilding($this->getHouse());
-		$farm->addBuilding($greenHouse);
-		$farm->addBuilding($barn);
+			$barn = new Barn();
+			$barn->addAnimal($cow1);
+			$barn->addAnimal($cow2);
+			$barn->addAnimal($chicken1);
+			$barn->addAnimal($chicken2);
+			$barn->addAnimal($chicken3);
+			$barn->addAnimal($sheep1);
+			$barn->addAnimal($sheep2);
+
+			$farm->addBuilding($this->getHouse());
+			$farm->addBuilding($greenHouse);
+			$farm->addBuilding($barn);
+		}
 
 		return $farm;
 	}
@@ -113,6 +118,7 @@ class Samples extends AbstractPETest
 
 		$this->addAnimalNodes();
 	}
+
 	public function addFarmNode() {
 		return EncoderNode::addNode(new FarmNode());
 	}
@@ -199,6 +205,14 @@ class Samples extends AbstractPETest
 	}
 	public function addNonArrayGetterMethodOnPurposeNode() {
 		return EncoderNode::addNode(new NonArrayGetterMethodOnPurposeNode());
+	}
+
+
+	public function getEncoderNodeLoader() {
+		return new EncoderNodeLoader();
+	}
+	public function addEncoderNodeLoaderNode($overrideObjectFileName = true) {
+		return EncoderNode::addNode(new EncoderNodeLoaderNode($overrideObjectFileName));
 	}
 
 

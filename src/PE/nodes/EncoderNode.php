@@ -87,7 +87,7 @@ class EncoderNode {
 	 * This method is essential for using this library because it will instruct it what to do and how to do it.
 	 *
 	 * @param EncoderNode $node
-	 * @return bool Will return true if the node had been successfully added
+	 * @return EncoderNode Will return the EncoderNode if the node had been successfully added
 	 */
 	public static function addNode(EncoderNode $node) {
 		$nodeName = $node->getNodeName();
@@ -182,7 +182,7 @@ class EncoderNode {
 	 * node. You can compare it with inheriting functions from a parent class.
 	 *
 	 * @param EncoderNode $nodeType
-	 * @return true Returns true if the node type was successfully added
+	 * @return EncoderNode Returns the EncoderNode if the node type was successfully added
 	 */
 	public static function addNodeType(EncoderNode $nodeType) {
 		if ($nodeType->getNodeTypeName() === null) {
@@ -466,23 +466,129 @@ class EncoderNode {
 
 
 
-	public function loadPlugin($pluginName) {
-		throw new EncoderNodeException('Must be overwritten by subclasses');
+	/**
+	 * @param EncoderNodeVariable $variable
+	 * @return EncoderNodeVariable
+	 *
+	 * @see EncoderNodeVariable::addNodeVariable()
+	 */
+	public function addVariable(EncoderNodeVariable $variable) {
+		return $this->variables->addNodeVariable($variable);
 	}
 
 	/**
-	 * Retrieve a node type based on its node type name
+	 * @param $variable
+	 * @return EncoderNodeVariable
 	 *
-	 * @param string $nodeTypeName
-	 * @return EncoderNode|null Returns the EncoderNode object for the requested type. Null if if no type is found
+	 * @see EncoderNodeVariable::getVariable()
 	 */
-	public function getType($nodeTypeName) {
-		return EncoderNode::getNodeType($this->getNodeName(), $nodeTypeName);
+	public function getVariable($variable) {
+		return $this->variables->getVariable($variable);
+	}
+
+	/**
+	 * @param string $id
+	 * @return null|EncoderNodeVariable
+	 *
+	 * @see EncoderNodeVariable::getVariableById()
+	 */
+	public function getVariableById($id) {
+		return $this->variables->getVariableById($id);
+	}
+
+	/**
+	 * @param string $type
+	 * @return EncoderNodeVariable[]
+	 *
+	 * @see EncoderNodeVariable::getVariablesSetterActionByType()
+	 */
+	public function getVariablesSetterActionByType($type) {
+		return $this->variables->getVariablesSetterActionByType($type);
+	}
+
+	/**
+	 * @param string $type
+	 * @return EncoderNodeVariable[]
+	 *
+	 * @see EncoderNodeVariable::getVariablesGetterActionByType()
+	 */
+	public function getVariablesGetterActionByType($type) {
+		return $this->variables->getVariablesGetterActionByType($type);
+	}
+
+	/**
+	 * @return EncoderNodeVariable[]
+	 *
+	 * @see EncoderNodeVariable::getAlwaysExecutedVariables()
+	 */
+	public function getAlwaysExecutedVariables() {
+		return $this->variables->getAlwaysExecutedVariables();
+	}
+
+	/**
+	 * @param bool $order
+	 * @return EncoderNodeVariable[]
+	 *
+	 * @see EncoderNodeVariable::getAlwaysExecutedVariables()
+	 */
+	public function getVariables($order = true) {
+		return $this->variables->getVariables($order);
+	}
+
+	/**
+	 * @param string $id
+	 * @return bool
+	 *
+	 * @see EncoderNodeVariable::variableExists()
+	 */
+	public function variableExists($id) {
+		return $this->variables->variableExists($id);
+	}
+
+	/**
+	 * @param array $nodeDataArray
+	 * @return bool
+	 *
+	 * @see EncoderNodeVariable::variablesAreValidWithData()
+	 */
+	public function variablesAreValid($nodeDataArray) {
+		return $this->variables->variablesAreValidWithData($nodeDataArray);
+	}
+
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 * @return mixed
+	 *
+	 * @see EncoderNodeVariable::processValue()
+	 */
+	public function processValue($name, $value) {
+		return $this->variables->processValue($name, $value);
+	}
+
+	/**
+	 * @param string $name Variable name you want to apply the parameters to
+	 * @param array $parameters Array of all the information required for the several methods needing it
+	 * @return bool|mixed
+	 *
+	 * @see EncoderNodeVariable::applyToSetter()
+	 */
+	public function applyToVariable($name, $parameters) {
+		$variable = $this->getVariable($name);
+		if ($variable == null) {
+			return false;
+		}
+		$parameters[ActionVariable::SETTER_NODE] = $this;
+		return $variable->applyToSetter($parameters);
 	}
 
 
+
+
+
+
 	protected function _loadObject($object) {
-		return null;
+		throw new EncoderNodeException('Must be overwritten by subclasses');
 	}
 
 	/**
@@ -508,9 +614,10 @@ class EncoderNode {
 	 * @see _objectFileName()
 	 */
 	public function loadObject($object = null) {
-		if ($object === null && $object = $this->_objectFileName()) {
+		if ($object === null) {
+			$object = $this->_objectFileName();
 			if ($object === null) {
-				throw new EncoderNodeException('Object cannot be null');
+				throw new EncoderNodeException('Object for loading cannot be null');
 			}
 		}
 		return $this->_loadObject($object);
@@ -526,91 +633,29 @@ class EncoderNode {
 	}
 
 
-	/**
-	 * @param $name
-	 * @param array $parameters
-	 * @return bool|mixed
-	 */
-	public function applyToVariable($name, $parameters) {
-		$variable = $this->getVariable($name);
-		if ($variable == null) {
-			return false;
-		}
-		$parameters[ActionVariable::SETTER_NODE] = $this;
-		return $variable->applyToSetter($parameters);
-	}
 
-	public function addVariable(EncoderNodeVariable $variable) {
-		return $this->variables->addNodeVariable($variable);
-	}
 
 	/**
-	 * @param $variable
-	 * @param $options
-	 * @return bool
+	 * Figure out which node type is going to be used. It is very handy to extend this method from a node because it
+	 * allows for more control over the type next to the default behavior
+	 *
+	 * @param object $parent A variable with the parent object so you can get some information from there next to the
+	 * processed node data
+	 * @param array $nodeData Processed node data
+	 * @return null|string Returns null is no type is found in the node data. Otherwise returns the type extracted from
+	 * the node data
 	 */
-	public function alterVariable($variable, $options) {
-		return $this->variables->alterVariable($variable, $options);
-	}
-
-	/**
-	 * @param $variable
-	 * @return EncoderNodeVariable
-	 */
-	public function getVariable($variable) {
-		return $this->variables->getVariable($variable);
-	}
-
-	/**
-	 * @param $id
-	 * @return null|EncoderNodeVariable
-	 */
-	public function getVariableById($id) {
-		return $this->variables->getVariableById($id);
-	}
-
-	/**
-	 * @param $type
-	 * @return EncoderNodeVariable[]
-	 */
-	public function getVariablesSetterActionByType($type) {
-		return $this->variables->getVariablesSetterActionByType($type);
-	}
-
-	/**
-	 * @param $type
-	 * @return EncoderNodeVariable[]
-	 */
-	public function getVariablesGetterActionByType($type) {
-		return $this->variables->getVariablesGetterActionByType($type);
-	}
-
-	/**
-	 * @return EncoderNodeVariable[]
-	 */
-	public function getAlwaysExecutedVariables() {
-		return $this->variables->getAlwaysExecutedVariables();
-	}
-
-	/**
-	 * @param bool $order
-	 * @return EncoderNodeVariable[]
-	 * @throws \Exception
-	 */
-	public function getVariables($order = true) {
-		return $this->variables->getVariables($order);
-	}
-	public function variableExists($id) {
-		return $this->variables->variableExists($id);
-	}
-	public function variablesAreValid($nodeDataArray) {
-		return $this->variables->variablesAreValidWithData($nodeDataArray);
-	}
-	public function processValue($name, $value) {
-		return $this->variables->processValue($name, $value);
-	}
-
 	public function getObjectType($parent, $nodeData) {
 		return isset($nodeData['type']) ? $nodeData['type'] : null;
+	}
+
+	/**
+	 * Retrieve a node type based on its node type name
+	 *
+	 * @param string $nodeTypeName
+	 * @return EncoderNode|null Returns the EncoderNode object for the requested type. Null if if no type is found
+	 */
+	public function getType($nodeTypeName) {
+		return EncoderNode::getNodeType($this->getNodeName(), $nodeTypeName);
 	}
 }

@@ -169,7 +169,7 @@ class Variable {
 	/**
 	 * Processes a value based on the set data type of the variable
 	 * @param $value
-	 * @return bool
+	 * @return mixed
 	 */
 	public function processValue($value) {
 		$type = $this->getType();

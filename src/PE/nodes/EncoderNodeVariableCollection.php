@@ -33,15 +33,30 @@ class EncoderNodeVariableCollection extends VariableCollection {
 		return $variables;
 	}
 
+	/**
+	 * @param EncoderNodeVariable $variable
+	 * @return EncoderNodeVariable
+	 */
 	public function addNodeVariable(EncoderNodeVariable $variable) {
 		$this->_cachedAlwaysExecutedVariables = null;
 		$variable = parent::addVariable($variable);
 		return $variable;
 	}
+
+	/**
+	 * You cannot use this method, use "addNodeVariable" instead
+	 *
+	 * @param Variable $variable
+	 * @return void
+	 */
 	public function addVariable(Variable $variable) {
 		throw new EncoderNodeVariableException('Use "addNodeVariable" to add variables');
 	}
 
+	/**
+	 * @param $dataArray
+	 * @return bool Returns true if all requirements are met
+	 */
 	public function variablesAreValidWithData($dataArray) {
 		$variables = $this->getVariables();
 		$unique = array();
@@ -49,11 +64,11 @@ class EncoderNodeVariableCollection extends VariableCollection {
 			foreach ($variables as $variable) {
 				$variableId = $variable->getId();
 				if ($variableId !== null && array_key_exists($variableId, $data)) {
-					$variableValue = $data[$variableId];
 					if ($variable->mustBeUnique()) {
 						if (!isset($unique[$variableId])) {
 							$unique[$variableId] = array();
 						}
+						$variableValue = $data[$variableId];
 						if (array_search($variableValue, $unique[$variableId]) !== false) {
 							throw new EncoderNodeVariableException(sprintf('Variable "%s" must be unique but value "%s" is given at least twice', $variableId, $variableValue));
 						}
@@ -77,5 +92,15 @@ class EncoderNodeVariableCollection extends VariableCollection {
 		}
 		$this->_cachedAlwaysExecutedVariables = $variables;
 		return $variables;
+	}
+
+	/**
+	 * Overridden method so the returned data type corresponds with this class
+	 *
+	 * @param bool $order
+	 * @return EncoderNodeVariable[]
+	 */
+	public function getVariables($order = true) {
+		return parent::getVariables($order);
 	}
 } 

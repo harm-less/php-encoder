@@ -2,7 +2,10 @@
 
 namespace PE\Tests\Nodes;
 
+use PE\Enums\ActionVariable;
 use PE\Nodes\EncoderNode;
+use PE\Nodes\EncoderNodeChild;
+use PE\Nodes\EncoderNodeVariable;
 use PE\Nodes\Farm\BuildingNode;
 use PE\Nodes\Farm\Buildings\HouseNode;
 use PE\Tests\Samples;
@@ -45,11 +48,12 @@ class EncoderNodeTest extends Samples
 		$node = $this->node();
 		$this->assertNotNull($node);
 		$this->assertTrue($node instanceof EncoderNode);
+		$this->assertTrue($node->needsObject());
 	}
 
 	public function testStaticAddNode() {
 		$node = $this->node();
-		$this->assertTrue(EncoderNode::addNode($node));
+		$this->assertEquals($node, EncoderNode::addNode($node));
 		// both the nodeName and the nodeNameSingle are being added, that's why there should be two.
 		$this->assertCount(2, EncoderNode::getNodes());
 
@@ -262,5 +266,104 @@ class EncoderNodeTest extends Samples
 		$houseNode = $this->addBuildingHouseNode();
 
 		$this->assertEquals('house', $houseNode->getNodeTypeName());
+	}
+
+	public function testChildNodeMethods() {
+		$node = EncoderNode::addNode($this->node());
+		$nodeChild = new EncoderNodeChild('node-child');
+		$node->addChildNode($nodeChild);
+
+		$this->assertTrue($node->childNodeExists('node-child'));
+		$this->assertFalse($node->childNodeExists('unknown'));
+		$this->assertEquals($nodeChild, $node->getChild('node-child'));
+		$this->assertNull($node->getChild('unknown'));
+
+		$this->assertEquals(array(
+			'node-child' => $nodeChild
+		), $node->getChildren());
+	}
+
+	public function testAddChildrenToObject() {
+		$farmNode = $this->addFarmNode();
+		$farm = $this->getFarm(false, false);
+		$house = $this->getBuildingHouse();
+		$farmNode->addChildrenToObject('buildings', $farm, array(
+			$house
+		));
+		$this->assertEquals(array($house), $farm->getBuildings());
+	}
+
+
+
+
+
+	public function testLoadObjectWhenObjectFileNameReturnsNullToo() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Object for loading cannot be null');
+		$loaderNode = $this->addEncoderNodeLoaderNode();
+		$loaderNode->loadObject();
+	}
+
+	public function testLoadObject() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Must be overwritten by subclasses');
+		$loaderNode = $this->addEncoderNodeLoaderNode(false);
+		$loaderNode->loadObject();
+	}
+
+
+
+
+
+	public function testVariableMethods() {
+		$node = EncoderNode::addNode($this->node());;
+		$nodeVariable = new EncoderNodeVariable('node-variable');
+		$node->addVariable($nodeVariable);
+
+		$this->assertTrue($node->variableExists('node-variable'));
+		$this->assertFalse($node->variableExists('unknown'));
+
+		$this->assertEquals($nodeVariable, $node->getVariable('node-variable'));
+		$this->assertNull($node->getVariable('unknown'));
+
+		$this->assertEquals($nodeVariable, $node->getVariableById('node-variable'));
+		$this->assertNull($node->getVariableById('unknown'));
+
+		$this->assertEquals(array(), $node->getVariablesSetterActionByType('type'));
+		$this->assertEquals(array(), $node->getVariablesGetterActionByType('type'));
+		$this->assertEquals(array(), $node->getAlwaysExecutedVariables());
+
+		$this->assertEquals(array(
+			$nodeVariable
+		), $node->getVariables());
+	}
+
+	public function testApplyToVariable() {
+		$node = $this->addThingNode();
+		$object = $this->getThing();
+
+		$this->assertFalse($node->applyToVariable('unknown', array()));
+
+		$node->applyToVariable('thingVar', array(
+			ActionVariable::SETTER_OBJECT => $object,
+			ActionVariable::SETTER_VALUE => 'test'
+		));
+
+		$this->assertEquals('test', $object->getThingVar());
+	}
+
+	public function testGetObjectType() {
+		$node = $this->addThingNode();
+		$this->assertEquals('test', $node->getObjectType(null, array(
+			'type' => 'test'
+		)));
+		$this->assertNull($node->getObjectType(null, array(
+			'other-than-type' => 'test'
+		)));
+	}
+
+	public function testGetType() {
+		$node = $this->addBuildingNode();
+		$this->assertNull($node->getType('house'));
+		$houseNode = $this->addBuildingHouseNode();
+		$this->assertEquals($houseNode, $node->getType('house'));
 	}
 }
