@@ -35,7 +35,7 @@ class XmlEncoder extends Encoder {
 		$node = is_string($node) ? simplexml_load_string($node) : $node;
 		return parent::decode($node, $options);
 	}
-	protected function decodeChildNames($structure) {
+	protected function decodeChildNames(\SimpleXMLElement $structure) {
 		$names = array();
 		foreach ($structure->children() as $child) {
 			$names[] = $child->getName();
@@ -48,10 +48,6 @@ class XmlEncoder extends Encoder {
 			$path = $nodeProxy->getNodeName() . '/' . $path;
 		}
 		$children = $nodeData->xpath($path);
-		if ($isSingle && count($children) == 0) {
-			throw new EncoderException(sprintf('There are no children found in node %s', ($isSingle ? $nodeProxy->getNodeNameSingle() : $nodeProxy->getNodeName())));
-		}
-
 		return ($isSingle ? $children[0] : $children);
 	}
 	protected function decodeNode($nodeData) {
