@@ -266,7 +266,7 @@ class EncoderNodeVariable extends Variable {
 	public function getSetterMethod() {
 		if (($result = self::_cache(__FUNCTION__)) === false) {
 			$result = parent::getSetterMethod();
-			if ($result === null) {
+			if ($result === null && $this->getName()) {
 				$result = 'set' . $this->camelCased($this->getName());
 			}
 			self::_cache(__FUNCTION__, $result);
@@ -282,7 +282,7 @@ class EncoderNodeVariable extends Variable {
 	public function getGetterMethod() {
 		if (($result = self::_cache(__FUNCTION__)) === false) {
 			$result = parent::getGetterMethod();
-			if ($result === null) {
+			if ($result === null && $this->getName()) {
 				$result = 'get' . $this->camelCased($this->getName());
 			}
 			self::_cache(__FUNCTION__, $result);

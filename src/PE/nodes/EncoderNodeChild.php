@@ -6,26 +6,24 @@ use PE\Exceptions\EncoderNodeChildException;
 
 class EncoderNodeChild extends EncoderNodeVariable {
 
-	private $nodeName;
+	private $childNodeName;
 	private $isArray = true;
 	private $setAfterChildren = true;
 	private $setAfterAttributes = true;
 
 	function __construct($nodeName, $options = null) {
-
 		parent::__construct('', $options);
-
-		$this->setNodeName($nodeName);
+		$this->setChildNodeName($nodeName);
 	}
 
-	public function setNodeName($nodeName) {
-		if ($nodeName === null || $nodeName === '') {
+	public function setChildNodeName($childNodeName) {
+		if ($childNodeName === null || $childNodeName === '') {
 			throw new EncoderNodeChildException('Node name cannot be null or empty');
 		}
-		$this->nodeName = $nodeName;
+		$this->childNodeName = $childNodeName;
 	}
-	public function getNodeName() {
-		return $this->nodeName;
+	public function getChildNodeName() {
+		return $this->childNodeName;
 	}
 
 	// @todo Figure out if this feature is still necessary. Because if you use a single node, can't we simply assume it isn't an array?
@@ -60,7 +58,7 @@ class EncoderNodeChild extends EncoderNodeVariable {
 	public function addChildrenToObject($target, $values) {
 		$methodName = $this->getSetterMethod();
 		if ($methodName === null) {
-			throw new EncoderNodeChildException(sprintf('Setter method (%s) for class "%s" does not exist', $this->getId(), get_class($target)));
+			throw new EncoderNodeChildException(sprintf('Setter method (%s) for class "%s" does not exist', $this->getChildNodeName(), get_class($target)));
 		}
 		else if (method_exists($target, $methodName)) {
 			foreach ($values as $value) {

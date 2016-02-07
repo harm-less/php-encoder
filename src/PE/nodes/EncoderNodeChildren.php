@@ -18,7 +18,7 @@ class EncoderNodeChildren {
 	 * @return false|EncoderNodeChild Return child object if succeeded. Returns false if it failed
 	 */
 	public function addChild(EncoderNodeChild $child) {
-        $nodeName = $child->getNodeName();
+        $nodeName = $child->getChildNodeName();
 		if ($this->childExists($nodeName)) {
 			return false;
 		}

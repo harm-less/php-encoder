@@ -6,8 +6,6 @@ use PE\Enums\ActionVariable;
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeChild;
 use PE\Nodes\EncoderNodeVariable;
-use PE\Nodes\Farm\BuildingNode;
-use PE\Nodes\Farm\Buildings\HouseNode;
 use PE\Tests\Samples;
 
 class EncoderNodeTest extends Samples

@@ -54,6 +54,7 @@ class VariableTest extends AbstractPETest {
 
 	public function testSetSetterMethod() {
 		$variable = $this->variable();
+		$this->assertNull($variable->getSetterMethod());
 		$variable->setSetterMethod('setterName');
 		$this->assertEquals('setterName', $variable->getSetterMethod());
 		$variable->setSetterMethod(null);
@@ -68,6 +69,7 @@ class VariableTest extends AbstractPETest {
 
 	public function testSetGetterMethod() {
 		$variable = $this->variable();
+		$this->assertNull($variable->getGetterMethod());
 		$variable->setGetterMethod('getterName');
 		$this->assertEquals('getterName', $variable->getGetterMethod());
 		$variable->setGetterMethod(null);

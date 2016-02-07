@@ -354,8 +354,8 @@ class Encoder implements IEncoder {
 			$children = $node->getChildren();
 			foreach ($children as $childNodeName => $child) {
 
-				if (!EncoderNode::nodeExists($child->getNodeName())) {
-					throw new EncoderException(sprintf('Cannot set the node name (%s) of a node child because it doesn\'t exist. Please add the requested node with "EncoderNode::addNode()". Current node name "%s" with class name "%s"', $child->getNodeName(), $node->getNodeName(), get_class($node)));
+				if (!EncoderNode::nodeExists($child->getChildNodeName())) {
+					throw new EncoderException(sprintf('Cannot set the node name (%s) of a node child because it doesn\'t exist. Please add the requested node with "EncoderNode::addNode()". Current node name "%s" with class name "%s"', $child->getChildNodeName(), $node->getNodeName(), get_class($node)));
 				}
 
 				$childOptionPath = $optionNodeIndex . ':' . $childNodeName;

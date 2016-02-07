@@ -435,6 +435,8 @@ class EncoderNode {
 		return $this->children->getChild($childName);
 	}
 	/**
+	 * @return EncoderNodeChild[]
+	 *
 	 * @see EncoderNodeChildren::getChildren()
 	 */
 	public function getChildren() {
