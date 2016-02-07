@@ -19,7 +19,7 @@ class ClassLoaderNode extends EncoderNode {
 
 	protected function _loadObject($object) {
 		if ($this->setupLoader === true) {
-			require_once TESTS_DIR . '/PE/samples/specials/ClassLoader.php';
+			require_once TESTS_DIR . '/PE/Samples/specials/ClassLoader.php';
 		}
 		return null;
 	}
