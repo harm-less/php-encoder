@@ -2,8 +2,6 @@
 
 namespace PE\Nodes;
 
-use PE\Exceptions\EncoderNodeChildException;
-
 class EncoderNodeChildren {
 
 	/**
@@ -15,6 +13,10 @@ class EncoderNodeChildren {
 		$this->children = array();
 	}
 
+	/**
+	 * @param EncoderNodeChild $child Child you want to add to the node
+	 * @return false|EncoderNodeChild Return child object if succeeded. Returns false if it failed
+	 */
 	public function addChild(EncoderNodeChild $child) {
         $nodeName = $child->getNodeName();
 		if ($this->childExists($nodeName)) {
@@ -24,43 +26,47 @@ class EncoderNodeChildren {
 		return $child;
 	}
 
+	/**
+	 * @param string $childName Name of the child you want to return
+	 * @return null|EncoderNodeChild Returns the requested child or returns null if it's not found
+	 */
 	public function getChild($childName) {
 		$childName = strtolower($childName);
-		if ($this->isChild($childName)) {
+		if ($this->childExists($childName)) {
 			return $this->children[$childName];
 		}
 		return null;
 	}
+
+	/**
+	 * @return EncoderNodeChild[] Returns all registered children
+	 */
 	public function getChildren() {
 		return $this->children;
 	}
 
+	/**
+	 * @param string $childName Name of the child
+	 * @return bool Returns true if the child exists based on its name
+	 */
 	public function childExists($childName) {
 		$nodeName = strtolower($childName);
 		return isset($this->children[$nodeName]);
 	}
-	public function isChild($nodeName) {
-		return $this->childExists($nodeName);
-	}
 
+	/**
+	 * Adds values to an object based on a single child
+	 *
+	 * @param string $childName Name if the child so it knows what method to use
+	 * @param object $target The target object where the values are supposed to be added to
+	 * @param array $values The values you want to add
+	 * @return bool Returns true if the action succeeded and false when it couldn't find the child
+	 */
 	public function addChildrenToObject($childName, $target, $values) {
 		$child = strtolower($childName);
 		$childNode = $this->getChild($child);
 		if ($childNode) {
-			$methodName = $childNode->getSetterMethod();
-			if ($methodName === null) {
-				throw new EncoderNodeChildException(sprintf('Setter method (%s) for class "%s" does not exist', $child, get_class($target)));
-			}
-			else if (method_exists($target, $methodName)) {
-				foreach ($values as $value) {
-					$target->$methodName($childNode->processValue($value));
-				}
-			}
-			else {
-				throw new EncoderNodeChildException(sprintf('Trying to add children to "%s" with method "%s", but this method does not exist', get_class($target), $methodName));
-			}
-
-			return true;
+			return $childNode->addChildrenToObject($target, $values);
 		}
 		return false;
 	}

@@ -58,7 +58,7 @@ class Encoder implements IEncoder {
 
 			foreach ($decodedData as $decodedName => $data) {
 				// if data belongs to a child
-				if ($nodeType->isChild($decodedName)) {
+				if ($nodeType->childNodeExists($decodedName)) {
 					// decode it, unset it and add it back into the array at the correct place
 					$childArrDecoded = $this->decodeRawToArray($decodedName, $nodeChildData, $array);
 					unset($decodedData[$decodedName]);
@@ -221,7 +221,7 @@ class Encoder implements IEncoder {
 
 				// set node children if they exist
 				foreach ($nodeDataItem as $childName => $value) {
-					if ($type->isChild($childName)) {
+					if ($type->childNodeExists($childName)) {
 						$children = $this->_decodeNode($childName, $nodeDataItem, $options, $type, $nodeInstance, $nodeDataItem);
 
 						if ($type->getChild($childName)->setAfterChildren()) {

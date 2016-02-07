@@ -2,9 +2,9 @@
 
 namespace PE\Nodes;
 
+use PE\Enums\ActionVariable;
 use ReflectionClass;
 use PE\Exceptions\EncoderNodeException;
-use PE\Variables\Variable;
 
 class EncoderNode {
 
@@ -21,9 +21,10 @@ class EncoderNode {
 	 * @var EncoderNode[]
 	 */
 	private static $getNodeByObjectCache = array();
+	/**
+	 * @var EncoderNode[]
+	 */
 	private static $getNodeTypeByObjectCache = array();
-
-	private $_nodeIsObjectCache;
 
 	/**
 	 * @var EncoderNodeChildren
@@ -34,14 +35,31 @@ class EncoderNode {
 	 * @var EncoderNodeVariableCollection
 	 */
 	private $variables;
-	private $key;
 
+	/**
+	 * @var string
+	 */
 	private $nodeName;
+	/**
+	 * @var string
+	 */
 	private $nodeNameSingle;
+	/**
+	 * @var string
+	 */
 	private $isolatedNodeName;
+	/**
+	 * @var string
+	 */
 	private $typeName;
 
+	/**
+	 * @var bool
+	 */
 	private $needsClass;
+	/**
+	 * @var string
+	 */
 	private $classPrepend;
 
 	const DEFAULT_TYPE = 'default';
@@ -302,15 +320,18 @@ class EncoderNode {
 	}
 
 	/**
-	 * Returns the
+	 * Returns the object name that this node requires
 	 *
 	 * @return string
-	 * @see classPrepend() This will get prepended this this value
+	 * @see classPrepend() This will get prepended to this value
 	 */
 	public function getNodeObjectName() {
 		return $this->_getNodeIsolatedClassName();
 	}
 
+	/**
+	 * @return string Returns the latest value for a namespace
+	 */
 	private function _getNodeIsolatedClassName() {
 		if ($this->isolatedNodeName !== null) {
 			return $this->isolatedNodeName;
@@ -324,6 +345,12 @@ class EncoderNode {
 		return $this->isolatedNodeName;
 	}
 
+	/**
+	 * Check if the supplied object belongs to this node
+	 *
+	 * @param object $object
+	 * @return bool Return true if the object belongs to this node
+	 */
 	public function nodeIsObject($object) {
 		$className = get_class($object);
 		if (isset($this->_nodeIsObjectCache[$className])) {
@@ -336,52 +363,102 @@ class EncoderNode {
 		return $nodeIsObject;
 	}
 
+	/**
+	 * @param string $nodeName Node name for array type entries
+	 * @param string $nodeNameSingle Node name for single entries
+	 */
 	protected function setNodeName($nodeName, $nodeNameSingle) {
 		$this->nodeName = $nodeName;
 		$this->nodeNameSingle = $nodeNameSingle;
 	}
+
+	/**
+	 * @return string Returns the node name for array type entries
+	 */
 	public function getNodeName() {
 		return $this->nodeName;
 	}
+
+	/**
+	 * @return string Returns the node name for single entries
+	 */
 	public function getNodeNameSingle() {
 		return $this->nodeNameSingle;
 	}
 
+	/**
+	 * @return string Returns the node type name
+	 */
 	public function getNodeTypeName() {
 		return $this->typeName;
 	}
 
+	/**
+	 * @return string Returns the default node type name
+	 */
 	public function getDefaultType() {
 		return EncoderNode::DEFAULT_TYPE;
 	}
+
+	/**
+	 * @param bool $bool If object is required for a node, set it to true.
+	 */
 	protected function setNeedsObject($bool) {
 		$this->needsClass = $bool;
 	}
+
+	/**
+	 * @return bool Returns true if an object is required for a node
+	 */
 	public function needsObject() {
 		return $this->needsClass;
 	}
 
 
-
-
+	/**
+	 * @param EncoderNodeChild $child
+	 * @return false|EncoderNodeChild
+	 *
+	 * @see EncoderNodeChildren::addChild()
+	 */
 	public function addChildNode(EncoderNodeChild $child) {
 		return $this->children->addChild($child);
 	}
-	public function getChild($childNodeName) {
-		return $this->children->getChild($childNodeName);
+
+	/**
+	 * @param string $childName
+	 * @return null|EncoderNodeChild
+	 *
+	 * @see EncoderNodeChildren::getChild()
+	 */
+	public function getChild($childName) {
+		return $this->children->getChild($childName);
 	}
 	/**
-	 * @return EncoderNodeChild[]
+	 * @see EncoderNodeChildren::getChildren()
 	 */
 	public function getChildren() {
 		return $this->children->getChildren();
 	}
-	public function childNodeExists($nodeName) {
-		return $this->children->childExists($nodeName);
+
+	/**
+	 * @param string $childName
+	 * @return bool
+	 *
+	 * @see EncoderNodeChildren::childExists()
+	 */
+	public function childNodeExists($childName) {
+		return $this->children->childExists($childName);
 	}
-	public function isChild($nodeName) {
-		return $this->children->isChild($nodeName);
-	}
+
+	/**
+	 * @param string $childName
+	 * @param object $target
+	 * @param array $values
+	 * @return bool
+	 *
+	 * @see EncoderNodeChildren::addChildrenToObject()
+	 */
 	public function addChildrenToObject($childName, $target, $values) {
 		return $this->children->addChildrenToObject($childName, $target, $values);
 	}
@@ -394,56 +471,42 @@ class EncoderNode {
 	}
 
 	/**
-	 * @param string $type
-	 * @return EncoderNode
-	 */
-	public function getType($type) {
-		return EncoderNode::getNodeType($this->getNodeName(), $type);
-	}
-
-	/**
-	 * @param $type
-	 * @param EncoderNode $typeObject
+	 * Retrieve a node type based on its node type name
 	 *
-	 * @return bool
+	 * @param string $nodeTypeName
+	 * @return EncoderNode|null Returns the EncoderNode object for the requested type. Null if if no type is found
 	 */
-	public function addType($type, EncoderNode $typeObject = null) {
-
-		if ($typeObject == null) {
-
-			$typeClassName = $this->getTypeClassName($type) . EncoderNode::NODE_EXTENSION;
-
-			// loads the class if it has need bee loaded
-			if (!class_exists($typeClassName)) {
-				$this->loadType($type);
-			}
-
-			// check if it has been loaded an set the object, otherwise return
-			if (class_exists($typeClassName)) {
-				$typeObject = new $typeClassName();
-			}
-			else {
-				return false;
-			}
-		}
-
-		return EncoderNode::addNodeType($typeObject, $type);
+	public function getType($nodeTypeName) {
+		return EncoderNode::getNodeType($this->getNodeName(), $nodeTypeName);
 	}
-
-
 
 
 	protected function _loadObject($object) {
 		return null;
 	}
 
+	/**
+	 * @return string Returns the full class name that will be required for this EncoderNode
+	 */
 	protected function _objectClassName() {
 		return $this->classPrepend() . '\\' . $this->_objectFileName();
 	}
 
+	/**
+	 * @return string Returns the file name of the class required for this EncoderNode
+	 */
 	protected function _objectFileName() {
 		return $this->_getNodeIsolatedClassName();
 	}
+
+	/**
+	 * Will load a certain file
+	 *
+	 * @param string|null $object Name of the object. Leave empty if you want to trigger the "_objectFileName" method
+	 * @return mixed
+	 *
+	 * @see _objectFileName()
+	 */
 	public function loadObject($object = null) {
 		if ($object === null && $object = $this->_objectFileName()) {
 			if ($object === null) {
@@ -452,19 +515,29 @@ class EncoderNode {
 		}
 		return $this->_loadObject($object);
 	}
+
+	/**
+	 * @return string Returns read-only value of "_objectClassName()"
+	 *
+	 * @see _objectClassName();
+	 */
 	public function getObjectClassName() {
 		return $this->_objectClassName();
 	}
 
 
-
-
+	/**
+	 * @param $name
+	 * @param array $parameters
+	 * @return bool|mixed
+	 */
 	public function applyToVariable($name, $parameters) {
 		$variable = $this->getVariable($name);
 		if ($variable == null) {
 			return false;
 		}
-		return $variable->applyToSetter($this, $parameters);
+		$parameters[ActionVariable::SETTER_NODE] = $this;
+		return $variable->applyToSetter($parameters);
 	}
 
 	public function addVariable(EncoderNodeVariable $variable) {
@@ -535,13 +608,6 @@ class EncoderNode {
 	}
 	public function processValue($name, $value) {
 		return $this->variables->processValue($name, $value);
-	}
-
-	public function key($variableId) {
-		$this->key = $variableId;
-	}
-	public function getKey() {
-		return $this->key;
 	}
 
 	public function getObjectType($parent, $nodeData) {

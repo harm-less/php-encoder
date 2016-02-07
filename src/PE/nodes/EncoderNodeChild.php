@@ -49,4 +49,28 @@ class EncoderNodeChild extends EncoderNodeVariable {
 		}
 		return $this->setAfterAttributes;
 	}
+
+	/**
+	 * Adds values to an object
+	 *
+	 * @param object $target The target object where the values are supposed to be added to
+	 * @param array $values The values you want to add
+	 * @return bool Returns true if the action succeeded and false when it couldn't find the child
+	 */
+	public function addChildrenToObject($target, $values) {
+		$methodName = $this->getSetterMethod();
+		if ($methodName === null) {
+			throw new EncoderNodeChildException(sprintf('Setter method (%s) for class "%s" does not exist', $this->getId(), get_class($target)));
+		}
+		else if (method_exists($target, $methodName)) {
+			foreach ($values as $value) {
+				$target->$methodName($this->processValue($value));
+			}
+		}
+		else {
+			throw new EncoderNodeChildException(sprintf('Trying to add children to "%s" with method "%s", but this method does not exist', get_class($target), $methodName));
+		}
+
+		return true;
+	}
 }

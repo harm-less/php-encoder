@@ -242,11 +242,12 @@ class EncoderNodeVariableTest extends Samples {
 		$this->assertEquals(array(
 			'node' => 'test',
 			'copied' => 'test',
-		), $var->applyToSetter($node, array(
+		), $var->applyToSetter(array(
 			ActionVariable::SETTER_OBJECT => $object,
 			ActionVariable::SETTER_NODE_DATA => array(
 				'node' => 'test'
 			),
+			ActionVariable::SETTER_NODE => $node,
 			ActionVariable::SETTER_NAME => 'node',
 			ActionVariable::SETTER_VALUE => 'test'
 		)));
@@ -267,12 +268,13 @@ class EncoderNodeVariableTest extends Samples {
 			'value' => 'test',
 			'object' => $object,
 			'parent' => $parent,
-		), $var->applyToSetter($node, array(
+		), $var->applyToSetter(array(
 			ActionVariable::SETTER_OBJECT => $object,
 			ActionVariable::SETTER_PARENT => $parent,
 			ActionVariable::SETTER_NODE_DATA => array(
 				'node' => 'test'
 			),
+			ActionVariable::SETTER_NODE => $node,
 			ActionVariable::SETTER_NAME => 'node',
 			ActionVariable::SETTER_VALUE => 'test'
 		)));
@@ -292,11 +294,12 @@ class EncoderNodeVariableTest extends Samples {
 
 		$this->assertEquals(array(
 			'test' => 'altered',
-		), $var->applyToSetter($node, array(
+		), $var->applyToSetter(array(
 			ActionVariable::SETTER_OBJECT => $object,
 			ActionVariable::SETTER_NODE_DATA => array(
 				'test' => 'test'
 			),
+			ActionVariable::SETTER_NODE => $node,
 			ActionVariable::SETTER_NAME => 'node',
 			ActionVariable::SETTER_VALUE => 'test'
 		)));
@@ -311,11 +314,12 @@ class EncoderNodeVariableTest extends Samples {
 		$object = $this->getEncoderNodeVariableApplyToSetter();
 		$var = $node->getVariableById('node-unknown-variable');
 
-		$var->applyToSetter($node, array(
+		$var->applyToSetter(array(
 			ActionVariable::SETTER_OBJECT => $object,
 			ActionVariable::SETTER_NODE_DATA => array(
 				'node' => 'test'
 			),
+			ActionVariable::SETTER_NODE => $node,
 			ActionVariable::SETTER_NAME => 'node',
 			ActionVariable::SETTER_VALUE => 'test'
 		));
@@ -338,7 +342,7 @@ class EncoderNodeVariableTest extends Samples {
 		$object = $this->getEncoderNodeVariableApplyToSetter();
 		$var = $node->getVariableById($variable);
 
-		$this->assertTrue($var->applyToSetter($node, array(
+		$this->assertTrue($var->applyToSetter(array(
 			ActionVariable::SETTER_OBJECT => $object,
 			ActionVariable::SETTER_VALUE => 'test'
 		)));

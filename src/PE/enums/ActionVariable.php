@@ -7,6 +7,7 @@ use PE\Nodes\EncoderNodeVariable;
 class ActionVariable {
 
 	const SETTER_NODE_DATA = EncoderNodeVariable::ACTION_VARIABLE_SETTER_NODE_DATA;
+	const SETTER_NODE = 'encoder_node';
 	const SETTER_NAME = 'name';
 	const SETTER_VALUE = 'value';
 	const SETTER_OBJECT = 'object';

@@ -370,26 +370,52 @@ class EncoderNodeVariable extends Variable {
 		return call_user_func_array(array($node, $actionMethodName), $parameters);
 	}
 
-	public function applyToSetter(EncoderNode $node, $parameters) {
+	/**
+	 * Depending on he settings in this variable it will either call a method in the supplied EncoderNode or in the
+	 * supplied object. The node will be called if a setterAction has been set with a type of
+	 * EncoderNodeVariable::ACTION_TYPE_NODE. Otherwise it will call the object. Depending on the method it chooses,
+	 * certain parameter are required.
+	 *
+	 * @param array $parameters Associated array based on all "SETTER_*" constants from ActionVariable.
+	 * @return mixed Returns whatever the object returns
+	 *
+	 * @see ActionVariable All "SETTER_*" constants can be a key of the $parameters array
+	 */
+	public function applyToSetter($parameters) {
 		if ($this->hasSetterAction() && $this->getSetterActionType() === EncoderNodeVariable::ACTION_TYPE_NODE) {
-			return $this->applyToNodeSetter($node, $parameters);
+			return $this->applyToNodeSetter($parameters);
 		}
 		else {
 			return $this->applyToObjectSetter($parameters[ActionVariable::SETTER_OBJECT], $parameters[ActionVariable::SETTER_VALUE]);
 		}
 	}
 
+	/**
+	 * Applies a certain value to certain object
+	 *
+	 * @param object $object The object you want to have called
+	 * @param mixed $value The value this method should receive
+	 * @return mixed Returns whatever the object returns
+	 */
 	protected function applyToObjectSetter($object, $value) {
 		$methodName = $this->getSetterActionMethod() ? $this->getSetterActionMethod() : $this->getSetterMethod();
-		if (method_exists($object, $methodName)) {
-			return $object->$methodName($this->processValue($value));
+		if (!method_exists($object, $methodName)) {
+			throw new EncoderNodeVariableException(sprintf('Method "%s" does not exist for class %s does not exist', $methodName, get_class($object)));
 		}
 		else {
-			throw new EncoderNodeVariableException(sprintf('Method "%s" does not exist for class %s does not exist', $methodName, get_class($object)));
+			return $object->$methodName($this->processValue($value));
 		}
 	}
 
-	protected function applyToNodeSetter(EncoderNode $node, $parameters) {
+	/**
+	 * Calls a certain node and provides any variables the method requires
+	 *
+	 * @param array $parameters Associated array based on all "SETTER_*" constants from ActionVariable.
+	 * @return mixed Returns whatever the object returns
+	 *
+	 * @see ActionVariable All "SETTER_*" constants can be a key of the $parameters array
+	 */
+	protected function applyToNodeSetter($parameters) {
 
 		$nodeData = $parameters[ActionVariable::SETTER_NODE_DATA];
 
@@ -404,21 +430,29 @@ class EncoderNodeVariable extends Variable {
 		$methodParameters = $customParameters ? $customParameters : array($nodeData, $parameters[ActionVariable::SETTER_VALUE]);
 
 		// using those parameters, call the node action method
-		return $this->_callNodeAction($node, $actionMethod, $methodParameters);
+		return $this->_callNodeAction($parameters[ActionVariable::SETTER_NODE], $actionMethod, $methodParameters);
 	}
 
+	/**
+	 * Gathers all required variables
+	 *
+	 * @param array $parameters Associated array based on all "SETTER_*" constants from ActionVariable.
+	 * @return array Returns an array with all required parameters extracted from the $parameters variable in the
+	 * right order.
+	 *
+	 * @see ActionVariable All "SETTER_*" constants can be a key of the $parameters array
+	 */
 	protected function gatherAccessorParameters($parameters) {
+		$actionVariables = array();
 		$variableAction = $this->getSetterAction();
 		if (isset($variableAction['variables']) && count($variableAction['variables'])) {
-			$actionVariables = array();
 			foreach ($variableAction['variables'] as $actionVariableId) {
 				if (!isset($parameters[$actionVariableId])) {
 					throw new EncoderNodeVariableException(sprintf('Action variable id "%s" is not known', $actionVariableId));
 				}
 				array_push($actionVariables, $parameters[$actionVariableId]);
 			}
-			return $actionVariables;
 		}
-		return null;
+		return $actionVariables;
 	}
 }
