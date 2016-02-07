@@ -27,7 +27,9 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"PE\\": "tests/PE"
+			"PE\\Tests\\": "tests/PE/Tests",
+			"PE\\Nodes\\": "tests/PE/nodes",
+			"PE\\Samples\\": "tests/PE/samples"
 		}
 	}
 }
