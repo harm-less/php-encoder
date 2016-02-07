@@ -2,6 +2,8 @@
 
 namespace PE\Nodes;
 
+use PE\Exceptions\EncoderNodeChildException;
+
 class EncoderNodeChildren {
 
 	/**
@@ -65,9 +67,9 @@ class EncoderNodeChildren {
 	public function addChildrenToObject($childName, $target, $values) {
 		$child = strtolower($childName);
 		$childNode = $this->getChild($child);
-		if ($childNode) {
-			return $childNode->addChildrenToObject($target, $values);
+		if (!$childNode) {
+			throw new EncoderNodeChildException(sprintf('Trying to add children to object, but the child "%s" could not be found', $childName));
 		}
-		return false;
+		return $childNode->addChildrenToObject($target, $values);
 	}
 } 
