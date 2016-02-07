@@ -9,4 +9,5 @@ define('ROOT_DIR', dirname(TESTS_DIR));
 
 // Load our autoloader, and add our Test class namespace
 $autoloader = require(ROOT_DIR . '/vendor/autoload.php');
-$autoloader->add('PE', __DIR__);
+$autoloader->add('PE\\nodes', __DIR__ . 'nodes');
+$autoloader->add('PE\\samples', __DIR__ . 'samples');
