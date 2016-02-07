@@ -117,7 +117,7 @@ class EncoderNode {
 		}
 
 		self::softCleanNodeCache();
-		return true;
+		return $node;
 	}
 
 	/**
@@ -198,7 +198,7 @@ class EncoderNode {
 		self::$nodesTypes[$nodeTypeId] = $nodeType;
 
 		self::softCleanNodeTypeCache();
-		return true;
+		return $nodeType;
 	}
 
 	/**

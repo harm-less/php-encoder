@@ -114,50 +114,47 @@ class Samples extends AbstractPETest
 		$this->addAnimalNodes();
 	}
 	public function addFarmNode() {
-		EncoderNode::addNode(new FarmNode());
+		return EncoderNode::addNode(new FarmNode());
 	}
 
 	public function addBuildingNode() {
-		$node = new BuildingNode();
-		EncoderNode::addNode(new BuildingNode());
-		return $node;
+		return EncoderNode::addNode(new BuildingNode());
 	}
 	public function getBuildingHouse() {
 		return new House();
 	}
 	public function addBuildingHouseNode() {
-		$node = new HouseNode();
-		EncoderNode::addNodeType($node);
-		return $node;
+		return EncoderNode::addNodeType(new HouseNode());
 	}
 	public function addBuildingGreenhouseNode() {
-		EncoderNode::addNodeType(new GreenhouseNode());
+		return EncoderNode::addNodeType(new GreenhouseNode());
 	}
 	public function addBuildingBarnNode() {
-		EncoderNode::addNodeType(new BarnNode());
+		return EncoderNode::addNodeType(new BarnNode());
 	}
 
 	public function addAnimalNodes($children = true) {
-		EncoderNode::addNode(new AnimalNode());
+		$animalNode = EncoderNode::addNode(new AnimalNode());
 		if ($children) {
 			$this->addAnimalCatNode();
 			$this->addAnimalChickenNode();
 			$this->addAnimalCowNode();
 			$this->addAnimalSheepNode();
 		}
+		return $animalNode;
 	}
 
 	public function addAnimalCatNode() {
-		EncoderNode::addNodeType(new CatNode());
+		return EncoderNode::addNodeType(new CatNode());
 	}
 	public function addAnimalChickenNode() {
-		EncoderNode::addNodeType(new ChickenNode());
+		return EncoderNode::addNodeType(new ChickenNode());
 	}
 	public function addAnimalCowNode() {
-		EncoderNode::addNodeType(new CowNode());
+		return EncoderNode::addNodeType(new CowNode());
 	}
 	public function addAnimalSheepNode() {
-		EncoderNode::addNodeType(new SheepNode());
+		return EncoderNode::addNodeType(new SheepNode());
 	}
 
 
@@ -165,15 +162,13 @@ class Samples extends AbstractPETest
 		return new Things();
 	}
 	public function addThingsNode() {
-		$thingsNode = new ThingsNode();
-		EncoderNode::addNode($thingsNode);
-		return $thingsNode;
+		return EncoderNode::addNode(new ThingsNode());
 	}
 	public function getThing() {
 		return new Thing();
 	}
 	public function addThingNode() {
-		EncoderNode::addNode(new ThingNode());
+		return EncoderNode::addNode(new ThingNode());
 	}
 
 
@@ -181,22 +176,21 @@ class Samples extends AbstractPETest
 		return new NoGetterMethod();
 	}
 	public function addNoGetterMethodNode() {
-		EncoderNode::addNode(new NoGetterMethodNode());
+		return EncoderNode::addNode(new NoGetterMethodNode());
 	}
 
 	public function getVariableNoGetterMethod() {
 		return new NoVariableGetterMethod();
 	}
 	public function addVariableNoGetterMethodNode() {
-		EncoderNode::addNode(new NoVariableGetterMethodNode());
+		return EncoderNode::addNode(new NoVariableGetterMethodNode());
 	}
 
 	public function getNonArrayGetterMethod() {
 		return new NonArrayGetterMethod();
 	}
-	public function addNonArrayGetterMethodNode()
-	{
-		EncoderNode::addNode(new NonArrayGetterMethodNode());
+	public function addNonArrayGetterMethodNode() {
+		return EncoderNode::addNode(new NonArrayGetterMethodNode());
 	}
 
 
@@ -204,7 +198,7 @@ class Samples extends AbstractPETest
 		return new NonArrayGetterMethodOnPurpose();
 	}
 	public function addNonArrayGetterMethodOnPurposeNode() {
-		EncoderNode::addNode(new NonArrayGetterMethodOnPurposeNode());
+		return EncoderNode::addNode(new NonArrayGetterMethodOnPurposeNode());
 	}
 
 
@@ -212,7 +206,7 @@ class Samples extends AbstractPETest
 		return new SingleChild();
 	}
 	public function addSingleChildNode() {
-		EncoderNode::addNode(new SingleChildNode());
+		return EncoderNode::addNode(new SingleChildNode());
 	}
 
 
@@ -223,7 +217,7 @@ class Samples extends AbstractPETest
 		return new AccessorMethodActionTypeNodeNode();
 	}
 	public function addAccessorMethodActionTypeNodeNode() {
-		EncoderNode::addNode(new AccessorMethodActionTypeNodeNode());
+		return EncoderNode::addNode(new AccessorMethodActionTypeNodeNode());
 	}
 
 	public function getEncoderNodeVariableApplyToSetter() {
@@ -233,15 +227,15 @@ class Samples extends AbstractPETest
 		return new EncoderNodeVariableApplyToSetterNode();
 	}
 	public function addEncoderNodeVariableApplyToSetterNodeNode() {
-		EncoderNode::addNode(new EncoderNodeVariableApplyToSetterNode());
+		return EncoderNode::addNode(new EncoderNodeVariableApplyToSetterNode());
 	}
 
 	public function addRequiredConstructorVariablesNode($addVariables = true) {
-		EncoderNode::addNode(new RequiredConstructorVariablesNode($addVariables));
+		return EncoderNode::addNode(new RequiredConstructorVariablesNode($addVariables));
 	}
 
 	public function addClassLoaderNode($setupLoader) {
-		EncoderNode::addNode(new ClassLoaderNode($setupLoader));
+		return EncoderNode::addNode(new ClassLoaderNode($setupLoader));
 	}
 
 	public function addAddAfterDecodeNodes($addAfterAttributes = true) {
