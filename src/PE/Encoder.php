@@ -242,16 +242,21 @@ class Encoder implements IEncoder {
 	}
 
 	protected function getRequiredConstructorVariables($className) {
-		$reflector = new \ReflectionMethod($className, '__construct');
-		$requiredVariables = $reflector->getParameters();
+		try {
+			$reflector = new \ReflectionMethod($className, '__construct');
+			$requiredVariables = $reflector->getParameters();
 
-		$arr = array();
-		foreach ($requiredVariables as $variable) {
-			if (!$variable->isOptional()) {
-				array_push($arr, $variable->getName());
+			$arr = array();
+			foreach ($requiredVariables as $variable) {
+				if (!$variable->isOptional()) {
+					array_push($arr, $variable->getName());
+				}
 			}
+			return $arr;
 		}
-		return $arr;
+		catch(\Exception $e) {
+			return array();
+		}
 	}
 
 

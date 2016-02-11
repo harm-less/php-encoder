@@ -36,13 +36,13 @@ class XmlEncoderTest extends CoreEncoder {
 		$xmlString = trim(preg_replace('/\s+/', ' ', $encoded->saveXML()));
 
 		$this->assertEquals('<?xml version="1.0" encoding="UTF-8"?> '
-			. '<tb> '
+			. '<encoded> '
 			.   '<building type="house"> '
 			.     '<animals> '
 			.       '<animal type="cat" name="Cat"/> '
 			.     '</animals> '
 			.   '</building> '
-			. '</tb>', $xmlString);
+			. '</encoded>', $xmlString);
 
 		$decoded = $this->encoder()->decode($xmlString);
 		$this->assertArrayHasKey('building', $decoded);
@@ -65,11 +65,11 @@ class XmlEncoderTest extends CoreEncoder {
 		$xmlString = trim(preg_replace('/\s+/', ' ', $encoded->saveXML()));
 
 		$this->assertEquals('<?xml version="1.0" encoding="UTF-8"?> '
-			. '<tb> '
+			. '<encoded> '
 			.   '<single-child> '
 			.     '<thing thingVar="hello world"/> '
 			.   '</single-child> '
-			. '</tb>', $xmlString);
+			. '</encoded>', $xmlString);
 
 		$decoded = $this->encoder()->decode($xmlString);
 		$this->assertArrayHasKey('single-child', $decoded);

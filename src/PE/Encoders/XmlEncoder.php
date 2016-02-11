@@ -11,7 +11,7 @@ use PE\Options\EncoderOptions;
 
 class XmlEncoder extends Encoder {
 
-	const ROOT_NODE_NAME = 'tb';
+	const ROOT_NODE_NAME = 'encoded';
 
 	public function encode($object, EncoderOptions $options = null) {
 		$arr = parent::encode($object, $options);
