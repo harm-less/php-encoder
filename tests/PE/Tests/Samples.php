@@ -25,6 +25,8 @@ use PE\Nodes\Specials\AddAfterDecodeChildRequiresNode;
 use PE\Nodes\Specials\AddAfterDecodeParentNode;
 use PE\Nodes\Specials\ClassLoaderNode;
 use PE\Nodes\Specials\EncoderNodeVariableApplyToSetterNode;
+use PE\Nodes\Specials\HasDefaultTypeNode;
+use PE\Nodes\Specials\HasDefaultTypeTypeNode;
 use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
 use PE\Nodes\Specials\RequiredConstructorVariablesNode;
 use PE\Nodes\Specials\SingleChildNode;
@@ -43,6 +45,8 @@ use PE\Samples\Erroneous\NoGetterMethod;
 use PE\Samples\General\Thing;
 use PE\Samples\General\Things;
 use PE\Samples\Specials\EncoderNodeVariableApplyToSetter;
+use PE\Samples\Specials\HasDefaultType;
+use PE\Samples\Specials\HasDefaultTypeType;
 use PE\Samples\Specials\NonArrayGetterMethodOnPurpose;
 use PE\Samples\Specials\AccessorMethodActionTypeNode;
 use PE\Samples\Specials\SingleChild;
@@ -197,6 +201,20 @@ class Samples extends AbstractPETest
 	}
 	public function addNonArrayGetterMethodNode() {
 		return EncoderNode::addNode(new NonArrayGetterMethodNode());
+	}
+
+
+	public function getHasDefaultType() {
+		return new HasDefaultType();
+	}
+	public function addHasDefaultTypeNode() {
+		return EncoderNode::addNode(new HasDefaultTypeNode());
+	}
+	public function getHasDefaultTypeType() {
+		return new HasDefaultTypeType();
+	}
+	public function addHasDefaultTypeTypeNode() {
+		return EncoderNode::addNodeType(new HasDefaultTypeTypeNode());
 	}
 
 

@@ -112,7 +112,7 @@ class EncoderNode {
 		// make this node the default one if no type has yet been specified
 		if (count(self::getNodeTypes($nodeName)) == 0) {
 			// set the default type name so it can be registered as a type
-			$node->typeName = $node->getDefaultType();
+			$node->typeName = self::DEFAULT_TYPE;
 			self::addNodeType($node);
 		}
 

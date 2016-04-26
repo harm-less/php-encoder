@@ -6,6 +6,7 @@ use PE\Enums\ActionVariable;
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeChild;
 use PE\Nodes\EncoderNodeVariable;
+use PE\Nodes\Specials\HasDefaultTypeNode;
 use PE\Tests\Samples;
 
 class EncoderNodeTest extends Samples
@@ -148,6 +149,15 @@ class EncoderNodeTest extends Samples
 	public function testStaticAddNodeTypeWithoutNodeType() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'The node type you\'re trying to add seems to be a regular node because it has a no type name. Make sure you try to add an EncoderNode with a type name');
 		EncoderNode::addNodeType($this->nodeType());
+	}
+
+	public function testOverwrittenDefaultType() {
+		$hasDefaultTypeNode = $this->addHasDefaultTypeNode();
+		$this->addHasDefaultTypeTypeNode();
+
+		$this->assertTrue(EncoderNode::nodeTypeExists($hasDefaultTypeNode->getNodeName(), 'default'));
+		$this->assertTrue(EncoderNode::nodeTypeExists($hasDefaultTypeNode->getNodeName(), HasDefaultTypeNode::NEW_DEFAULT_TYPE));
+		$this->assertEquals(count(EncoderNode::getNodeTypes()), 2);
 	}
 
 	public function testStaticGetNodeTypeByObject() {
