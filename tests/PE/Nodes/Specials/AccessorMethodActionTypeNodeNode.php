@@ -16,23 +16,23 @@ class AccessorMethodActionTypeNodeNode extends EncoderNode {
 		$this->addVariable(new EncoderNodeVariable('node', array(
 			'setterAction' => array(
 				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'addThingToNode',
+				'method' => 'addNodeToSpecial',
 				'variables' => array(ActionVariable::SETTER_NAME)
 			),
 			'getterAction' => array(
 				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'getThingFromNode',
-				'variables' => array(ActionVariable::SETTER_NAME)
+				'method' => 'getNodeFromSpecial',
+				'variables' => array(ActionVariable::GETTER_NAME)
 			)
 		)));
 	}
 
-	public function addThingToNode($data, $setterName) {
+	public function addNodeToSpecial($data, $setterName) {
 		$data['special'] = $data[$setterName];
 		return $data;
 	}
 
-	public function getThingFromNode($data, $getterName) {
+	public function getNodeFromSpecial($data, $getterName) {
 		$data['special'] = $data[$getterName] . ' getter';
 		return $data;
 	}

@@ -8,6 +8,7 @@ use PE\Samples\Farm\Building;
 use PE\Samples\Farm\Buildings\House;
 use PE\Samples\Loader\ClassLoader;
 use PE\Samples\Specials\AddAfterDecodeParent;
+use PE\Samples\Specials\OptionalVariables;
 use PE\Samples\Specials\RequiredConstructorVariables;
 use PE\Samples\Specials\AccessorMethodActionTypeNode;
 use PE\Samples\Specials\SingleChild;
@@ -221,6 +222,20 @@ class EncoderTest extends Samples {
 		$this->assertEquals('awesomeName', $obj->getName());
 		$this->assertEquals('awesomeCategory', $obj->getVariableCategory());
 		$this->assertTrue($obj->getOptional());
+	}
+
+	public function testDecodeObjectWithOptionalVariables() {
+		$this->addOptionalVariablesNode();
+		$decoded = $this->encoder()->decode(array(
+			'optional-variables' => array(
+				'name' => 'Hello world',
+				'other-variable' => 'other hello world'
+			)
+		));
+		/** @var OptionalVariables $obj */
+		$obj = $decoded['optional-variables'];
+		$this->assertEquals('Hello world', $obj->getName());
+		$this->assertEquals('other hello world', $obj->getOtherVariable());
 	}
 
 	public function testDecodeWithSetAfterChildrenFalse() {
