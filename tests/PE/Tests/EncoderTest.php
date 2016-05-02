@@ -238,6 +238,20 @@ class EncoderTest extends Samples {
 		$this->assertEquals('other hello world', $obj->getOtherVariable());
 	}
 
+	public function testDecodeObjectAllVariableTypes() {
+		$this->addVariableTypesNode();
+		$decoded = $this->encoder()->decode(array(
+			'variable-types' => array(
+				'required' => 'Hello world',
+				'optional' => 'Hello other world'
+			)
+		));
+		/** @var OptionalVariables $obj */
+		$obj = $decoded['optional-variables'];
+		$this->assertEquals('Hello world', $obj->getName());
+		$this->assertEquals('other hello world', $obj->getOtherVariable());
+	}
+
 	public function testDecodeWithSetAfterChildrenFalse() {
 		$this->addAddAfterDecodeNodes();
 

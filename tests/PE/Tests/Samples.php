@@ -31,6 +31,7 @@ use PE\Nodes\Specials\NonArrayGetterMethodOnPurposeNode;
 use PE\Nodes\Specials\OptionalVariablesNode;
 use PE\Nodes\Specials\RequiredConstructorVariablesNode;
 use PE\Nodes\Specials\SingleChildNode;
+use PE\Nodes\Specials\VariableTypesNode;
 use PE\Samples\Erroneous\EncoderNodeLoader;
 use PE\Samples\Erroneous\NonArrayGetterMethod;
 use PE\Samples\Erroneous\NoVariableGetterMethod;
@@ -52,6 +53,7 @@ use PE\Samples\Specials\NonArrayGetterMethodOnPurpose;
 use PE\Samples\Specials\AccessorMethodActionTypeNode;
 use PE\Samples\Specials\OptionalVariables;
 use PE\Samples\Specials\SingleChild;
+use PE\Samples\Specials\VariableTypes;
 
 class Samples extends AbstractPETest
 {
@@ -210,6 +212,13 @@ class Samples extends AbstractPETest
 	}
 	public function addOptionalVariablesNode() {
 		return EncoderNode::addNode(new OptionalVariablesNode());
+	}
+
+	public function getVariableTypes($required) {
+		return new VariableTypes($required);
+	}
+	public function addVariableTypesNode() {
+		return EncoderNode::addNode(new VariableTypesNode());
 	}
 
 
