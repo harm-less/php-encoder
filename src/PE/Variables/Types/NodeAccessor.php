@@ -7,7 +7,6 @@ namespace PE\Variables\Types;
 
 use PE\Exceptions\VariableTypeException;
 use PE\Nodes\EncoderNode;
-use PE\Variables\VariableType;
 
 /**
  * Class NodeAccessor
@@ -23,6 +22,12 @@ abstract class NodeAccessor extends VariableType {
 	const VARIABLE_VALUE = 'node_value';
 	const VARIABLE_OBJECT = 'node_object';
 	const VARIABLE_PARENT = 'node_parent';
+
+	const ACCESSOR_SETTER = 'setter';
+	const ACCESSOR_GETTER = 'getter';
+
+	const ORDER_PRE = 'pre';
+	const ORDER_POST = 'post';
 
 	function __construct($method, $parameters = null) {
 		parent::__construct($method);
@@ -49,7 +54,7 @@ abstract class NodeAccessor extends VariableType {
 	 *
 	 * @see ActionVariable All "SETTER_*" constants can be a key of the $parameters array
 	 */
-	protected function apply($options) {
+	public function apply($options) {
 		$parameters = $this->getParameters();
 
 		if (!count($parameters)) {

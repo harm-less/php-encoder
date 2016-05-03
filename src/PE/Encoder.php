@@ -129,6 +129,7 @@ class Encoder implements IEncoder {
 			$nodeChildType = $proxyNode->getObjectType($parentObject, $nodeDataItem);
 			$nodeType = ($nodeChildType !== null && !empty($nodeChildType) ? $nodeChildType : $proxyNode->getDefaultType());
 			$type = $proxyNode->getType($nodeType);
+			$variableCollection = $type->getVariableCollection();
 
 			// make sure the variables are all dashed as this is the default
 			foreach ($nodeDataItem as $nodeDataName => $nodeDataValue) {
@@ -139,18 +140,22 @@ class Encoder implements IEncoder {
 				}
 			}
 
+			$preNodeStaticOptions = array(
+				ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
+				ActionVariable::SETTER_NODE => $type,
+				ActionVariable::SETTER_PARENT => $parentObject
+			);
 			// call node methods. It can be useful when you want to change the outcome of the node data in the node
 			// that does not have a certain setter but is used in other ways
-			$nodeMethodVariables = $type->getVariablesSetterActionByType(EncoderNodeVariable::ACTION_TYPE_NODE);
+			$nodeMethodVariables = $variableCollection->getPreNodeSetterVariables();
 			foreach ($nodeMethodVariables as $variableId => $nodeMethodVariable) {
-				if (isset($nodeDataItem[$variableId])) {
-					$setterOptions = array(
-						ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
+				$preNodeSetter = $nodeMethodVariable->getPreNodeSetter();
+				if (isset($nodeDataItem[$variableId]) || $preNodeSetter->alwaysExecute()) {
+					$setterOptions = array_merge($preNodeStaticOptions, array(
 						ActionVariable::SETTER_NAME => $variableId,
-						ActionVariable::SETTER_PARENT => $parentObject,
 						ActionVariable::SETTER_VALUE => $nodeDataItem[$variableId]
-					);
-					if ($newNode = $nodeMethodVariable->callNodeSetterAction($type, $setterOptions)) {
+					));
+					if ($newNode = $preNodeSetter->apply($setterOptions)) {
 						$nodeDataItem = $newNode;
 					}
 				}

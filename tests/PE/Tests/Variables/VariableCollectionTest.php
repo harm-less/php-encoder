@@ -99,7 +99,7 @@ class VariableCollectionTest extends AbstractPETest {
 	}
 
 	public function testGetVariablesSameIndex() {
-		$this->setExpectedException('PE\\Exceptions\\VariableCollectionException', 'Cannot order variables because position "10" is being used more than once');
+		$this->setExpectedException('PE\\Exceptions\\EncoderNodeVariableCollectionException', 'Cannot order variables because position "10" is being used more than once');
 
 		$variable = $this->collectionAddVariableDefault();
 		$variable->setOrder(10);

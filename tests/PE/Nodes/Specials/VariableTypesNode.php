@@ -6,10 +6,8 @@ use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeVariable;
 use PE\Samples\Specials\VariableTypes;
 use PE\Variables\Types\NodeAccessor;
-use PE\Variables\Types\ObjectSetter;
 use PE\Variables\Types\PostNodeSetter;
 use PE\Variables\Types\PreNodeSetter;
-use PE\Variables\Variable;
 
 class VariableTypesNode extends EncoderNode {
 
@@ -17,7 +15,7 @@ class VariableTypesNode extends EncoderNode {
 		parent::__construct('variable-types', 'variable-type', '\\PE\\Samples\\Specials');
 
 		$required = $this->addVariable(new EncoderNodeVariable('required'));
-		$required->setType(Variable::TYPE_STRING);
+		$required->setType(EncoderNodeVariable::TYPE_STRING);
 		$required->preNodeSetter(new PreNodeSetter('preNodeRequiredSetter', array(
 			NodeAccessor::VARIABLE_NODE,
 			NodeAccessor::VARIABLE_NAME,

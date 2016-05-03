@@ -2,70 +2,231 @@
 
 namespace PE\Nodes;
 
+use PE\Exceptions\EncoderNodeVariableCollectionException;
 use PE\Exceptions\EncoderNodeVariableException;
-use PE\Variables\Variable;
-use PE\Variables\VariableCollection;
+use PE\Variables\Types\NodeAccessor;
+use PE\Variables\Types\ObjectAccessor;
 
-class EncoderNodeVariableCollection extends VariableCollection {
+class EncoderNodeVariableCollection {
 
-	private $_cachedAlwaysExecutedVariables;
-
-	public function getVariablesSetterActionByType($type) {
-		return $this->_getVariablesActionByType($type, 'getSetterAction');
-	}
-	public function getVariablesGetterActionByType($type) {
-		return $this->_getVariablesActionByType($type, 'getGetterAction');
-	}
+	private $_cache;
 
 	/**
-	 * @param $type
-	 * @param $actionMethod
-	 * @return EncoderNodeVariable[]
+	 * @var EncoderNodeVariable[]
 	 */
-	protected function _getVariablesActionByType($type, $actionMethod) {
-		$variables = array();
-		foreach ($this->getVariables() as $variable) {
-			$action = $variable->$actionMethod();
-			if (isset($action['type']) && $action['type'] == $type) {
-				$variables[$variable->getId()] = $variable;
-			}
-		}
-		return $variables;
+	private $variables;
+
+	function __construct() {
+		$this->variables = array();
 	}
 
 	/**
+	 * Adds a EncoderNodeVariable to the collection
 	 * @param EncoderNodeVariable $variable
 	 * @return EncoderNodeVariable
 	 */
-	public function addNodeVariable(EncoderNodeVariable $variable) {
-		$this->_cachedAlwaysExecutedVariables = null;
-		$variable = parent::addVariable($variable);
+	public function addVariable(EncoderNodeVariable $variable) {
+		$id = $variable->getId();
+		if (!$this->variableExists($id)) {
+			$this->variables[$id] = $variable;
+		}
+		$this->_cacheHardReset();
 		return $variable;
 	}
 
 	/**
-	 * You cannot use this method, use "addNodeVariable" instead
-	 *
-	 * @param Variable $variable
-	 * @return void
+	 * @param EncoderNodeVariable|string $variable
+	 * @return EncoderNodeVariable
 	 */
-	public function addVariable(Variable $variable) {
-		throw new EncoderNodeVariableException('Use "addNodeVariable" to add variables');
+	public function getVariable($variable) {
+		if (is_string($variable)) {
+			if ($object = $this->getVariableById($variable)) {
+				return $object;
+			}
+		}
+		else if (is_object($variable)) {
+			return $variable;
+		}
+		return null;
 	}
+
+	/**
+	 * Get a variable based on its id
+	 * @param $id
+	 * @return null|EncoderNodeVariable
+	 */
+	public function getVariableById($id) {
+		return $this->variableExists($id) ? $this->variables[$id] : null;
+	}
+
+	/**
+	 * @param string $id
+	 * @return bool
+	 */
+	public function variableExists($id) {
+		return isset($this->variables[$id]);
+	}
+
+
+	/**
+	 * @param bool $ordered
+	 * @return EncoderNodeVariable[]
+	 */
+	public function getPreNodeSetterVariables($ordered = true) {
+		$parameters = $ordered;
+		if (($result = $this->_cache(__FUNCTION__, $parameters)) === false) {
+			$result = $this->_getVariables('has' . ucfirst(NodeAccessor::ORDER_PRE) . 'Node' . ucfirst(NodeAccessor::ACCESSOR_SETTER), $ordered);
+			$this->_cache(__FUNCTION__, $parameters, $result);
+		}
+		return $result;
+	}
+
+	/**
+	 * @param bool $ordered
+	 * @return EncoderNodeVariable[]
+	 */
+	public function getPreNodeGetterVariables($ordered = true) {
+		$parameters = $ordered;
+		if (($result = $this->_cache(__FUNCTION__, $parameters)) === false) {
+			$result = $this->_getVariables('has' . ucfirst(NodeAccessor::ORDER_PRE) . 'Node' . ucfirst(NodeAccessor::ACCESSOR_GETTER), $ordered);
+			$this->_cache(__FUNCTION__, $parameters, $result);
+		}
+		return $result;
+	}
+
+
+	/**
+	 * @param bool $ordered
+	 * @return EncoderNodeVariable[]
+	 */
+	public function getPostNodeSetterVariables($ordered = true) {
+		$parameters = $ordered;
+		if (($result = $this->_cache(__FUNCTION__, $parameters)) === false) {
+			$result = $this->_getVariables('has' . ucfirst(NodeAccessor::ORDER_POST) . 'Node' . ucfirst(NodeAccessor::ACCESSOR_SETTER), $ordered);
+			$this->_cache(__FUNCTION__, $parameters, $result);
+		}
+		return $result;
+	}
+
+	/**
+	 * @param bool $ordered
+	 * @return EncoderNodeVariable[]
+	 */
+	public function getPostNodeGetterVariables($ordered = true) {
+		$parameters = $ordered;
+		if (($result = $this->_cache(__FUNCTION__, $parameters)) === false) {
+			$result = $this->_getVariables('has' . ucfirst(NodeAccessor::ORDER_POST) . 'Node' . ucfirst(NodeAccessor::ACCESSOR_GETTER), $ordered);
+			$this->_cache(__FUNCTION__, $parameters, $result);
+		}
+		return $result;
+	}
+
+
+	/**
+	 * @param bool $ordered
+	 * @return EncoderNodeVariable[]
+	 */
+	public function getObjectSetterVariables($ordered = true) {
+		$parameters = $ordered;
+		if (($result = $this->_cache(__FUNCTION__, $parameters)) === false) {
+			$result = $this->_getVariables('hasObject' . ucfirst(ObjectAccessor::ACCESSOR_SETTER), $ordered);
+			$this->_cache(__FUNCTION__, $parameters, $result);
+		}
+		return $result;
+	}
+
+	/**
+	 * @param bool $ordered
+	 * @return EncoderNodeVariable[]
+	 */
+	public function getObjectGetterVariables($ordered = true) {
+		$parameters = $ordered;
+		if (($result = $this->_cache(__FUNCTION__, $parameters)) === false) {
+			$result = $this->_getVariables('hasObject' . ucfirst(ObjectAccessor::ACCESSOR_GETTER), $ordered);
+			$this->_cache(__FUNCTION__, $parameters, $result);
+		}
+		return $result;
+	}
+
+	/**
+	 * @param string $methodNameHas
+	 * @param bool $ordered
+	 * @return EncoderNodeVariable[]
+	 */
+	protected function _getVariables($methodNameHas, $ordered = true) {
+		$orderedVariables = array();
+		$unorderedVariables = array();
+		foreach ($this->variables as $variable) {
+			if (!$variable->{$methodNameHas}()) {
+				// the variable does not have an object variable so continue the loop
+				continue;
+			}
+			$orderPosition = $ordered ? $variable->getOrder() : null;
+			if ($orderPosition !== null) {
+				if (array_key_exists($orderPosition, $orderedVariables)) {
+					throw new EncoderNodeVariableCollectionException(sprintf('Cannot order variables because position "%s" is being used more than once', $orderPosition));
+				}
+				$orderedVariables[$orderPosition] = $variable;
+			}
+			else {
+				array_push($unorderedVariables, $variable);
+			}
+		}
+		return $ordered ? array_merge($orderedVariables, $unorderedVariables) : $unorderedVariables;
+	}
+
+
+	/**
+	 * @param string $method The "has-variable" method name
+	 * @param null $parameters
+	 * @param bool $value
+	 * @return bool
+	 */
+	protected function _cache($method, $parameters = null, $value = false) {
+		$parameters = is_null($parameters) ? '__default__' : (string) $parameters;
+		if ($value !== false) {
+			if (!isset($this->_cache[$method])) {
+				$this->_cache[$method] = array();
+			}
+			$this->_cache[$method][$parameters] = $value;
+			return $value;
+		}
+		if (!array_key_exists($method, $this->_cache) || !array_key_exists($parameters, $this->_cache[$method])) {
+			return false;
+		}
+		return $this->_cache[$method][$parameters];
+	}
+
+	/**
+	 * @param string $method
+	 * @return bool
+	 */
+	protected function _cacheReset($method) {
+		if (array_key_exists($method, $this->_cache)) {
+			unset($this->_cache[$method]);
+			return true;
+		}
+		return false;
+	}
+
+	protected function _cacheHardReset() {
+		$this->_cache = array();
+	}
+
 
 	/**
 	 * @param $dataArray
 	 * @param bool $throwErrorIfFails Set to true if you want it to throw an error if it fails
 	 * @return bool Returns true if all requirements are met
 	 */
-	public function variablesAreValidWithData($dataArray, $throwErrorIfFails = false) {
-		$variables = $this->getVariables();
+	public function objectVariablesAreValidWithData($dataArray, $throwErrorIfFails = false) {
+		$variables = $this->getObjectSetterVariables(false);
 		$unique = array();
 		foreach ($dataArray as $data) {
 			foreach ($variables as $variable) {
 				$variableId = $variable->getId();
 				if ($variableId !== null && array_key_exists($variableId, $data)) {
-					if ($variable->mustBeUnique()) {
+					if ($variable->getObjectSetter()->mustBeUnique()) {
 						if (!isset($unique[$variableId])) {
 							$unique[$variableId] = array();
 						}
@@ -84,29 +245,5 @@ class EncoderNodeVariableCollection extends VariableCollection {
 			}
 		}
 		return true;
-	}
-
-	public function getAlwaysExecutedVariables() {
-		if ($this->_cachedAlwaysExecutedVariables !== null) {
-			return $this->_cachedAlwaysExecutedVariables;
-		}
-		$variables = array();
-		foreach ($this->getVariables() as $variable) {
-			if ($variable->alwaysExecute()) {
-				$variables[$variable->getId()] = $variable;
-			}
-		}
-		$this->_cachedAlwaysExecutedVariables = $variables;
-		return $variables;
-	}
-
-	/**
-	 * Overridden method so the returned data type corresponds with this class
-	 *
-	 * @param bool $order
-	 * @return EncoderNodeVariable[]
-	 */
-	public function getVariables($order = true) {
-		return parent::getVariables($order);
 	}
 } 

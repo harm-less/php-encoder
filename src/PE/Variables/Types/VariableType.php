@@ -3,7 +3,8 @@
  * Variable type that determines when a variable can be called
  */
 
-namespace PE\Variables;
+namespace PE\Variables\Types;
+use PE\Variables\Variable;
 
 /**
  * Class VariableType
@@ -31,13 +32,15 @@ abstract class VariableType {
 	/**
 	 * Sets the Variable the type is connected to
 	 *
-	 * @param $variable
+	 * @param Variable $variable
 	 */
 	public function setVariable($variable) {
 		$this->variable = $variable;
 	}
 	/**
 	 * Gets the Variable the type is connected to
+	 *
+	 * @return Variable
 	 */
 	public function getVariable() {
 		return $this->variable;

@@ -7,7 +7,6 @@ namespace PE\Variables\Types;
 
 use PE\Exceptions\VariableTypeException;
 use PE\Library\Inflector;
-use PE\Variables\VariableType;
 
 /**
  * Class ObjectVariable
@@ -16,6 +15,9 @@ use PE\Variables\VariableType;
 abstract class ObjectAccessor extends VariableType {
 
 	private $mustBeUnique;
+
+	const ACCESSOR_SETTER = 'setter';
+	const ACCESSOR_GETTER = 'getter';
 
 	function __construct($method = null) {
 		parent::__construct($method);

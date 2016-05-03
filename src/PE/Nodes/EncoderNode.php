@@ -3,6 +3,9 @@
 namespace PE\Nodes;
 
 use PE\Enums\ActionVariable;
+use PE\Variables\Types\NodeAccessor;
+use PE\Variables\Types\ObjectSetter;
+use PE\Variables\Types\VariableType;
 use ReflectionClass;
 use PE\Exceptions\EncoderNodeException;
 
@@ -475,7 +478,7 @@ class EncoderNode {
 	 * @see EncoderNodeVariable::addNodeVariable()
 	 */
 	public function addVariable(EncoderNodeVariable $variable) {
-		return $this->variables->addNodeVariable($variable);
+		return $this->variables->addVariable($variable);
 	}
 
 	/**
@@ -489,62 +492,10 @@ class EncoderNode {
 	}
 
 	/**
-	 * @param string $id
-	 * @return null|EncoderNodeVariable
-	 *
-	 * @see EncoderNodeVariable::getVariableById()
+	 * @return EncoderNodeVariableCollection
 	 */
-	public function getVariableById($id) {
-		return $this->variables->getVariableById($id);
-	}
-
-	/**
-	 * @param string $type
-	 * @return EncoderNodeVariable[]
-	 *
-	 * @see EncoderNodeVariable::getVariablesSetterActionByType()
-	 */
-	public function getVariablesSetterActionByType($type) {
-		return $this->variables->getVariablesSetterActionByType($type);
-	}
-
-	/**
-	 * @param string $type
-	 * @return EncoderNodeVariable[]
-	 *
-	 * @see EncoderNodeVariable::getVariablesGetterActionByType()
-	 */
-	public function getVariablesGetterActionByType($type) {
-		return $this->variables->getVariablesGetterActionByType($type);
-	}
-
-	/**
-	 * @return EncoderNodeVariable[]
-	 *
-	 * @see EncoderNodeVariable::getAlwaysExecutedVariables()
-	 */
-	public function getAlwaysExecutedVariables() {
-		return $this->variables->getAlwaysExecutedVariables();
-	}
-
-	/**
-	 * @param bool $order
-	 * @return EncoderNodeVariable[]
-	 *
-	 * @see EncoderNodeVariable::getAlwaysExecutedVariables()
-	 */
-	public function getVariables($order = true) {
-		return $this->variables->getVariables($order);
-	}
-
-	/**
-	 * @param string $id
-	 * @return bool
-	 *
-	 * @see EncoderNodeVariable::variableExists()
-	 */
-	public function variableExists($id) {
-		return $this->variables->variableExists($id);
+	public function getVariableCollection() {
+		return $this->variables;
 	}
 
 	/**
@@ -555,36 +506,20 @@ class EncoderNode {
 	 * @see EncoderNodeVariable::variablesAreValidWithData()
 	 */
 	public function variablesAreValid($nodeDataArray, $throwErrorIfFails = false) {
-		return $this->variables->variablesAreValidWithData($nodeDataArray, $throwErrorIfFails);
+		return $this->variables->objectVariablesAreValidWithData($nodeDataArray, $throwErrorIfFails);
 	}
 
 	/**
-	 * @param string $name
-	 * @param mixed $value
-	 * @return mixed
-	 *
-	 * @see EncoderNodeVariable::processValue()
-	 */
-	public function processValue($name, $value) {
-		return $this->variables->processValue($name, $value);
-	}
-
-	/**
-	 * @param string $name Variable name you want to apply the parameters to
+	 * @param NodeAccessor $nodeAccessor NodeAccessor you want to apply to
 	 * @param array $parameters Array of all the information required for the several methods needing it
 	 * @return bool|mixed
 	 *
 	 * @see EncoderNodeVariable::applyToSetter()
 	 */
-	public function applyToVariable($name, $parameters) {
-		$variable = $this->getVariable($name);
-		if ($variable == null) {
-			return false;
-		}
-		$parameters[ActionVariable::SETTER_NODE] = $this;
-		return $variable->applyToSetter($parameters);
+	public function applyToNode(NodeAccessor $nodeAccessor, $parameters) {
+		$parameters[NodeAccessor::VARIABLE_NODE] = $this;
+		return $nodeAccessor->apply($parameters);
 	}
-
 
 
 

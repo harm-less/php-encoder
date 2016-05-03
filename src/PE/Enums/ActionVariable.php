@@ -2,18 +2,16 @@
 
 namespace PE\Enums;
 
-use PE\Nodes\EncoderNodeVariable;
-
 class ActionVariable {
 
-	const SETTER_NODE_DATA = EncoderNodeVariable::ACTION_VARIABLE_SETTER_NODE_DATA;
+	const SETTER_NODE_DATA = 'node_data';
 	const SETTER_NODE = 'encoder_node';
 	const SETTER_NAME = 'name';
 	const SETTER_VALUE = 'value';
 	const SETTER_OBJECT = 'object';
     const SETTER_PARENT = 'parent';
 
-	const GETTER_NODE_DATA = EncoderNodeVariable::ACTION_VARIABLE_GETTER_NODE_DATA;
+	const GETTER_NODE_DATA = 'node_data';
 	const GETTER_NAME = 'name';
 	const GETTER_VALUE = 'value';
     const GETTER_OBJECT = 'object';
