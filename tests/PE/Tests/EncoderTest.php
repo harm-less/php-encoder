@@ -248,11 +248,15 @@ class EncoderTest extends Samples {
 			)
 		));
 
-		print_r($decoded);
 		/** @var VariableTypes $obj */
 		$obj = $decoded['variable-type'];
-		$this->assertEquals('Hello world', $obj->getRequired());
-		$this->assertEquals('Hello other world', $obj->getOptional());
+		$this->assertEquals('Hello world | setter pre', $obj->getRequired());
+		$this->assertEquals('Hello other world | setter  pre | setter  post', $obj->getOptional());
+
+		$encoded = $this->encoder()->encode($obj);
+		$encodedProcessed = $encoded['processed'];
+		$this->assertEquals('Hello world | setter pre | getter post', $encodedProcessed['variable-type']['required']);
+		$this->assertEquals('Hello other world | setter  pre | setter  post | getter post', $encodedProcessed['variable-type']['optional']);
 	}
 
 	public function testDecodeWithSetAfterChildrenFalse() {

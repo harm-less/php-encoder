@@ -22,6 +22,9 @@ abstract class NodeAccessor extends VariableType {
 	const VARIABLE_VALUE = 'node_value';
 	const VARIABLE_OBJECT = 'node_object';
 	const VARIABLE_PARENT = 'node_parent';
+	const VARIABLE_OPTIONS = 'node_options';
+	const VARIABLE_NODE_ITERATION_INDEX = 'node_iteration_index';
+	const VARIABLE_CHILD_OBJECT_ITERATION_INDEX = 'node_child_object_iteration_index';
 
 	const ACCESSOR_SETTER = 'setter';
 	const ACCESSOR_GETTER = 'getter';
