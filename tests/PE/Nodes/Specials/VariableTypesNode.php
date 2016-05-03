@@ -47,22 +47,22 @@ class VariableTypesNode extends EncoderNode {
 	}
 
 	public function preNodeRequiredSetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, $parent) {
-		pr('pre required');
-		pr($nodeData);
+		print_r('pre required');
+		print_r($nodeData);
 		return $nodeData;
 	}
 	public function postNodeRequiredSetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, VariableTypes $variableTypes, $parent) {
-		pr('post required');
+		print_r('post required');
 		return $nodeData;
 	}
 
 	public function preNodeOptionalSetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, $parent) {
-		pr('pre optional');
-		pr($nodeData);
+		print_r('pre optional');
+		print_r($nodeData);
 		return $nodeData;
 	}
 	public function postNodeOptionsSetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, VariableTypes $variableTypes, $parent) {
-		pr('post optional');
+		print_r('post optional');
 		return $nodeData;
 	}
 }

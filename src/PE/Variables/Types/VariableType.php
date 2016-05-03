@@ -4,7 +4,7 @@
  */
 
 namespace PE\Variables\Types;
-use PE\Variables\Variable;
+use PE\Nodes\EncoderNodeVariable;
 
 /**
  * Class VariableType
@@ -17,7 +17,7 @@ abstract class VariableType {
 	private $alwaysExecute;
 
 	/**
-	 * @var Variable
+	 * @var EncoderNodeVariable
 	 */
 	private $variable;
 
@@ -32,7 +32,7 @@ abstract class VariableType {
 	/**
 	 * Sets the Variable the type is connected to
 	 *
-	 * @param Variable $variable
+	 * @param EncoderNodeVariable $variable
 	 */
 	public function setVariable($variable) {
 		$this->variable = $variable;
@@ -40,7 +40,7 @@ abstract class VariableType {
 	/**
 	 * Gets the Variable the type is connected to
 	 *
-	 * @return Variable
+	 * @return EncoderNodeVariable
 	 */
 	public function getVariable() {
 		return $this->variable;

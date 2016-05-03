@@ -11,6 +11,8 @@ use PE\Library\Inflector;
 use PE\Enums\ActionVariable;
 use PE\Exceptions\EncoderException;
 use PE\Options\EncoderOptions;
+use PE\Variables\Types\NodeAccessor;
+use PE\Variables\Types\ObjectAccessor;
 
 /**
  * Class Encoder
@@ -141,19 +143,20 @@ class Encoder implements IEncoder {
 			}
 
 			$preNodeStaticOptions = array(
-				ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
-				ActionVariable::SETTER_NODE => $type,
-				ActionVariable::SETTER_PARENT => $parentObject
+				NodeAccessor::VARIABLE_NODE => $type,
+				NodeAccessor::VARIABLE_PARENT => $parentObject
 			);
 			// call node methods. It can be useful when you want to change the outcome of the node data in the node
 			// that does not have a certain setter but is used in other ways
 			$nodeMethodVariables = $variableCollection->getPreNodeSetterVariables();
-			foreach ($nodeMethodVariables as $variableId => $nodeMethodVariable) {
-				$preNodeSetter = $nodeMethodVariable->getPreNodeSetter();
+			foreach ($nodeMethodVariables as $objectSetterVariable) {
+				$variableId = $objectSetterVariable->getId();
+				$preNodeSetter = $objectSetterVariable->getPreNodeSetter();
 				if (isset($nodeDataItem[$variableId]) || $preNodeSetter->alwaysExecute()) {
 					$setterOptions = array_merge($preNodeStaticOptions, array(
-						ActionVariable::SETTER_NAME => $variableId,
-						ActionVariable::SETTER_VALUE => $nodeDataItem[$variableId]
+						NodeAccessor::VARIABLE_NODE_DATA => $nodeDataItem,
+						NodeAccessor::VARIABLE_NAME => $variableId,
+						NodeAccessor::VARIABLE_VALUE => $nodeDataItem[$variableId]
 					));
 					if ($newNode = $preNodeSetter->apply($setterOptions)) {
 						$nodeDataItem = $newNode;
@@ -188,7 +191,8 @@ class Encoder implements IEncoder {
 						throw new EncoderException(sprintf('Variable "%s" for "%s" does not exist but is required to create an object for node "%s" (Node type: "%s") at index "%s"', $processedVariable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
 					}
 					$requiredValue = $nodeDataItem[$processedVariable];
-					$processedRequiredValue = $type->processValue($processedVariable, $requiredValue);
+					$objectSetter = $variableCollection->getVariableById($processedVariable)->getObjectSetter();
+					$processedRequiredValue = $objectSetter->processValue($requiredValue);
 					if ($processedRequiredValue === null) {
 						throw new EncoderException(sprintf('Variable "%s" for "%s" cannot process its value (%s). Presumably because the NodeType does not recognize the variable', $processedVariable, $nodeClassName, $requiredValue));
 					}
@@ -208,15 +212,43 @@ class Encoder implements IEncoder {
 					$parentNode->addChildrenToObject($nodeName, $parentObject, array($nodeInstance));
 				}
 
-				foreach ($nodeDataItem as $name => $value) {
-					$type->applyToVariable($name, array(
-						ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
-						ActionVariable::SETTER_OBJECT => $nodeInstance,
-						ActionVariable::SETTER_PARENT => $parentObject,
-						ActionVariable::SETTER_NAME => $name,
-						ActionVariable::SETTER_VALUE => $value
-					));
+				$objectStaticOptions = array_merge($preNodeStaticOptions, array(
+					ObjectAccessor::VARIABLE_NODE_DATA => $nodeDataItem,
+					ObjectAccessor::VARIABLE_OBJECT => $nodeInstance,
+				));
+
+				$objectSetterVariables = $variableCollection->getObjectSetterVariables();
+				foreach ($objectSetterVariables as $objectSetterVariable) {
+					$variableId = $objectSetterVariable->getId();
+					$variableIsset = isset($nodeDataItem[$variableId]);
+					$objectSetter = $objectSetterVariable->getObjectSetter();
+					if ($variableIsset || $objectSetter->alwaysExecute()) {
+						$objectSetter->apply($nodeInstance, $variableIsset ? $nodeDataItem[$variableId] : null);
+					}
 				}
+
+
+				/*$setterOptionsStatic = array(
+					ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
+					ActionVariable::SETTER_OBJECT => $nodeInstance,
+					ActionVariable::SETTER_PARENT => $parentObject
+				);
+
+				$nodeMethodVariables = $type->getVariables();
+				foreach ($nodeMethodVariables as $nodeMethodVariable) {
+					$variableId = $nodeMethodVariable->getId();
+					$variableIsset = isset($nodeDataItem[$variableId]);
+					if (($variableIsset || $nodeMethodVariable->alwaysExecute()) && $nodeMethodVariable->setterIsActive()) {
+						$setterOptions = array_merge($setterOptionsStatic, array(
+							ActionVariable::SETTER_NAME => $variableId,
+							ActionVariable::SETTER_VALUE => $variableIsset ? $nodeDataItem[$variableId] : null
+						));
+						$type->applyToVariable($variableId, $setterOptions);
+					}
+				}*/
+
+
+
 
 				if (!$addAfterDecode && $addAfterAttributes) {
 					$parentNode->addChildrenToObject($nodeName, $parentObject, array($nodeInstance));

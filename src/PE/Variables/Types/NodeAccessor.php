@@ -59,14 +59,14 @@ abstract class NodeAccessor extends VariableType {
 
 		if (!count($parameters)) {
 			// if there are no custom parameters at least send the value of the variable
-			$parameters = array(self::VARIABLE_VALUE);
+			$parameters = array(NodeAccessor::VARIABLE_VALUE);
 		}
 
 		// prepend the required node data as the first variable
-		array_unshift($parameters, self::VARIABLE_NODE_DATA);
+		array_unshift($parameters, NodeAccessor::VARIABLE_NODE_DATA);
 
 		// using those parameters, call the node action method
-		return $this->_callNodeAction($parameters[self::VARIABLE_NODE], $this->getMethod(), $this->_gatherAccessorParameters($options, $parameters));
+		return $this->_callNodeAction($options[NodeAccessor::VARIABLE_NODE], $this->getMethod(), $this->_gatherAccessorParameters($options, $parameters));
 	}
 
 	/**
@@ -81,7 +81,7 @@ abstract class NodeAccessor extends VariableType {
 	protected function _gatherAccessorParameters($options, $parameters) {
 		$actionVariables = array();
 		foreach ($parameters as $parameter) {
-			if (!isset($options[$parameter])) {
+			if (!array_key_exists($parameter, $options)) {
 				throw new VariableTypeException(sprintf('Action variable id "%s" is not known', $parameter));
 			}
 			array_push($actionVariables, $options[$parameter]);

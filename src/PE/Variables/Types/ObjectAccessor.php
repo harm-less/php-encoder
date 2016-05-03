@@ -16,6 +16,13 @@ abstract class ObjectAccessor extends VariableType {
 
 	private $mustBeUnique;
 
+	const VARIABLE_NODE_DATA = 'node_node_data';
+	const VARIABLE_NODE = 'node_encoder_node';
+	const VARIABLE_NAME = 'node_name';
+	const VARIABLE_VALUE = 'node_value';
+	const VARIABLE_OBJECT = 'node_object';
+	const VARIABLE_PARENT = 'node_parent';
+
 	const ACCESSOR_SETTER = 'setter';
 	const ACCESSOR_GETTER = 'getter';
 

@@ -12,6 +12,7 @@ use PE\Samples\Specials\OptionalVariables;
 use PE\Samples\Specials\RequiredConstructorVariables;
 use PE\Samples\Specials\AccessorMethodActionTypeNode;
 use PE\Samples\Specials\SingleChild;
+use PE\Samples\Specials\VariableTypes;
 
 class EncoderTest extends Samples {
 
@@ -241,15 +242,17 @@ class EncoderTest extends Samples {
 	public function testDecodeObjectAllVariableTypes() {
 		$this->addVariableTypesNode();
 		$decoded = $this->encoder()->decode(array(
-			'variable-types' => array(
+			'variable-type' => array(
 				'required' => 'Hello world',
 				'optional' => 'Hello other world'
 			)
 		));
-		/** @var OptionalVariables $obj */
-		$obj = $decoded['optional-variables'];
-		$this->assertEquals('Hello world', $obj->getName());
-		$this->assertEquals('other hello world', $obj->getOtherVariable());
+
+		print_r($decoded);
+		/** @var VariableTypes $obj */
+		$obj = $decoded['variable-type'];
+		$this->assertEquals('Hello world', $obj->getRequired());
+		$this->assertEquals('Hello other world', $obj->getOptional());
 	}
 
 	public function testDecodeWithSetAfterChildrenFalse() {

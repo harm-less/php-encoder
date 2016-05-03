@@ -6,6 +6,7 @@
 namespace PE\Variables\Types;
 
 use PE\Exceptions\VariableTypeException;
+use PE\Nodes\EncoderNodeVariable;
 use PE\Variables\Variable;
 
 /**
@@ -42,7 +43,7 @@ final class ObjectSetter extends ObjectAccessor {
 		$type = $this->getVariable()->getType();
 		if ($type !== null) {
 			switch ($type) {
-				case Variable::TYPE_BOOL :
+				case EncoderNodeVariable::TYPE_BOOL :
 					if (is_string($value)) {
 						return ($value === 'true' || $value === '1');
 					}
@@ -50,7 +51,7 @@ final class ObjectSetter extends ObjectAccessor {
 						return (bool) $value;
 					}
 					break;
-				case Variable::TYPE_ARRAY :
+				case EncoderNodeVariable::TYPE_ARRAY :
 					if (is_string($value)) {
 						return (array) json_decode($value);
 					}
@@ -58,7 +59,7 @@ final class ObjectSetter extends ObjectAccessor {
 						throw new VariableTypeException(sprintf('The set data type is array but the value cannot be processed'));
 					}
 					break;
-				case Variable::TYPE_STRING :
+				case EncoderNodeVariable::TYPE_STRING :
 					return (string) $value;
 					break;
 				default :
