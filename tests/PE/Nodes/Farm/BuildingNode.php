@@ -6,6 +6,8 @@ use PE\Enums\ActionVariable;
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeVariable;
 use PE\Samples\Farm\Building;
+use PE\Variables\Types\NodeAccessor;
+use PE\Variables\Types\PostNodeGetter;
 
 class BuildingNode extends EncoderNode {
 
@@ -13,14 +15,12 @@ class BuildingNode extends EncoderNode {
 
 		parent::__construct('buildings', 'building', $classPrepend !== null ? $classPrepend : '\\PE\\Samples\\Farm', $nodeTypeName);
 
-		$this->addVariable(new EncoderNodeVariable('type', array(
-			'getterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'getBuildingType',
-				'variables' => array(ActionVariable::GETTER_OBJECT)
-			),
-			'alwaysExecute' => true
+		$type = $this->addVariable(new EncoderNodeVariable('type'));
+
+		$typePostNodeGetter = $type->postNodeGetter(new PostNodeGetter('getBuildingType', array(
+			NodeAccessor::VARIABLE_OBJECT
 		)));
+		$typePostNodeGetter->alwaysExecute(true);
 	}
 
 	public function getBuildingType($nodeData, Building $building) {

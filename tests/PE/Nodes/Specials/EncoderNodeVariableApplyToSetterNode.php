@@ -7,73 +7,45 @@ use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeVariable;
 use PE\Samples\General\Thing;
 use PE\Samples\Specials\EncoderNodeVariableApplyToSetter;
+use PE\Variables\Types\NodeAccessor;
+use PE\Variables\Types\ObjectSetter;
+use PE\Variables\Types\PostNodeSetter;
 
 class EncoderNodeVariableApplyToSetterNode extends EncoderNode {
 
 	function __construct() {
 		parent::__construct('encoder-node-variable-apply-to-setters-node', 'encoder-node-variable-apply-to-setters-node', '\\PE\\Samples\\Specials');
 
-		$this->addVariable(new EncoderNodeVariable('node-simple', array(
-			'setterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'nodeSimple',
-				'variables' => array(ActionVariable::SETTER_NAME)
-			)
+		$nodeSimple = $this->addVariable(new EncoderNodeVariable('node-simple'));
+		$nodeSimple->postNodeSetter(new PostNodeSetter('nodeSimple', NodeAccessor::VARIABLE_NAME));
+
+		$nodeFull = $this->addVariable(new EncoderNodeVariable('node-full'));
+		$nodeFull->postNodeSetter(new PostNodeSetter('nodeFull', array(
+			NodeAccessor::VARIABLE_NAME,
+			NodeAccessor::VARIABLE_VALUE,
+			NodeAccessor::VARIABLE_OBJECT,
+			NodeAccessor::VARIABLE_PARENT
 		)));
 
-		$this->addVariable(new EncoderNodeVariable('node-full', array(
-			'setterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'nodeFull',
-				'variables' => array(ActionVariable::SETTER_NAME, ActionVariable::SETTER_VALUE, ActionVariable::SETTER_OBJECT, ActionVariable::SETTER_PARENT)
-			)
-		)));
+		$nodeWithoutVariables = $this->addVariable(new EncoderNodeVariable('node-without-variables'));
+		$nodeWithoutVariables->postNodeSetter(new PostNodeSetter('nodeWithoutVariables'));
 
-		$this->addVariable(new EncoderNodeVariable('node-without-variables', array(
-			'setterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'nodeWithoutVariables'
-			)
-		)));
-		$this->addVariable(new EncoderNodeVariable('node-without-variables-empty', array(
-			'setterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'nodeWithoutVariables',
-				'variables' => array()
-			)
-		)));
-		$this->addVariable(new EncoderNodeVariable('node-without-variables-null', array(
-			'setterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'nodeWithoutVariables',
-				'variables' => array()
-			)
-		)));
+		$nodeWithoutVariablesEmpty = $this->addVariable(new EncoderNodeVariable('node-without-variables-empty'));
+		$nodeWithoutVariablesEmpty->postNodeSetter(new PostNodeSetter('nodeWithoutVariables', array()));
 
-		$this->addVariable(new EncoderNodeVariable('node-unknown-variable', array(
-			'setterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'nodeSimple',
-				'variables' => array('unknown_variable')
-			)
-		)));
+		$nodeWithoutVariablesNull = $this->addVariable(new EncoderNodeVariable('node-without-variables-null'));
+		$nodeWithoutVariablesNull->postNodeSetter(new PostNodeSetter('nodeWithoutVariables', array()));
 
+		$nodeUnknownVariable = $this->addVariable(new EncoderNodeVariable('node-unknown-variable'));
+		$nodeUnknownVariable->postNodeSetter(new PostNodeSetter('nodeSimple', array('unknown_variable')));
 
 		$this->addVariable(new EncoderNodeVariable('var'));
 
-		$this->addVariable(new EncoderNodeVariable('object-using-setter-action', array(
-			'setterAction' => array(
-				'method' => 'setVar'
-			)
-		)));
+		$objectUsingSetterMethod = $this->addVariable(new EncoderNodeVariable('object-using-setter-method'));
+		$objectUsingSetterMethod->objectSetter(new ObjectSetter('setVar'));
 
-		$this->addVariable(new EncoderNodeVariable('object-using-setter-method', array(
-			'setter' => 'setVar'
-		)));
-
-		$this->addVariable(new EncoderNodeVariable('object-using-unknown-setter-method', array(
-			'setterMethod' => 'unknownMethod'
-		)));
+		$objectUsingUnknownSetterMethod = $this->addVariable(new EncoderNodeVariable('object-using-unknown-setter-method'));
+		$objectUsingUnknownSetterMethod->objectSetter(new ObjectSetter('unknownMethod'));
 	}
 
 	public function nodeSimple($nodeData, $setterName) {
