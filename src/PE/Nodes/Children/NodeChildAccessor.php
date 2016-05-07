@@ -10,6 +10,10 @@ class NodeChildAccessor {
 		$this->method = $method;
 	}
 
+	public function getMethod() {
+		return $this->method;
+	}
+
 }
 
 ?>

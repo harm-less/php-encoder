@@ -412,7 +412,7 @@ class Encoder implements IEncoder {
 				$isIterated = $optionChildIteration !== null;
 				$childIteration = $optionChildIteration === null ? 1 : $optionChildIteration;
 
-				$getChildObjectsMethod = $child->getGetterMethod();
+				$getChildObjectsMethod = $child->getGetter()->getMethod();
 				if (!method_exists($object, $getChildObjectsMethod)) {
 					throw new EncoderException(sprintf('Getter method "%s" for node "%s" does not exist in class "%s"', $getChildObjectsMethod, $childNodeName, get_class($object)));
 				}

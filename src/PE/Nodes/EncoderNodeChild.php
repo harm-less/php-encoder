@@ -3,10 +3,26 @@
 namespace PE\Nodes;
 
 use PE\Exceptions\EncoderNodeChildException;
+use PE\Nodes\Children\NodeChildGetter;
+use PE\Nodes\Children\NodeChildSetter;
 
 class EncoderNodeChild extends EncoderNodeVariable {
 
+	/**
+	 * @var string
+	 */
 	private $childNodeName;
+
+	/**
+	 * @var NodeChildSetter Setter of the child objects
+	 */
+	private $setter;
+
+	/**
+	 * @var NodeChildGetter Setter of the child objects
+	 */
+	private $getter;
+
 	private $isArray = true;
 	private $setAfterChildren = true;
 	private $setAfterAttributes = true;
@@ -24,6 +40,32 @@ class EncoderNodeChild extends EncoderNodeVariable {
 	}
 	public function getChildNodeName() {
 		return $this->childNodeName;
+	}
+
+	/**
+	 * @param NodeChildSetter $setter
+	 */
+	public function setter(NodeChildSetter $setter) {
+		$this->setter = $setter;
+	}
+	/**
+	 * @return NodeChildSetter
+	 */
+	public function getSetter() {
+		return $this->setter;
+	}
+
+	/**
+	 * @param NodeChildGetter $getter
+	 */
+	public function getter(NodeChildGetter $getter) {
+		$this->getter = $getter;
+	}
+	/**
+	 * @return NodeChildGetter
+	 */
+	public function getGetter() {
+		return $this->getter;
 	}
 
 	// @todo Figure out if this feature is still necessary. Because if you use a single node, can't we simply assume it isn't an array?
@@ -56,13 +98,13 @@ class EncoderNodeChild extends EncoderNodeVariable {
 	 * @return bool Returns true if the action succeeded and false when it couldn't find the child
 	 */
 	public function addChildrenToObject($target, $values) {
-		$methodName = $this->getSetterMethod();
+		$methodName = $this->getSetter()->getMethod();
 		if ($methodName === null) {
 			throw new EncoderNodeChildException(sprintf('Setter method (%s) for class "%s" does not exist', $this->getChildNodeName(), get_class($target)));
 		}
 		else if (method_exists($target, $methodName)) {
 			foreach ($values as $value) {
-				$target->$methodName($this->processValue($value));
+				$target->$methodName($value);
 			}
 		}
 		else {
