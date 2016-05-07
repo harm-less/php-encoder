@@ -85,7 +85,7 @@ abstract class NodeAccessor extends VariableType {
 		$actionVariables = array();
 		foreach ($parameters as $parameter) {
 			if (!array_key_exists($parameter, $options)) {
-				throw new VariableTypeException(sprintf('Action variable id "%s" is not known', $parameter));
+				throw new VariableTypeException(sprintf('Parameter with id "%s" is not known', $parameter));
 			}
 			array_push($actionVariables, $options[$parameter]);
 		}

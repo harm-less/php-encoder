@@ -2,10 +2,12 @@
 
 namespace PE\Tests\Variables\Types;
 
-use PE\Tests\AbstractPETest;
+use PE\Nodes\EncoderNodeVariable;
+use PE\Tests\Samples;
+use PE\Variables\Types\NodeAccessor;
 use PE\Variables\Types\ObjectSetter;
 
-class ObjectSetterTest extends AbstractPETest
+class ObjectSetterTest extends Samples
 {
 
 	protected function setUp()
@@ -53,13 +55,23 @@ class ObjectSetterTest extends AbstractPETest
 
 	public function testEncodeWithoutVariableGetterMethod()
 	{
-		$this->markTestIncomplete(
-			'This test has not been implemented yet.'
-		);
+		$this->setExpectedException('\\PE\\Exceptions\\VariableTypeException', 'Method "setNonExistent" does not exist for class "PE\Tests\Variables\Types\ObjectSetterTestObject');
 
-		$this->setExpectedException('\\PE\\Exceptions\\VariableTypeException', 'Method "getNonExistent" does not exist for class "PE\Samples\Erroneous\NoVariableGetterMethod" does not exist');
+		$objectSetter = $this->objectSetter();
+		$objectSetter->setVariable(new EncoderNodeVariable('non-existent'));
 
 		$this->objectSetter()->apply(new ObjectSetterTestObject(), 'value');
+	}
+
+	public function testApplyToSetterObjectWithSetterMethod() {
+		$node = $this->getEncoderNodeVariableApplyToSetterNode();
+
+		$object = $this->getEncoderNodeVariableApplyToSetter();
+		$collection = $node->getVariableCollection();
+		$var = $collection->getVariableById('var');
+
+		$this->assertTrue($var->getObjectSetter()->apply($object, 'test'));
+		$this->assertEquals('test', $object->getVar());
 	}
 }
 
