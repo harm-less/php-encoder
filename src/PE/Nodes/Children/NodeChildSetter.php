@@ -2,7 +2,7 @@
 
 namespace PE\Nodes\Children;
 
-class NodeChildSetter extends NodeChildAccessor {
+final class NodeChildSetter extends NodeChildAccessor {
 
 	private $setAfterChildren = true;
 	private $setAfterAttributes = true;

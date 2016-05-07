@@ -7,7 +7,6 @@ namespace PE\Variables\Types;
 
 use PE\Exceptions\VariableTypeException;
 use PE\Nodes\EncoderNodeVariable;
-use PE\Variables\Variable;
 
 /**
  * Class ObjectSetter

@@ -6,7 +6,7 @@ use PE\Exceptions\EncoderNodeChildException;
 use PE\Nodes\Children\NodeChildGetter;
 use PE\Nodes\Children\NodeChildSetter;
 
-class EncoderNodeChild extends EncoderNodeVariable {
+class EncoderNodeChild {
 
 	/**
 	 * @var string
@@ -25,12 +25,11 @@ class EncoderNodeChild extends EncoderNodeVariable {
 
 	private $isArray = true;
 
-	function __construct($nodeName, NodeChildSetter $setter, NodeChildGetter $getter, $options = null) {
-		parent::__construct('', $options);
+	function __construct($nodeName, NodeChildSetter $setter = null, NodeChildGetter $getter = null) {
 		$this->setChildNodeName($nodeName);
 
-		$this->setter($setter);
-		$this->getter($getter);
+		if ($setter) $this->setter($setter);
+		if ($getter) $this->getter($getter);
 	}
 
 	public function setChildNodeName($childNodeName) {

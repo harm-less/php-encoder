@@ -2,7 +2,7 @@
 
 namespace PE\Nodes\Children;
 
-class NodeChildAccessor {
+abstract class NodeChildAccessor {
 
 	private $method;
 

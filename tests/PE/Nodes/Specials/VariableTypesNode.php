@@ -70,7 +70,6 @@ class VariableTypesNode extends EncoderNode {
 		return $nodeData;
 	}
 	public function postNodeRequiredGetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, VariableTypes $variableTypes, $parent) {
-		print_r('post getter required');
 		$nodeData['required'] = $nodeData['required'] . ' | getter post';
 		return $nodeData;
 	}
@@ -85,7 +84,6 @@ class VariableTypesNode extends EncoderNode {
 		return $nodeData;
 	}
 	public function postNodeOptionalGetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, VariableTypes $variableTypes, $parent) {
-		print_r('post getter optional');
 		$nodeData['optional'] = $nodeData['optional'] . ' | getter post';
 		return $nodeData;
 	}
