@@ -61,7 +61,7 @@ abstract class ObjectAccessor extends VariableType {
 	protected function _apply($object, $parameters) {
 		$methodName = $this->getMethod();
 		if (!method_exists($object, $methodName)) {
-			throw new VariableTypeException(sprintf('Method "%s" does not exist for class %s does not exist', $methodName, get_class($object)));
+			throw new VariableTypeException(sprintf('Method "%s" does not exist for class "%s" does not exist', $methodName, get_class($object)));
 		}
 		else {
 			return call_user_func_array(array($object, $methodName), $parameters);

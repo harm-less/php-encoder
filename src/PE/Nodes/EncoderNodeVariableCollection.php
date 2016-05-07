@@ -17,6 +17,7 @@ class EncoderNodeVariableCollection {
 	private $variables;
 
 	function __construct() {
+		$this->_cache = array();
 		$this->variables = array();
 	}
 
@@ -48,6 +49,13 @@ class EncoderNodeVariableCollection {
 			return $variable;
 		}
 		return null;
+	}
+
+	/**
+	 * @return EncoderNodeVariable[]
+	 */
+	public function getVariables() {
+		return $this->variables;
 	}
 
 	/**
@@ -172,6 +180,9 @@ class EncoderNodeVariableCollection {
 				array_push($unorderedVariables, $variable);
 			}
 		}
+		// sort the ordered variables array
+		ksort($orderedVariables);
+		// merge all arrays and return the merged variables
 		return $ordered ? array_merge($orderedVariables, $unorderedVariables) : $unorderedVariables;
 	}
 
@@ -191,7 +202,7 @@ class EncoderNodeVariableCollection {
 			$this->_cache[$method][$parameters] = $value;
 			return $value;
 		}
-		if (!array_key_exists($method, $this->_cache) || !array_key_exists($parameters, $this->_cache[$method])) {
+		if (!(array_key_exists($method, $this->_cache) && array_key_exists($parameters, $this->_cache[$method]))) {
 			return false;
 		}
 		return $this->_cache[$method][$parameters];

@@ -11,9 +11,7 @@ class AnimalsBuildingNode extends CustomBuilding {
 	function __construct($nodeTypeName) {
 		parent::__construct($nodeTypeName);
 
-		$animals = $this->addChildNode(new EncoderNodeChild('animals'));
-		$animals->setter(new NodeChildSetter('addAnimal'));
-		$animals->getter(new NodeChildGetter('getAnimals'));
+		$this->addChildNode(new EncoderNodeChild('animals', new NodeChildSetter('addAnimal'), new NodeChildGetter('getAnimals')));
 	}
 
 }

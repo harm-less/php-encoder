@@ -16,7 +16,7 @@ class AddAfterDecodeChildRequiresNode extends EncoderNode {
 		parent::__construct('add-after-decode-children-require', 'add-after-decode-child-require', '\\PE\\Samples\\Specials');
 
 		$name = $this->addVariable(new EncoderNodeVariable('name'));
-		$name->postNodeSetter(new PostNodeSetter('setNodeName', array(NodeAccessor::VARIABLE_VALUE, NodeAccessor::VARIABLE_PARENT)));
+		$name->postNodeSetter(new PostNodeSetter('nodeSetName', array(NodeAccessor::VARIABLE_VALUE, NodeAccessor::VARIABLE_PARENT)));
 	}
 
 	public function nodeSetName($nodeData, $value, AddAfterDecodeParent $parent) {

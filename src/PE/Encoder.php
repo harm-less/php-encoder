@@ -61,10 +61,11 @@ class Encoder implements IEncoder {
 			foreach ($decodedData as $decodedName => $data) {
 				// if data belongs to a child
 				if ($nodeType->childNodeExists($decodedName)) {
+					$childNodeSetter = $nodeType->getChild($decodedName)->getSetter();
 					// decode it, unset it and add it back into the array at the correct place
 					$childArrDecoded = $this->decodeRawToArray($decodedName, $nodeChildData, $array);
 					unset($decodedData[$decodedName]);
-					$decodedData = $nodeType->getChild($decodedName)->setAfterChildren() === false ? array($decodedName => $childArrDecoded) + $decodedData : array_merge($decodedData, array($decodedName => $childArrDecoded));
+					$decodedData = $childNodeSetter->setAfterChildren() === false ? array($decodedName => $childArrDecoded) + $decodedData : array_merge($decodedData, array($decodedName => $childArrDecoded));
 				}
 				// if data belongs to an attribute simply
 				else if (is_array($data)) {
@@ -118,8 +119,10 @@ class Encoder implements IEncoder {
 		$addAfterAttributes = true;
 		if ($parentNode) {
 			$childNode = $parentNode->getChild($nodeName);
-			$addAfterDecode = $childNode->setAfterChildren();
-			$addAfterAttributes = $childNode->setAfterAttributes();
+
+			$childNodeSetter = $childNode->getSetter();
+			$addAfterDecode = $childNodeSetter->setAfterChildren();
+			$addAfterAttributes = $childNodeSetter->setAfterAttributes();
 		}
 
 		$objects = array();
@@ -192,7 +195,12 @@ class Encoder implements IEncoder {
 						throw new EncoderException(sprintf('Variable "%s" for "%s" does not exist but is required to create an object for node "%s" (Node type: "%s") at index "%s"', $processedVariable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
 					}
 					$requiredValue = $nodeDataItem[$processedVariable];
-					$objectSetter = $variableCollection->getVariableById($processedVariable)->getObjectSetter();
+					$objectSetterVariable = $variableCollection->getVariableById($processedVariable);
+					if (!$objectSetterVariable) {
+						throw new EncoderException(sprintf('Variable "%s" for "%s" is required but there is no EncoderNodeVariable available to retrieve the value for node "%s" (Node type: "%s") at index "%s".', $processedVariable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
+					}
+
+					$objectSetter = $objectSetterVariable->getObjectSetter();
 					$processedRequiredValue = $objectSetter->processValue($requiredValue);
 					if ($processedRequiredValue === null) {
 						throw new EncoderException(sprintf('Variable "%s" for "%s" cannot process its value (%s). Presumably because the NodeType does not recognize the variable', $processedVariable, $nodeClassName, $requiredValue));
@@ -258,7 +266,7 @@ class Encoder implements IEncoder {
 					if ($type->childNodeExists($childName)) {
 						$children = $this->_decodeNode($childName, $nodeDataItem, $options, $type, $nodeInstance, $nodeDataItem);
 
-						if ($type->getChild($childName)->setAfterChildren()) {
+						if ($type->getChild($childName)->getSetter()->setAfterChildren()) {
 							$isSingleChildNode = $type->isSingleNode($childName);
 							$type->addChildrenToObject($childName, $nodeInstance, $isSingleChildNode ? array($children) : $children);
 						}

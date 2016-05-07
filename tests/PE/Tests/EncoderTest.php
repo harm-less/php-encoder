@@ -198,7 +198,7 @@ class EncoderTest extends Samples {
 		));
 	}
 	public function testDecodeObjectWithRequiredConstructorVariablesButOneRequiredVariableIsNotProperlySetup() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" cannot process its value (awesomeType). Presumably because the NodeType does not recognize the variable');
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" is required but there is no EncoderNodeVariable available to retrieve the value for node "required-constructor-variables" (Node type: "required-constructors-variables") at index "0"');
 		$encoder = $this->encoder();
 		$this->addRequiredConstructorVariablesNode(false);
 
@@ -420,7 +420,7 @@ class EncoderTest extends Samples {
 		$this->encoder()->encode($this->getNoGetterMethod());
 	}
 	public function testEncodeWithoutVariableGetterMethod() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Getter method "getNonExistent" does not exist in object "PE\Samples\Erroneous\NoVariableGetterMethod" for node type "default" (PE\Nodes\Erroneous\NoVariableGetterMethodNode) and variable with id "nonExistent".');
+		$this->setExpectedException('\\PE\\Exceptions\\VariableTypeException', 'Method "getNonExistent" does not exist for class "PE\Samples\Erroneous\NoVariableGetterMethod" does not exist');
 
 		$this->addVariableNoGetterMethodNode();
 

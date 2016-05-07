@@ -16,7 +16,7 @@ class AccessorMethodActionTypeNodeNode extends EncoderNode {
 
 		$this->addVariable(new EncoderNodeVariable('special'));
 
-		$special = $this->addVariable(new EncoderNodeVariable('node'));
+		$special = $this->addVariable(new EncoderNodeVariable('node', false));
 		$special->postNodeSetter(new PostNodeSetter('addNodeToSpecial', array(NodeAccessor::VARIABLE_NAME)));
 		$special->postNodeGetter(new PostNodeGetter('getNodeFromSpecial', array(NodeAccessor::VARIABLE_NAME)));
 	}

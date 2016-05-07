@@ -82,7 +82,7 @@ class EncoderNodeVariable {
 	 * @param string $id
 	 * @return null|string
 	 */
-	public function setId($id) {
+	protected function setId($id) {
 		$this->id = $id;
 		return $id;
 	}
@@ -112,6 +112,8 @@ class EncoderNodeVariable {
 
 	/**
 	 * Set the order the variable (when it is a collection)
+	 *
+	 * A lower number means it will end up near the beginning of the array
 	 * @param int $index
 	 */
 	public function setOrder($index) {

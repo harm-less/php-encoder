@@ -24,12 +24,13 @@ class EncoderNodeChild extends EncoderNodeVariable {
 	private $getter;
 
 	private $isArray = true;
-	private $setAfterChildren = true;
-	private $setAfterAttributes = true;
 
-	function __construct($nodeName, $options = null) {
+	function __construct($nodeName, NodeChildSetter $setter, NodeChildGetter $getter, $options = null) {
 		parent::__construct('', $options);
 		$this->setChildNodeName($nodeName);
+
+		$this->setter($setter);
+		$this->getter($getter);
 	}
 
 	public function setChildNodeName($childNodeName) {
@@ -45,7 +46,7 @@ class EncoderNodeChild extends EncoderNodeVariable {
 	/**
 	 * @param NodeChildSetter $setter
 	 */
-	public function setter(NodeChildSetter $setter) {
+	protected function setter(NodeChildSetter $setter) {
 		$this->setter = $setter;
 	}
 	/**
@@ -58,7 +59,7 @@ class EncoderNodeChild extends EncoderNodeVariable {
 	/**
 	 * @param NodeChildGetter $getter
 	 */
-	public function getter(NodeChildGetter $getter) {
+	protected function getter(NodeChildGetter $getter) {
 		$this->getter = $getter;
 	}
 	/**
@@ -74,20 +75,6 @@ class EncoderNodeChild extends EncoderNodeVariable {
 			$this->isArray = $bool;
 		}
 		return $this->isArray;
-	}
-
-	public function setAfterChildren($bool = null) {
-		if ($bool !== null) {
-			$this->setAfterChildren = $bool;
-		}
-		return $this->setAfterChildren;
-	}
-
-	public function setAfterAttributes($bool = null) {
-		if ($bool !== null) {
-			$this->setAfterAttributes = $bool;
-		}
-		return $this->setAfterAttributes;
 	}
 
 	/**

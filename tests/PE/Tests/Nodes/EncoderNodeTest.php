@@ -3,6 +3,8 @@
 namespace PE\Tests\Nodes;
 
 use PE\Enums\ActionVariable;
+use PE\Nodes\Children\NodeChildGetter;
+use PE\Nodes\Children\NodeChildSetter;
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeChild;
 use PE\Nodes\EncoderNodeVariable;
@@ -278,7 +280,7 @@ class EncoderNodeTest extends Samples
 
 	public function testChildNodeMethods() {
 		$node = EncoderNode::addNode($this->node());
-		$nodeChild = new EncoderNodeChild('node-child');
+		$nodeChild = new EncoderNodeChild('node-child', new NodeChildSetter('setterMethod'), new NodeChildGetter('getterMethod'));
 		$node->addChildNode($nodeChild);
 
 		$this->assertTrue($node->childNodeExists('node-child'));
@@ -322,38 +324,30 @@ class EncoderNodeTest extends Samples
 
 
 	public function testVariableMethods() {
-		$node = EncoderNode::addNode($this->node());;
+		$node = EncoderNode::addNode($this->node());
 		$nodeVariable = new EncoderNodeVariable('node-variable');
 		$node->addVariable($nodeVariable);
 
-		$this->assertTrue($node->variableExists('node-variable'));
-		$this->assertFalse($node->variableExists('unknown'));
+		$collection = $node->getVariableCollection();
+
+		$this->assertTrue($collection->variableExists('node-variable'));
+		$this->assertFalse($collection->variableExists('unknown'));
 
 		$this->assertEquals($nodeVariable, $node->getVariable('node-variable'));
 		$this->assertNull($node->getVariable('unknown'));
 
-		$this->assertEquals($nodeVariable, $node->getVariableById('node-variable'));
-		$this->assertNull($node->getVariableById('unknown'));
-
-		$this->assertEquals(array(), $node->getVariablesSetterActionByType('type'));
-		$this->assertEquals(array(), $node->getVariablesGetterActionByType('type'));
-		$this->assertEquals(array(), $node->getAlwaysExecutedVariables());
-
-		$this->assertEquals(array(
-			$nodeVariable
-		), $node->getVariables());
+		$this->assertEquals($nodeVariable, $collection->getVariableById('node-variable'));
+		$this->assertNull($collection->getVariableById('unknown'));
 	}
 
 	public function testApplyToVariable() {
 		$node = $this->addThingNode();
 		$object = $this->getThing();
 
-		$this->assertFalse($node->applyToVariable('unknown', array()));
+		$collection = $node->getVariableCollection();
+		$objectSetter = $collection->getVariableById('thingVar')->getObjectSetter();
 
-		$node->applyToVariable('thingVar', array(
-			ActionVariable::SETTER_OBJECT => $object,
-			ActionVariable::SETTER_VALUE => 'test'
-		));
+		$objectSetter->apply($object, 'test');
 
 		$this->assertEquals('test', $object->getThingVar());
 	}

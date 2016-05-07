@@ -5,6 +5,8 @@ namespace PE\Tests\Nodes;
 use PE\Enums\ActionVariable;
 use PE\Nodes\EncoderNodeVariable;
 use PE\Tests\Samples;
+use PE\Variables\Types\ObjectGetter;
+use PE\Variables\Types\ObjectSetter;
 
 class EncoderNodeVariableTest extends Samples {
 
@@ -20,6 +22,14 @@ class EncoderNodeVariableTest extends Samples {
 	protected function variable() {
 		return $this->_peApp;
 	}
+	/**
+	 * @param $id
+	 * @param bool $enableObjectAccessors
+	 * @return EncoderNodeVariable
+	 */
+	protected function newVariable($id, $enableObjectAccessors = true) {
+		return new EncoderNodeVariable($id, $enableObjectAccessors);
+	}
 
 	public function testConstructor()
 	{
@@ -28,126 +38,80 @@ class EncoderNodeVariableTest extends Samples {
 		$this->assertTrue($variable instanceof EncoderNodeVariable);
 	}
 
-	public function testParseOptions() {
+	public function testObjectSetter() {
+		$variable = $this->newVariable('var', false);
+		$this->assertNull($variable->getObjectSetter());
+		$objectSetter = new ObjectSetter('setterMethod');
+		$variable->objectSetter($objectSetter);
+		$this->assertEquals($objectSetter, $variable->getObjectSetter());
+	}
+
+	public function testObjectGetter() {
+		$variable = $this->newVariable('var', false);
+		$this->assertNull($variable->getObjectGetter());
+		$objectGetter = new ObjectGetter('setterMethod');
+		$variable->objectGetter($objectGetter);
+		$this->assertEquals($objectGetter, $variable->getObjectGetter());
+	}
+
+	public function testSetType() {
 		$variable = $this->variable();
-		$variable->parseOptions(array(
-			'setterAction' => 'setterMethodName',
-			'getterAction' => 'getterMethodName',
-			'unique' => true,
-			'alwaysExecute' => true
-		));
-
-		// setter
-		$this->assertEquals('setVar', $variable->getSetterMethod());
-		$this->assertEquals('setterMethodName', $variable->getSetterAction());
-		$this->assertEquals(EncoderNodeVariable::ACTION_TYPE_OBJECT, $variable->getSetterActionType());
-		$this->assertEquals('setterMethodName', $variable->getSetterActionMethod());
-
-		// getter
-		$this->assertEquals('getVar', $variable->getGetterMethod());
-		$this->assertEquals('getterMethodName', $variable->getGetterAction());
-		$this->assertEquals(EncoderNodeVariable::ACTION_TYPE_OBJECT, $variable->getGetterActionType());
-		$this->assertEquals('getterMethodName', $variable->getGetterActionMethod());
-
-		// unique
-		$this->assertTrue($variable->mustBeUnique());
-
-		// always execute
-		$this->assertTrue($variable->alwaysExecute());
+		$variable->setType(EncoderNodeVariable::TYPE_ARRAY);
+		$this->assertEquals(EncoderNodeVariable::TYPE_ARRAY, $variable->getType());
+		$variable->setType(EncoderNodeVariable::TYPE_STRING);
+		$this->assertEquals(EncoderNodeVariable::TYPE_STRING, $variable->getType());
+		$variable->setType(EncoderNodeVariable::TYPE_BOOL);
+		$this->assertEquals(EncoderNodeVariable::TYPE_BOOL, $variable->getType());
+		$variable->setType(null);
+		$this->assertNull($variable->getType());
 	}
 
-	public function testMustBeUnique() {
+	public function testGetType() {
 		$variable = $this->variable();
-
-		$this->assertFalse($variable->mustBeUnique());
-
-		$this->assertFalse($variable->mustBeUnique(false));
-		$this->assertFalse($variable->mustBeUnique());
-		$this->assertTrue($variable->mustBeUnique(true));
-		$this->assertTrue($variable->mustBeUnique());
+		$this->assertNull($variable->getType());
 	}
 
-	public function testAlwaysExecute() {
+	public function testOrder() {
 		$variable = $this->variable();
-
-		$this->assertFalse($variable->alwaysExecute());
-
-		$this->assertFalse($variable->alwaysExecute(false));
-		$this->assertFalse($variable->alwaysExecute());
-		$this->assertTrue($variable->alwaysExecute(true));
-		$this->assertTrue($variable->alwaysExecute());
+		$this->assertNull($variable->getOrder());
+		$variable->setOrder(10);
+		$this->assertEquals(10, $variable->getOrder());
 	}
 
-	public function testSetterAction() {
+	public function testProcessValue() {
 		$variable = $this->variable();
+		$objectSetter = $variable->getObjectSetter();
+		$this->assertEquals('test', $objectSetter->processValue('test'));
 
-		$this->assertFalse($variable->hasSetterAction());
+		$variable->setType(EncoderNodeVariable::TYPE_BOOL);
+		$this->assertEquals(true, $objectSetter->processValue(1));
+		$this->assertEquals(true, $objectSetter->processValue('1'));
+		$this->assertEquals(true, $objectSetter->processValue('true'));
+		$this->assertEquals(false, $objectSetter->processValue(0));
+		$this->assertEquals(false, $objectSetter->processValue('0'));
+		$this->assertEquals(false, $objectSetter->processValue('false'));
+		$this->assertEquals(false, $objectSetter->processValue('abc'));
 
-		$variable->setSetterAction('methodName');
-		$this->assertEquals('methodName', $variable->getSetterAction());
+		$variable->setType(EncoderNodeVariable::TYPE_STRING);
+		$this->assertEquals('1', $objectSetter->processValue(1));
+		$this->assertEquals('string', $objectSetter->processValue('string'));
 
-		$this->assertTrue($variable->hasSetterAction());
+		$variable->setType(EncoderNodeVariable::TYPE_ARRAY);
+		$this->assertEquals(array(), $objectSetter->processValue(json_encode(array())));
+		$this->assertEquals(array('hello' => 'world'), $objectSetter->processValue(json_encode(array('hello' => 'world'))));
 	}
-	public function testSetterActionMethod() {
+
+	public function testProcessValueArrayException() {
+		$this->setExpectedException('PE\\Exceptions\\VariableTypeException', 'The set data type is array but the value cannot be processed');
 		$variable = $this->variable();
-
-		$this->assertNull($variable->getSetterActionMethod());
-
-		$variable->setSetterAction('methodName');
-		$this->assertEquals('methodName', $variable->getSetterActionMethod());
-
-		$variable->setSetterAction(array(
-			'method' => 'methodNameArray'
-		));
-		$this->assertEquals('methodNameArray', $variable->getSetterActionMethod());
-		$this->assertEquals(EncoderNodeVariable::ACTION_TYPE_OBJECT, $variable->getSetterActionType());
-
-		$variable->setSetterAction(array(
-			'method' => 'methodNameArray',
-			'type' => EncoderNodeVariable::ACTION_TYPE_NODE
-		));
-		$this->assertEquals('methodNameArray', $variable->getSetterActionMethod());
-		$this->assertEquals(EncoderNodeVariable::ACTION_TYPE_NODE, $variable->getSetterActionType());
+		$variable->setType(EncoderNodeVariable::TYPE_ARRAY);
+		$variable->getObjectSetter()->processValue(array());
 	}
-
-	public function testGetterAction() {
+	public function testProcessValueUnknownTypeException() {
+		$this->setExpectedException('PE\\Exceptions\\VariableTypeException', 'Can\'t process value "string" because the data type "unknown" isn\'t recognized.');
 		$variable = $this->variable();
-
-		$this->assertFalse($variable->hasGetterAction());
-
-		$variable->setGetterAction('methodName');
-		$this->assertEquals('methodName', $variable->getGetterAction());
-
-		$this->assertTrue($variable->hasGetterAction());
-	}
-	public function testGetterActionWhenWrongDataType() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableException', 'Either method must be a string or an array with a "method" key being a string');
-		$this->variable()->setGetterAction(1);
-	}
-	public function testGetterActionWhenEmptyArray() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableException', 'Either method must be a string or an array with a "method" key being a string');
-		$this->variable()->setGetterAction(array());
-	}
-	public function testGetterActionMethod() {
-		$variable = $this->variable();
-
-		$this->assertNull($variable->getGetterActionMethod());
-
-		$variable->setGetterAction('methodName');
-		$this->assertEquals('methodName', $variable->getGetterActionMethod());
-
-		$variable->setGetterAction(array(
-			'method' => 'methodNameArray'
-		));
-		$this->assertEquals('methodNameArray', $variable->getGetterActionMethod());
-		$this->assertEquals(EncoderNodeVariable::ACTION_TYPE_OBJECT, $variable->getGetterActionType());
-
-		$variable->setGetterAction(array(
-			'method' => 'methodNameArray',
-			'type' => EncoderNodeVariable::ACTION_TYPE_NODE
-		));
-		$this->assertEquals('methodNameArray', $variable->getGetterActionMethod());
-		$this->assertEquals(EncoderNodeVariable::ACTION_TYPE_NODE, $variable->getGetterActionType());
+		$variable->setType('unknown');
+		$variable->getObjectSetter()->processValue('string');
 	}
 
 	public function testCallNodeSetterAction() {

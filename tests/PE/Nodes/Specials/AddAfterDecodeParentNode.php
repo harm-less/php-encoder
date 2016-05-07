@@ -2,6 +2,8 @@
 
 namespace PE\Nodes\Specials;
 
+use PE\Nodes\Children\NodeChildGetter;
+use PE\Nodes\Children\NodeChildSetter;
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeChild;
 use PE\Nodes\EncoderNodeVariable;
@@ -13,16 +15,11 @@ class AddAfterDecodeParentNode extends EncoderNode {
 
 		$this->addVariable(new EncoderNodeVariable('name'));
 
-		$this->addChildNode(new EncoderNodeChild('add-after-decode-child', array(
-			'setter' => 'addChild',
-			'getter' => 'getChildren',
-			'setAfterChildren' => false,
-			'setAfterAttributes' => $addAfterAttributes
-		)));
+		$addAfterDecodeChildSetter = new NodeChildSetter('addChild');
+		$addAfterDecodeChildSetter->setAfterChildren(false);
+		$addAfterDecodeChildSetter->setAfterAttributes($addAfterAttributes);
+		$this->addChildNode(new EncoderNodeChild('add-after-decode-child', $addAfterDecodeChildSetter, new NodeChildGetter('getChildren')));
 
-		$this->addChildNode(new EncoderNodeChild('add-after-decode-children-require', array(
-			'setter' => 'addChildRequires',
-			'getter' => 'getChildrenRequires'
-		)));
+		$this->addChildNode(new EncoderNodeChild('add-after-decode-children-require', new NodeChildSetter('addChildRequires'), new NodeChildGetter('getChildrenRequires')));
 	}
 }

@@ -12,9 +12,7 @@ class FarmNode extends EncoderNode {
 	function __construct() {
 		parent::__construct('farms', 'farm', '\\PE\\Samples\\Farm');
 
-		$buildings = $this->addChildNode(new EncoderNodeChild('buildings'));
-		$buildings->setter(new NodeChildSetter('addBuilding'));
-		$buildings->getter(new NodeChildGetter('getBuildings'));
+		$this->addChildNode(new EncoderNodeChild('buildings', new NodeChildSetter('addBuilding'), new NodeChildGetter('getBuildings')));
 	}
 
 }
