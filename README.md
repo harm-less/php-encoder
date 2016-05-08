@@ -7,8 +7,8 @@
 ## About
 
 This library will allow you to save a snapshot of your PHP object in various formats like XML or JSON (encoding). 
-When your project has been setup properly you can reuse this by decoding the snapshot. It will return the 
-same PHP object.
+When your project has been setup properly you can reuse the snapshot by decoding it. The decoding process will return 
+the same PHP object you started with.
 
 This library is useful for you if you want to quickly find a way to save a state of your PHP object. Think about a 
 configurator that allows you to customize a certain product in various ways for example.
