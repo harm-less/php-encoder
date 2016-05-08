@@ -14,8 +14,23 @@ use PE\Nodes\EncoderNodeVariable;
  */
 final class ObjectSetter extends ObjectAccessor {
 
-	function __construct($method = null) {
+	private $required;
+
+	function __construct($method = null, $required = false) {
 		parent::__construct($method);
+
+		$this->required($required);
+	}
+
+	/**
+	 * @param null|bool $bool
+	 * @return bool
+	 */
+	public function required($bool = null) {
+		if ($bool !== null && is_bool($bool)) {
+			$this->required = $bool;
+		}
+		return (bool) $this->required;
 	}
 
 	/**

@@ -45,6 +45,17 @@ class ObjectSetterTest extends Samples
 		$this->assertEquals('setVariableId', $objectSetter->getMethod());
 	}
 
+	public function testRequired() {
+		$objectSetter = $this->objectSetter();
+
+		$this->assertFalse($objectSetter->required());
+
+		$this->assertFalse($objectSetter->required(false));
+		$this->assertFalse($objectSetter->required());
+		$this->assertTrue($objectSetter->required(true));
+		$this->assertTrue($objectSetter->required());
+	}
+
 	public function testEncodeWithoutVariableGetterMethod() {
 		$this->setExpectedException('\\PE\\Exceptions\\VariableTypeException', 'Method "setNonExistent" does not exist for class "PE\Tests\Variables\Types\ObjectSetterTestObject');
 

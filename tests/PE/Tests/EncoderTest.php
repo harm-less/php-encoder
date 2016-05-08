@@ -103,6 +103,16 @@ class EncoderTest extends Samples {
 	}
 
 
+	public function testRequiredVariable() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Decoding failed because variable "required" for node "required-variable" is required but isn\'t present in the node data.');
+
+		$this->addRequireVariableNode();
+
+		$this->encoder()->decode(array(
+			'required-variable' => array()
+		));
+	}
+
 
 	public function testDecode() {
 		$this->addFarmNodes();

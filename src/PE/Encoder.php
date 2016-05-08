@@ -249,6 +249,9 @@ class Encoder implements IEncoder {
 					}
 					$variableIsset = isset($nodeDataItem[$variableId]);
 					$objectSetter = $objectSetterVariable->getObjectSetter();
+					if ($objectSetter->required() && !$variableIsset) {
+						throw new EncoderException(sprintf('Decoding failed because variable "%s" for node "%s" is required but isn\'t present in the node data.', $variableId, $nodeName));
+					}
 					if ($variableIsset || $objectSetter->alwaysExecute()) {
 						$objectSetter->apply($nodeInstance, $variableIsset ? $nodeDataItem[$variableId] : null);
 					}
