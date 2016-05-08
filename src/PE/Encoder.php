@@ -136,15 +136,6 @@ class Encoder implements IEncoder {
 			$type = $proxyNode->getType($nodeType);
 			$variableCollection = $type->getVariableCollection();
 
-			// make sure the variables are all dashed as this is the default
-			foreach ($nodeDataItem as $nodeDataName => $nodeDataValue) {
-				$nodeDataNameDashed = Inflector::underscore($nodeDataName, '-');
-				if ($nodeDataName !== $nodeDataNameDashed) {
-					$nodeDataItem[$nodeDataNameDashed] = $nodeDataValue;
-					unset($nodeDataItem[$nodeDataName]);
-				}
-			}
-
 			$preNodeStaticOptions = array(
 				NodeAccessor::VARIABLE_NODE => $type,
 				NodeAccessor::VARIABLE_PARENT => $parentObject
@@ -188,23 +179,20 @@ class Encoder implements IEncoder {
 				$requiredVariableValues = array();
 				foreach ($requiredVariables as $variable) {
 
-					// make sure the variable is underscored
-					$processedVariable = Inflector::underscore($variable, '-');
-
-					if (!array_key_exists($processedVariable, $nodeDataItem)) {
-						throw new EncoderException(sprintf('Variable "%s" for "%s" does not exist but is required to create an object for node "%s" (Node type: "%s") at index "%s"', $processedVariable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
+					if (!array_key_exists($variable, $nodeDataItem)) {
+						throw new EncoderException(sprintf('Variable "%s" for "%s" does not exist but is required to create an object for node "%s" (Node type: "%s") at index "%s"', $variable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
 					}
-					$requiredValue = $nodeDataItem[$processedVariable];
-					$objectSetterVariable = $variableCollection->getVariableById($processedVariable);
+					$requiredValue = $nodeDataItem[$variable];
+					$objectSetterVariable = $variableCollection->getVariableById($variable);
 					if (!$objectSetterVariable) {
-						throw new EncoderException(sprintf('Variable "%s" for "%s" is required but there is no EncoderNodeVariable available to retrieve the value for node "%s" (Node type: "%s") at index "%s".', $processedVariable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
+						throw new EncoderException(sprintf('Variable "%s" for "%s" is required but there is no EncoderNodeVariable available to retrieve the value for node "%s" (Node type: "%s") at index "%s".', $variable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
 					}
 
 					$objectSetter = $objectSetterVariable->getObjectSetter();
 					$processedRequiredValue = $objectSetter->processValue($requiredValue);
 
-					$requiredVariableValues[$processedVariable] = $processedRequiredValue;
-					unset($nodeDataItem[$processedVariable]);
+					$requiredVariableValues[$variable] = $processedRequiredValue;
+					unset($nodeDataItem[$variable]);
 				}
 
 				// create a new instance of the class

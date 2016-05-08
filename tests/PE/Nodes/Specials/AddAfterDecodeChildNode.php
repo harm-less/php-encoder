@@ -8,7 +8,7 @@ use PE\Nodes\EncoderNodeVariable;
 class AddAfterDecodeChildNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('add-after-decode-children', 'add-after-decode-child', '\\PE\\Samples\\Specials');
+		parent::__construct('addAfterDecodeChildren', 'addAfterDecodeChild', '\\PE\\Samples\\Specials');
 
 		$this->addVariable(new EncoderNodeVariable('name'));
 	}

@@ -42,7 +42,7 @@ class ObjectGetterTest extends Samples
 		$this->setExpectedException('\\PE\\Exceptions\\VariableTypeException', 'Method "getNonExistent" does not exist for class "PE\Tests\Variables\Types\ObjectGetterTestObject" does not exist');
 
 		$objectGetter = $this->objectGetter();
-		$objectGetter->setVariable(new EncoderNodeVariable('non-existent'));
+		$objectGetter->setVariable(new EncoderNodeVariable('nonExistent'));
 		$objectGetter->apply(new ObjectGetterTestObject());
 	}
 

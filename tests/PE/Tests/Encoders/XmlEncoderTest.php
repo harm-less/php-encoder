@@ -66,16 +66,16 @@ class XmlEncoderTest extends CoreEncoder {
 
 		$this->assertEquals('<?xml version="1.0" encoding="UTF-8"?> '
 			. '<encoded> '
-			.   '<single-child> '
+			.   '<singleChild> '
 			.     '<thing thingVar="hello world"/> '
-			.   '</single-child> '
+			.   '</singleChild> '
 			. '</encoded>', $xmlString);
 
 		$decoded = $this->encoder()->decode($xmlString);
-		$this->assertArrayHasKey('single-child', $decoded);
+		$this->assertArrayHasKey('singleChild', $decoded);
 
 		/** @var SingleChild $singleChildDecoded */
-		$singleChildDecoded = $decoded['single-child'];
+		$singleChildDecoded = $decoded['singleChild'];
 		$this->assertNotEmpty($singleChildDecoded->getThing());
 	}
 }

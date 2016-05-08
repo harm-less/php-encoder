@@ -14,12 +14,12 @@ use PE\Variables\Types\PostNodeSetter;
 class EncoderNodeVariableApplyToSetterNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('encoder-node-variable-apply-to-setters-node', 'encoder-node-variable-apply-to-setters-node', '\\PE\\Samples\\Specials');
+		parent::__construct('encoderNodeVariableApplyToSettersNode', 'encoderNodeVariableApplyToSetterNode', '\\PE\\Samples\\Specials');
 
-		$nodeSimple = $this->addVariable(new EncoderNodeVariable('node-simple'));
+		$nodeSimple = $this->addVariable(new EncoderNodeVariable('nodeSimple'));
 		$nodeSimple->postNodeSetter(new PostNodeSetter('nodeSimple', array(NodeAccessor::VARIABLE_NAME)));
 
-		$nodeFull = $this->addVariable(new EncoderNodeVariable('node-full'));
+		$nodeFull = $this->addVariable(new EncoderNodeVariable('nodeFull'));
 		$nodeFull->postNodeSetter(new PostNodeSetter('nodeFull', array(
 			NodeAccessor::VARIABLE_NAME,
 			NodeAccessor::VARIABLE_VALUE,
@@ -27,16 +27,16 @@ class EncoderNodeVariableApplyToSetterNode extends EncoderNode {
 			NodeAccessor::VARIABLE_PARENT
 		)));
 
-		$nodeWithoutVariables = $this->addVariable(new EncoderNodeVariable('node-without-variables'));
+		$nodeWithoutVariables = $this->addVariable(new EncoderNodeVariable('nodeWithoutVariables'));
 		$nodeWithoutVariables->postNodeSetter(new PostNodeSetter('nodeWithoutVariables'));
 
-		$nodeWithoutVariablesEmpty = $this->addVariable(new EncoderNodeVariable('node-without-variables-empty'));
+		$nodeWithoutVariablesEmpty = $this->addVariable(new EncoderNodeVariable('nodeWithoutVariablesEmpty'));
 		$nodeWithoutVariablesEmpty->postNodeSetter(new PostNodeSetter('nodeWithoutVariables', array()));
 
-		$nodeWithoutVariablesNull = $this->addVariable(new EncoderNodeVariable('node-without-variables-null'));
+		$nodeWithoutVariablesNull = $this->addVariable(new EncoderNodeVariable('nodeWithoutVariablesNull'));
 		$nodeWithoutVariablesNull->postNodeSetter(new PostNodeSetter('nodeWithoutVariables', array()));
 
-		$nodeUnknownVariable = $this->addVariable(new EncoderNodeVariable('node-unknown-variable'));
+		$nodeUnknownVariable = $this->addVariable(new EncoderNodeVariable('nodeUnknownVariable'));
 		$nodeUnknownVariable->postNodeSetter(new PostNodeSetter('nodeSimple', array('unknown_variable')));
 
 		$this->addVariable(new EncoderNodeVariable('var'));

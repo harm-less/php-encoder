@@ -56,7 +56,7 @@ class PostNodeSetterTest extends Samples
 
 		$object = $this->getEncoderNodeVariableApplyToSetter();
 		$collection = $node->getVariableCollection();
-		$var = $collection->getVariableById('node-simple');
+		$var = $collection->getVariableById('nodeSimple');
 
 		$this->assertEquals(array(
 			'node' => 'test',
@@ -79,7 +79,7 @@ class PostNodeSetterTest extends Samples
 
 		$object = $this->getEncoderNodeVariableApplyToSetter();
 		$collection = $node->getVariableCollection();
-		$var = $collection->getVariableById('node-full');
+		$var = $collection->getVariableById('nodeFull');
 
 		$parent = $this->getThing();
 
@@ -102,9 +102,9 @@ class PostNodeSetterTest extends Samples
 	}
 
 	public function testApplyToSetterNodeWithoutVariables() {
-		$this->_applyToSetterNodeWithoutVariables('node-without-variables');
-		$this->_applyToSetterNodeWithoutVariables('node-without-variables-empty');
-		$this->_applyToSetterNodeWithoutVariables('node-without-variables-null');
+		$this->_applyToSetterNodeWithoutVariables('nodeWithoutVariables');
+		$this->_applyToSetterNodeWithoutVariables('nodeWithoutVariablesEmpty');
+		$this->_applyToSetterNodeWithoutVariables('nodeWithoutVariablesNull');
 	}
 	protected function _applyToSetterNodeWithoutVariables($variable)
 	{
@@ -135,7 +135,7 @@ class PostNodeSetterTest extends Samples
 
 		$object = $this->getEncoderNodeVariableApplyToSetter();
 		$collection = $node->getVariableCollection();
-		$var = $collection->getVariableById('node-unknown-variable');
+		$var = $collection->getVariableById('nodeUnknownVariable');
 
 		$var->getPostNodeSetter()->apply(array(
 			NodeAccessor::VARIABLE_OBJECT => $object,

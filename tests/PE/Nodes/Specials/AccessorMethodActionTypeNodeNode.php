@@ -12,7 +12,7 @@ use PE\Variables\Types\PostNodeSetter;
 class AccessorMethodActionTypeNodeNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('accessor-method-action-type-nodes', 'accessor-method-action-type-node', '\\PE\\Samples\\Specials');
+		parent::__construct('accessorMethodActionTypeNodes', 'accessorMethodActionTypeNode', '\\PE\\Samples\\Specials');
 
 		$this->addVariable(new EncoderNodeVariable('special'));
 

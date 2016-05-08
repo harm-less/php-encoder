@@ -33,7 +33,6 @@ class EncoderNodeChildren {
 	 * @return null|EncoderNodeChild Returns the requested child or returns null if it's not found
 	 */
 	public function getChild($childName) {
-		$childName = strtolower($childName);
 		if ($this->childExists($childName)) {
 			return $this->children[$childName];
 		}
@@ -52,21 +51,19 @@ class EncoderNodeChildren {
 	 * @return bool Returns true if the child exists based on its name
 	 */
 	public function childExists($childName) {
-		$nodeName = strtolower($childName);
-		return isset($this->children[$nodeName]);
+		return isset($this->children[$childName]);
 	}
 
 	/**
 	 * Adds values to an object based on a single child
 	 *
-	 * @param string $childName Name if the child so it knows what method to use
+	 * @param string $childName Name of the child so it knows what method to use
 	 * @param object $target The target object where the values are supposed to be added to
 	 * @param array $values The values you want to add
 	 * @return bool Returns true if the action succeeded and false when it couldn't find the child
 	 */
 	public function addChildrenToObject($childName, $target, $values) {
-		$child = strtolower($childName);
-		$childNode = $this->getChild($child);
+		$childNode = $this->getChild($childName);
 		if (!$childNode) {
 			throw new EncoderNodeChildException(sprintf('Trying to add children to object, but the child "%s" could not be found', $childName));
 		}

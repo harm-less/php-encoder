@@ -8,9 +8,9 @@ use PE\Nodes\EncoderNodeVariable;
 class OptionalVariablesNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('optional-variables', 'optional-variables', '\\PE\\Samples\\Specials');
+		parent::__construct('optionalVariables', 'optionalVariables', '\\PE\\Samples\\Specials');
 
 		$this->addVariable(new EncoderNodeVariable('name'));
-		$this->addVariable(new EncoderNodeVariable('other-variable'));
+		$this->addVariable(new EncoderNodeVariable('otherVariable'));
 	}
 }

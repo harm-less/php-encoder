@@ -13,7 +13,7 @@ use PE\Variables\Types\PostNodeSetter;
 class AddAfterDecodeChildRequiresNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('add-after-decode-children-require', 'add-after-decode-child-require', '\\PE\\Samples\\Specials');
+		parent::__construct('addAfterDecodeChildrenRequire', 'addAfterDecodeChildRequire', '\\PE\\Samples\\Specials');
 
 		$name = $this->addVariable(new EncoderNodeVariable('name'));
 		$name->postNodeSetter(new PostNodeSetter('nodeSetName', array(NodeAccessor::VARIABLE_VALUE, NodeAccessor::VARIABLE_PARENT)));

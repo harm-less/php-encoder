@@ -38,7 +38,6 @@ class EncoderNodeChildrenTest extends Samples {
 		$nodeChildren = $this->nodeChildren();
 		$child = $nodeChildren->addChild(new EncoderNodeChild('test'));
 		$this->assertEquals($child, $nodeChildren->getChild('test'));
-		$this->assertEquals($child, $nodeChildren->getChild('tEsT'));
 		$this->assertNull($nodeChildren->getChild('unknown'));
 	}
 

@@ -69,7 +69,7 @@ class JsonEncoderTest extends CoreEncoder {
 		$jsonString = trim(preg_replace('/\s+/', ' ', $encoded));
 
 		$this->assertEquals('{'
-			. '"single-child":'
+			. '"singleChild":'
 			.   '{'
 			.     '"thing":{'
 			.       '"thingVar":"hello world"'
@@ -78,10 +78,10 @@ class JsonEncoderTest extends CoreEncoder {
 			. '}', $jsonString);
 
 		$decoded = $this->encoder()->decode($jsonString);
-		$this->assertArrayHasKey('single-child', $decoded);
+		$this->assertArrayHasKey('singleChild', $decoded);
 
 		/** @var SingleChild $singleChildDecoded */
-		$singleChildDecoded = $decoded['single-child'];
+		$singleChildDecoded = $decoded['singleChild'];
 		$this->assertNotEmpty($singleChildDecoded->getThing());
 	}
 }

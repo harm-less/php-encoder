@@ -285,16 +285,16 @@ class EncoderNodeTest extends Samples
 
 	public function testChildNodeMethods() {
 		$node = EncoderNode::addNode($this->node());
-		$nodeChild = new EncoderNodeChild('node-child', new NodeChildSetter('setterMethod'), new NodeChildGetter('getterMethod'));
+		$nodeChild = new EncoderNodeChild('nodeChild', new NodeChildSetter('setterMethod'), new NodeChildGetter('getterMethod'));
 		$node->addChildNode($nodeChild);
 
-		$this->assertTrue($node->childNodeExists('node-child'));
+		$this->assertTrue($node->childNodeExists('nodeChild'));
 		$this->assertFalse($node->childNodeExists('unknown'));
-		$this->assertEquals($nodeChild, $node->getChild('node-child'));
+		$this->assertEquals($nodeChild, $node->getChild('nodeChild'));
 		$this->assertNull($node->getChild('unknown'));
 
 		$this->assertEquals(array(
-			'node-child' => $nodeChild
+			'nodeChild' => $nodeChild
 		), $node->getChildren());
 	}
 
@@ -334,18 +334,18 @@ class EncoderNodeTest extends Samples
 
 	public function testVariableMethods() {
 		$node = EncoderNode::addNode($this->node());
-		$nodeVariable = new EncoderNodeVariable('node-variable');
+		$nodeVariable = new EncoderNodeVariable('nodeVariable');
 		$node->addVariable($nodeVariable);
 
 		$collection = $node->getVariableCollection();
 
-		$this->assertTrue($collection->variableExists('node-variable'));
+		$this->assertTrue($collection->variableExists('nodeVariable'));
 		$this->assertFalse($collection->variableExists('unknown'));
 
-		$this->assertEquals($nodeVariable, $node->getVariable('node-variable'));
+		$this->assertEquals($nodeVariable, $node->getVariable('nodeVariable'));
 		$this->assertNull($node->getVariable('unknown'));
 
-		$this->assertEquals($nodeVariable, $collection->getVariableById('node-variable'));
+		$this->assertEquals($nodeVariable, $collection->getVariableById('nodeVariable'));
 		$this->assertNull($collection->getVariableById('unknown'));
 	}
 

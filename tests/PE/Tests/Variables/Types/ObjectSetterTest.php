@@ -60,7 +60,7 @@ class ObjectSetterTest extends Samples
 		$this->setExpectedException('\\PE\\Exceptions\\VariableTypeException', 'Method "setNonExistent" does not exist for class "PE\Tests\Variables\Types\ObjectSetterTestObject');
 
 		$objectSetter = $this->objectSetter();
-		$objectSetter->setVariable(new EncoderNodeVariable('non-existent'));
+		$objectSetter->setVariable(new EncoderNodeVariable('nonExistent'));
 		$objectSetter->apply(new ObjectSetterTestObject(), 'value');
 	}
 

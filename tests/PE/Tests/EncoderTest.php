@@ -87,7 +87,7 @@ class EncoderTest extends Samples {
 		$encodedProcessed = $encoded['processed'];
 
 		$this->assertEquals(array(
-			'single-child' => array(
+			'singleChild' => array(
 				'thing' => array(
 					'thingVar' => 'hello world'
 				)
@@ -95,21 +95,21 @@ class EncoderTest extends Samples {
 		), $encodedProcessed);
 
 		$decoded = $this->encoder()->decode($encodedProcessed);
-		$this->assertArrayHasKey('single-child', $decoded);
+		$this->assertArrayHasKey('singleChild', $decoded);
 
 		/** @var SingleChild $singleChildDecoded */
-		$singleChildDecoded = $decoded['single-child'];
+		$singleChildDecoded = $decoded['singleChild'];
 		$this->assertNotEmpty($singleChildDecoded->getThing());
 	}
 
 
 	public function testRequiredVariable() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Decoding failed because variable "required" for node "required-variable" is required but isn\'t present in the node data.');
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Decoding failed because variable "required" for node "requiredVariable" is required but isn\'t present in the node data.');
 
 		$this->addRequireVariableNode();
 
 		$this->encoder()->decode(array(
-			'required-variable' => array()
+			'requiredVariable' => array()
 		));
 	}
 
@@ -173,13 +173,13 @@ class EncoderTest extends Samples {
 		$this->addAccessorMethodActionTypeNodeNode();
 
 		$decoded = $this->encoder()->decode(array(
-			'accessor-method-action-type-node' => array(
+			'accessorMethodActionTypeNode' => array(
 				'special' => 'value',
 				'node' => 'hello world'
 			)
 		));
 		/** @var AccessorMethodActionTypeNode $obj */
-		$obj = $decoded['accessor-method-action-type-node'];
+		$obj = $decoded['accessorMethodActionTypeNode'];
 		$this->assertEquals('hello world', $obj->getSpecial());
 	}
 
@@ -187,33 +187,33 @@ class EncoderTest extends Samples {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Tried loading class "\PE\Samples\Loader\ClassLoader" so it can be decoded, this failed however because it\'s not available. You either mistyped the name of the class in the node or the "loadObject()" method didn\'t load the correct file with the class');
 		$this->addClassLoaderNode(false);
 		$this->encoder()->decode(array(
-			'class-loader' => array()
+			'classLoader' => array()
 		));
 	}
 	public function testDecodeClassLoader() {
 		$this->addClassLoaderNode(true);
 
 		$decoded = $this->encoder()->decode(array(
-			'class-loader' => array()
+			'classLoader' => array()
 		));
-		$obj = $decoded['class-loader'];
+		$obj = $decoded['classLoader'];
 		$this->assertTrue(is_a($obj, '\\PE\\Samples\\Loader\\ClassLoader'));
 	}
 
 	public function testDecodeObjectWithRequiredConstructorVariablesWhenOneOfTheVariablesIsNotAvailable() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" does not exist but is required to create an object for node "required-constructor-variables" (Node type: "required-constructors-variables") at index "0"');
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" does not exist but is required to create an object for node "requiredConstructorVariables" (Node type: "requiredConstructorsVariables") at index "0"');
 		$this->addRequiredConstructorVariablesNode();
 		$this->encoder()->decode(array(
-			'required-constructor-variables' => array()
+			'requiredConstructorVariables' => array()
 		));
 	}
 	public function testDecodeObjectWithRequiredConstructorVariablesButOneRequiredVariableIsNotProperlySetup() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" is required but there is no EncoderNodeVariable available to retrieve the value for node "required-constructor-variables" (Node type: "required-constructors-variables") at index "0"');
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" is required but there is no EncoderNodeVariable available to retrieve the value for node "requiredConstructorVariables" (Node type: "requiredConstructorsVariables") at index "0"');
 		$encoder = $this->encoder();
 		$this->addRequiredConstructorVariablesNode(false);
 
 		$encoder->decode(array(
-			'required-constructor-variables' => array(
+			'requiredConstructorVariables' => array(
 				'name' => 'awesomeType'
 			)
 		));
@@ -223,13 +223,13 @@ class EncoderTest extends Samples {
 		$this->addRequiredConstructorVariablesNode();
 
 		$decoded = $encoder->decode(array(
-			'required-constructor-variables' => array(
+			'requiredConstructorVariables' => array(
 				'name' => 'awesomeName',
 				'variableCategory' => 'awesomeCategory'
 			)
 		));
 		/** @var RequiredConstructorVariables $obj */
-		$obj = $decoded['required-constructor-variables'];
+		$obj = $decoded['requiredConstructorVariables'];
 		$this->assertEquals('awesomeName', $obj->getName());
 		$this->assertEquals('awesomeCategory', $obj->getVariableCategory());
 		$this->assertTrue($obj->getOptional());
@@ -238,13 +238,13 @@ class EncoderTest extends Samples {
 	public function testDecodeObjectWithOptionalVariables() {
 		$this->addOptionalVariablesNode();
 		$decoded = $this->encoder()->decode(array(
-			'optional-variables' => array(
+			'optionalVariables' => array(
 				'name' => 'Hello world',
-				'other-variable' => 'other hello world'
+				'otherVariable' => 'other hello world'
 			)
 		));
 		/** @var OptionalVariables $obj */
-		$obj = $decoded['optional-variables'];
+		$obj = $decoded['optionalVariables'];
 		$this->assertEquals('Hello world', $obj->getName());
 		$this->assertEquals('other hello world', $obj->getOtherVariable());
 	}
@@ -252,34 +252,34 @@ class EncoderTest extends Samples {
 	public function testDecodeObjectAllVariableTypes() {
 		$this->addVariableTypesNode();
 		$decoded = $this->encoder()->decode(array(
-			'variable-type' => array(
+			'variableType' => array(
 				'required' => 'Hello world',
 				'optional' => 'Hello other world'
 			)
 		));
 
 		/** @var VariableTypes $obj */
-		$obj = $decoded['variable-type'];
+		$obj = $decoded['variableType'];
 		$this->assertEquals('Hello world | setter pre', $obj->getRequired());
 		$this->assertEquals('Hello other world | setter pre | setter post', $obj->getOptional());
 
 		$encoded = $this->encoder()->encode($obj);
 		$encodedProcessed = $encoded['processed'];
-		$this->assertEquals('Hello world | setter pre | getter post', $encodedProcessed['variable-type']['required']);
-		$this->assertEquals('getter pre', $encodedProcessed['variable-type']['pre-required']);
-		$this->assertEquals('Hello other world | setter pre | setter post | required pre | optional pre | getter post', $encodedProcessed['variable-type']['optional']);
-		$this->assertEquals('getter pre', $encodedProcessed['variable-type']['pre-optional']);
+		$this->assertEquals('Hello world | setter pre | getter post', $encodedProcessed['variableType']['required']);
+		$this->assertEquals('getter pre', $encodedProcessed['variableType']['pre-required']);
+		$this->assertEquals('Hello other world | setter pre | setter post | required pre | optional pre | getter post', $encodedProcessed['variableType']['optional']);
+		$this->assertEquals('getter pre', $encodedProcessed['variableType']['pre-optional']);
 	}
 
 	public function testDecodeWithSetAfterChildrenFalse() {
 		$this->addAddAfterDecodeNodes();
 
 		$decoded = $this->encoder()->decode(array(
-			'add-after-decode-parent' => array(
-				'add-after-decode-child' => array(
+			'addAfterDecodeParent' => array(
+				'addAfterDecodeChild' => array(
 					'name' => 'child'
 				),
-				'add-after-decode-children-require' => array(
+				'addAfterDecodeChildrenRequire' => array(
 					array(
 						'name' => 'child-require'
 					)
@@ -288,7 +288,7 @@ class EncoderTest extends Samples {
 		));
 
 		/** @var AddAfterDecodeParent $specialDecoded */
-		$specialDecoded = $decoded['add-after-decode-parent'];
+		$specialDecoded = $decoded['addAfterDecodeParent'];
 
 		$child = $specialDecoded->getChild();
 
@@ -300,12 +300,12 @@ class EncoderTest extends Samples {
 		$this->addAddAfterDecodeNodes(false);
 
 		$decoded = $this->encoder()->decode(array(
-			'add-after-decode-parent' => array(
+			'addAfterDecodeParent' => array(
 				'name' => 'parent',
-				'add-after-decode-child' => array(
+				'addAfterDecodeChild' => array(
 					'name' => 'child'
 				),
-				'add-after-decode-children-require' => array(
+				'addAfterDecodeChildrenRequire' => array(
 					array(
 						'name' => 'child-require'
 					)
@@ -314,7 +314,7 @@ class EncoderTest extends Samples {
 		));
 
 		/** @var AddAfterDecodeParent $specialDecoded */
-		$specialDecoded = $decoded['add-after-decode-parent'];
+		$specialDecoded = $decoded['addAfterDecodeParent'];
 
 		$child = $specialDecoded->getChild();
 
@@ -323,28 +323,24 @@ class EncoderTest extends Samples {
 	}
 
 	public function testDecodeWithSetAfterChildrenTrueAndChildrenInverted() {
-		//$this->markTestSkipped(
-		//	'This test cannot be created yet. setAfterChildren doesn\'t work when it has the wrong order like described below, so perhaps I need to build a sorting mechanism. Perhaps in "decodeRawToArray"?'
-		//);
-
 		$this->addAddAfterDecodeNodes(false);
 
 		$decoded = $this->encoder()->decode(array(
-			'add-after-decode-parent' => array(
+			'addAfterDecodeParent' => array(
 				'name' => 'parent',
-				'add-after-decode-children-require' => array(
+				'addAfterDecodeChildrenRequire' => array(
 					array(
 						'name' => 'child-require'
 					)
 				),
-				'add-after-decode-child' => array(
+				'addAfterDecodeChild' => array(
 					'name' => 'child'
 				)
 			)
 		));
 
 		/** @var AddAfterDecodeParent $specialDecoded */
-		$specialDecoded = $decoded['add-after-decode-parent'];
+		$specialDecoded = $decoded['addAfterDecodeParent'];
 
 		$child = $specialDecoded->getChild();
 
@@ -485,7 +481,7 @@ class EncoderTest extends Samples {
 		$encoder = $this->encoder();
 		$encoded = $encoder->encode($obj);
 
-		$this->assertArrayHasKey('thingVar', $encoded['processed']['non-array-getter-method-on-purpose']['things']);
+		$this->assertArrayHasKey('thingVar', $encoded['processed']['nonArrayGetterMethodOnPurpose']['things']);
 	}
 
 	public function testEncodeWithWrapperName() {

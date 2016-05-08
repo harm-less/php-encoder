@@ -9,7 +9,7 @@ class EncoderNodeLoaderNode extends EncoderNode {
 	private $overrideObjectFileName;
 
 	function __construct($overrideObjectFileName = true) {
-		parent::__construct('encoder-node-loaders', 'encoder-node-loader', '\\PE\\Samples\\Erroneous');
+		parent::__construct('encoderNodeLoaders', 'encoderNodeLoader', '\\PE\\Samples\\Erroneous');
 
 		$this->overrideObjectFileName = $overrideObjectFileName;
 	}

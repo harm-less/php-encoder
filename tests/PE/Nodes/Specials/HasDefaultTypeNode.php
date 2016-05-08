@@ -10,7 +10,7 @@ class HasDefaultTypeNode extends EncoderNode {
 	const NEW_DEFAULT_TYPE = 'should-be-the-default-type';
 
 	function __construct($nodeTypeName = null) {
-		parent::__construct('has-default-types', 'has-default-type', '\\PE\\Samples\\Specials', $nodeTypeName);
+		parent::__construct('hasDefaultTypes', 'hasDefaultType', '\\PE\\Samples\\Specials', $nodeTypeName);
 	}
 
 	public function getDefaultType() {

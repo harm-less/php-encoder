@@ -12,7 +12,7 @@ class ClassLoaderNode extends EncoderNode {
 	private $setupLoader;
 
 	function __construct($setupLoader) {
-		parent::__construct('class-loaders', 'class-loader', '\\PE\\Samples\\Loader');
+		parent::__construct('classLoaders', 'classLoader', '\\PE\\Samples\\Loader');
 
 		$this->setupLoader = $setupLoader;
 	}

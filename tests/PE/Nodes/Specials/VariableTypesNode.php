@@ -14,7 +14,7 @@ use PE\Variables\Types\PreNodeSetter;
 class VariableTypesNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('variable-types', 'variable-type', '\\PE\\Samples\\Specials');
+		parent::__construct('variableTypes', 'variableType', '\\PE\\Samples\\Specials');
 
 		$required = $this->addVariable(new EncoderNodeVariable('required'));
 		$required->setType(EncoderNodeVariable::TYPE_STRING);

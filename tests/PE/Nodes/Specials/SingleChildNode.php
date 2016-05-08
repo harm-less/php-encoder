@@ -10,7 +10,7 @@ use PE\Nodes\EncoderNodeChild;
 class SingleChildNode extends EncoderNode {
 
 	function __construct() {
-		parent::__construct('single-children', 'single-child', '\\PE\\Samples\\Specials');
+		parent::__construct('singleChildren', 'singleChild', '\\PE\\Samples\\Specials');
 
 		$thing = $this->addChildNode(new EncoderNodeChild('thing', new NodeChildSetter('setThing'), new NodeChildGetter('getThing')));
 		$thing->isArray(false);
