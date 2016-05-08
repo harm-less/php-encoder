@@ -142,40 +142,4 @@ class EncoderNodeVariableTest extends Samples {
 		$this->assertTrue($variable->hasObjectGetter());
 		$this->assertEquals($variable, $objectGetter->getVariable());
 	}
-
-	public function testProcessValue() {
-		$variable = $this->variable();
-		$objectSetter = $variable->getObjectSetter();
-		$this->assertEquals('test', $objectSetter->processValue('test'));
-
-		$variable->setType(EncoderNodeVariable::TYPE_BOOL);
-		$this->assertEquals(true, $objectSetter->processValue(1));
-		$this->assertEquals(true, $objectSetter->processValue('1'));
-		$this->assertEquals(true, $objectSetter->processValue('true'));
-		$this->assertEquals(false, $objectSetter->processValue(0));
-		$this->assertEquals(false, $objectSetter->processValue('0'));
-		$this->assertEquals(false, $objectSetter->processValue('false'));
-		$this->assertEquals(false, $objectSetter->processValue('abc'));
-
-		$variable->setType(EncoderNodeVariable::TYPE_STRING);
-		$this->assertEquals('1', $objectSetter->processValue(1));
-		$this->assertEquals('string', $objectSetter->processValue('string'));
-
-		$variable->setType(EncoderNodeVariable::TYPE_ARRAY);
-		$this->assertEquals(array(), $objectSetter->processValue(json_encode(array())));
-		$this->assertEquals(array('hello' => 'world'), $objectSetter->processValue(json_encode(array('hello' => 'world'))));
-	}
-
-	public function testProcessValueArrayException() {
-		$this->setExpectedException('PE\\Exceptions\\VariableTypeException', 'The set data type is array but the value cannot be processed');
-		$variable = $this->variable();
-		$variable->setType(EncoderNodeVariable::TYPE_ARRAY);
-		$variable->getObjectSetter()->processValue(array());
-	}
-	public function testProcessValueUnknownTypeException() {
-		$this->setExpectedException('PE\\Exceptions\\VariableTypeException', 'Can\'t process value "string" because the data type "unknown" isn\'t recognized.');
-		$variable = $this->variable();
-		$variable->setType('unknown');
-		$variable->getObjectSetter()->processValue('string');
-	}
 }
