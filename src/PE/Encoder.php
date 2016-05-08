@@ -11,6 +11,8 @@ use PE\Library\Inflector;
 use PE\Enums\ActionVariable;
 use PE\Exceptions\EncoderException;
 use PE\Options\EncoderOptions;
+use PE\Variables\Types\NodeAccessor;
+use PE\Variables\Types\ObjectAccessor;
 
 /**
  * Class Encoder
@@ -59,10 +61,11 @@ class Encoder implements IEncoder {
 			foreach ($decodedData as $decodedName => $data) {
 				// if data belongs to a child
 				if ($nodeType->childNodeExists($decodedName)) {
+					$childNodeSetter = $nodeType->getChild($decodedName)->getSetter();
 					// decode it, unset it and add it back into the array at the correct place
 					$childArrDecoded = $this->decodeRawToArray($decodedName, $nodeChildData, $array);
 					unset($decodedData[$decodedName]);
-					$decodedData = $nodeType->getChild($decodedName)->setAfterChildren() === false ? array($decodedName => $childArrDecoded) + $decodedData : array_merge($decodedData, array($decodedName => $childArrDecoded));
+					$decodedData = $childNodeSetter->setAfterChildren() === false ? array($decodedName => $childArrDecoded) + $decodedData : array_merge($decodedData, array($decodedName => $childArrDecoded));
 				}
 				// if data belongs to an attribute simply
 				else if (is_array($data)) {
@@ -116,8 +119,10 @@ class Encoder implements IEncoder {
 		$addAfterAttributes = true;
 		if ($parentNode) {
 			$childNode = $parentNode->getChild($nodeName);
-			$addAfterDecode = $childNode->setAfterChildren();
-			$addAfterAttributes = $childNode->setAfterAttributes();
+
+			$childNodeSetter = $childNode->getSetter();
+			$addAfterDecode = $childNodeSetter->setAfterChildren();
+			$addAfterAttributes = $childNodeSetter->setAfterAttributes();
 		}
 
 		$objects = array();
@@ -129,6 +134,7 @@ class Encoder implements IEncoder {
 			$nodeChildType = $proxyNode->getObjectType($parentObject, $nodeDataItem);
 			$nodeType = ($nodeChildType !== null && !empty($nodeChildType) ? $nodeChildType : $proxyNode->getDefaultType());
 			$type = $proxyNode->getType($nodeType);
+			$variableCollection = $type->getVariableCollection();
 
 			// make sure the variables are all dashed as this is the default
 			foreach ($nodeDataItem as $nodeDataName => $nodeDataValue) {
@@ -139,18 +145,24 @@ class Encoder implements IEncoder {
 				}
 			}
 
+			$preNodeStaticOptions = array(
+				NodeAccessor::VARIABLE_NODE => $type,
+				NodeAccessor::VARIABLE_PARENT => $parentObject
+			);
 			// call node methods. It can be useful when you want to change the outcome of the node data in the node
 			// that does not have a certain setter but is used in other ways
-			$nodeMethodVariables = $type->getVariablesSetterActionByType(EncoderNodeVariable::ACTION_TYPE_NODE);
-			foreach ($nodeMethodVariables as $variableId => $nodeMethodVariable) {
-				if (isset($nodeDataItem[$variableId])) {
-					$setterOptions = array(
-						ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
-						ActionVariable::SETTER_NAME => $variableId,
-						ActionVariable::SETTER_PARENT => $parentObject,
-						ActionVariable::SETTER_VALUE => $nodeDataItem[$variableId]
-					);
-					if ($newNode = $nodeMethodVariable->callNodeSetterAction($type, $setterOptions)) {
+			$preNodeSetterVariables = $variableCollection->getPreNodeSetterVariables();
+			foreach ($preNodeSetterVariables as $preNodeSetterVariable) {
+				$variableId = $preNodeSetterVariable->getId();
+				$variableIsset = isset($nodeDataItem[$variableId]);
+				$preNodeSetter = $preNodeSetterVariable->getPreNodeSetter();
+				if (isset($nodeDataItem[$variableId]) || $preNodeSetter->alwaysExecute()) {
+					$setterOptions = array_merge($preNodeStaticOptions, array(
+						NodeAccessor::VARIABLE_NODE_DATA => $nodeDataItem,
+						NodeAccessor::VARIABLE_NAME => $variableId,
+						NodeAccessor::VARIABLE_VALUE => $variableIsset ? $nodeDataItem[$variableId] : null
+					));
+					if ($newNode = $preNodeSetter->apply($setterOptions)) {
 						$nodeDataItem = $newNode;
 					}
 				}
@@ -183,12 +195,15 @@ class Encoder implements IEncoder {
 						throw new EncoderException(sprintf('Variable "%s" for "%s" does not exist but is required to create an object for node "%s" (Node type: "%s") at index "%s"', $processedVariable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
 					}
 					$requiredValue = $nodeDataItem[$processedVariable];
-					$processedRequiredValue = $type->processValue($processedVariable, $requiredValue);
-					if ($processedRequiredValue === null) {
-						throw new EncoderException(sprintf('Variable "%s" for "%s" cannot process its value (%s). Presumably because the NodeType does not recognize the variable', $processedVariable, $nodeClassName, $requiredValue));
+					$objectSetterVariable = $variableCollection->getVariableById($processedVariable);
+					if (!$objectSetterVariable) {
+						throw new EncoderException(sprintf('Variable "%s" for "%s" is required but there is no EncoderNodeVariable available to retrieve the value for node "%s" (Node type: "%s") at index "%s".', $processedVariable, $nodeClassName, $nodeName, $type->getNodeName(), $nodeIndex));
 					}
 
-					array_push($requiredVariableValues, $processedRequiredValue);
+					$objectSetter = $objectSetterVariable->getObjectSetter();
+					$processedRequiredValue = $objectSetter->processValue($requiredValue);
+
+					$requiredVariableValues[$processedVariable] = $processedRequiredValue;
 					unset($nodeDataItem[$processedVariable]);
 				}
 
@@ -203,14 +218,40 @@ class Encoder implements IEncoder {
 					$parentNode->addChildrenToObject($nodeName, $parentObject, array($nodeInstance));
 				}
 
-				foreach ($nodeDataItem as $name => $value) {
-					$type->applyToVariable($name, array(
-						ActionVariable::SETTER_NODE_DATA => $nodeDataItem,
-						ActionVariable::SETTER_OBJECT => $nodeInstance,
-						ActionVariable::SETTER_PARENT => $parentObject,
-						ActionVariable::SETTER_NAME => $name,
-						ActionVariable::SETTER_VALUE => $value
-					));
+				// run the post setter variable types
+				$postNodeStaticOptions = array_merge($preNodeStaticOptions, array(
+					ObjectAccessor::VARIABLE_OBJECT => $nodeInstance,
+				));
+				$postNodeSetterVariables = $variableCollection->getPostNodeSetterVariables();
+				foreach ($postNodeSetterVariables as $postNodeSetterVariable) {
+					$variableId = $postNodeSetterVariable->getId();
+					$variableIsset = isset($nodeDataItem[$variableId]);
+					$postNodeSetter = $postNodeSetterVariable->getPostNodeSetter();
+					if ($variableIsset || $postNodeSetter->alwaysExecute()) {
+						$setterOptions = array_merge($postNodeStaticOptions, array(
+							NodeAccessor::VARIABLE_NODE_DATA => $nodeDataItem,
+							NodeAccessor::VARIABLE_NAME => $variableId,
+							NodeAccessor::VARIABLE_VALUE => $variableIsset ? $nodeDataItem[$variableId] : null
+						));
+						if ($newNode = $postNodeSetter->apply($setterOptions)) {
+							$nodeDataItem = $newNode;
+						}
+					}
+				}
+
+				// run the optional object setter variable types
+				$objectSetterVariables = $variableCollection->getObjectSetterVariables();
+				foreach ($objectSetterVariables as $objectSetterVariable) {
+					$variableId = $objectSetterVariable->getId();
+					if (array_key_exists($variableId, $requiredVariableValues)) {
+						// if the variable was an required variable do not try to set it again
+						continue;
+					}
+					$variableIsset = isset($nodeDataItem[$variableId]);
+					$objectSetter = $objectSetterVariable->getObjectSetter();
+					if ($variableIsset || $objectSetter->alwaysExecute()) {
+						$objectSetter->apply($nodeInstance, $variableIsset ? $nodeDataItem[$variableId] : null);
+					}
 				}
 
 				if (!$addAfterDecode && $addAfterAttributes) {
@@ -222,7 +263,7 @@ class Encoder implements IEncoder {
 					if ($type->childNodeExists($childName)) {
 						$children = $this->_decodeNode($childName, $nodeDataItem, $options, $type, $nodeInstance, $nodeDataItem);
 
-						if ($type->getChild($childName)->setAfterChildren()) {
+						if ($type->getChild($childName)->getSetter()->setAfterChildren()) {
 							$isSingleChildNode = $type->isSingleNode($childName);
 							$type->addChildrenToObject($childName, $nodeInstance, $isSingleChildNode ? array($children) : $children);
 						}
@@ -232,7 +273,7 @@ class Encoder implements IEncoder {
 
 			$nodeIndex++;
 		}
-		$proxyNode->variablesAreValid($decodedChildren, true);
+		$variableCollection->objectVariablesAreValidWithData($decodedChildren, true);
 
 		if ($isSingleNode) {
 			return $objects[0];
@@ -295,38 +336,64 @@ class Encoder implements IEncoder {
 	}
 
 	protected function _encode($object, EncoderNode $node, EncoderOptions $options, $parent = null, $nodeIterationIndex = null, $childObjectIterationIndex = null) {
-		$variables = $node->getVariables();
+		$variableCollection = $node->getVariableCollection();
+		$objectGetterVariables = $variableCollection->getObjectGetterVariables();
 
         $optionNodeIndex = $node->getNodeName() . '[' . $childObjectIterationIndex . ']';
 
 		$attributesRaw = array();
-		foreach ($variables as $variable) {
-			if (!$variable->hasGetterAction() || $variable->alwaysExecute()) {
 
-				$variableId = $variable->getId();
+		$postNodeStaticOptions = array(
+			NodeAccessor::VARIABLE_NODE => $node,
+			NodeAccessor::VARIABLE_OBJECT => $object,
+			NodeAccessor::VARIABLE_PARENT => $parent,
+			NodeAccessor::VARIABLE_OPTIONS => $options,
+			NodeAccessor::VARIABLE_NODE_ITERATION_INDEX => $nodeIterationIndex,
+			NodeAccessor::VARIABLE_CHILD_OBJECT_ITERATION_INDEX => $childObjectIterationIndex,
+		);
 
-                $attributeValue = null;
-				$getAttributeMethod = $variable->getGetterMethod();
-				if (method_exists($object, $getAttributeMethod)) {
-					$attributeValue = $object->$getAttributeMethod();
-				} else {
-					throw new EncoderException(sprintf('Getter method "%s" does not exist in object "%s" for node type "%s" (%s) and variable with id "%s".', $getAttributeMethod, get_class($object), $node->getNodeTypeName(), get_class($node), $variableId));
+		$preNodeGetterVariables = $variableCollection->getPreNodeGetterVariables();
+		foreach ($preNodeGetterVariables as $preNodeGetterVariable) {
+			$variableId = $preNodeGetterVariable->getId();
+			$postNodeGetter = $preNodeGetterVariable->getPreNodeGetter();
+			$actionOptions = array_merge($postNodeStaticOptions, array(
+				NodeAccessor::VARIABLE_NODE_DATA => $attributesRaw,
+				NodeAccessor::VARIABLE_NAME => $variableId,
+			));
+			if ($newAttributeData = $postNodeGetter->apply($actionOptions)) {
+				if (is_array($newAttributeData)) {
+					$attributesRaw = $newAttributeData;
 				}
-
-				$attributesRaw[$variableId] = $attributeValue;
 			}
 		}
 
-		$actionVariables = array(
-			ActionVariable::GETTER_OBJECT => $object,
-			ActionVariable::GETTER_PARENT => $parent,
-			ActionVariable::GETTER_OPTIONS => $options,
-			ActionVariable::GETTER_NODE_ITERATION_INDEX => $nodeIterationIndex,
-			ActionVariable::GETTER_CHILD_OBJECT_ITERATION_INDEX => $childObjectIterationIndex,
-		);
+		// get all the variables values from the object
+		foreach ($objectGetterVariables as $objectGetterVariable) {
+			$variableId = $objectGetterVariable->getId();
 
-		$nodeMethodVariables = $node->getVariablesGetterActionByType(EncoderNodeVariable::ACTION_TYPE_NODE);
-		$attributesRaw = $this->loopNodeVariables($node, $nodeMethodVariables, $attributesRaw, $actionVariables);
+			$objectGetter = $objectGetterVariable->getObjectGetter();
+			$attributesRaw[$variableId] = $objectGetter->apply($object);
+		}
+
+		$postNodeGetterVariables = $variableCollection->getPostNodeGetterVariables();
+		foreach ($postNodeGetterVariables as $postNodeGetterVariable) {
+			$variableId = $postNodeGetterVariable->getId();
+			$hasVariable = array_key_exists($variableId, $attributesRaw);
+			$postNodeGetter = $postNodeGetterVariable->getPostNodeGetter();
+			if ($hasVariable || $postNodeGetter->alwaysExecute()) {
+				$actionOptions = array_merge($postNodeStaticOptions, array(
+					NodeAccessor::VARIABLE_NODE_DATA => $attributesRaw,
+					NodeAccessor::VARIABLE_NAME => $variableId,
+					NodeAccessor::VARIABLE_VALUE => $hasVariable ? $attributesRaw[$variableId] : null,
+				));
+				if ($newAttributeData = $postNodeGetter->apply($actionOptions)) {
+					if (is_array($newAttributeData)) {
+						$attributesRaw = $newAttributeData;
+					}
+				}
+			}
+		}
+
 
         $optionNodeKey = $options->option('key', $node);
         $optionNodeValue = $options->option('value', $node);
@@ -367,7 +434,7 @@ class Encoder implements IEncoder {
 				$isIterated = $optionChildIteration !== null;
 				$childIteration = $optionChildIteration === null ? 1 : $optionChildIteration;
 
-				$getChildObjectsMethod = $child->getGetterMethod();
+				$getChildObjectsMethod = $child->getGetter()->getMethod();
 				if (!method_exists($object, $getChildObjectsMethod)) {
 					throw new EncoderException(sprintf('Getter method "%s" for node "%s" does not exist in class "%s"', $getChildObjectsMethod, $childNodeName, get_class($object)));
 				}
@@ -472,26 +539,5 @@ class Encoder implements IEncoder {
 
 	protected function encodeAttributes($attributes) {
 		return $attributes;
-	}
-
-
-	protected function loopNodeVariables($node, $variables, $data, $actionOptions) {
-		$temp = $data;
-		foreach ($variables as $variableId => $nodeMethodVariable) {
-			$hasVariable = array_key_exists($variableId, $data);
-			if ($hasVariable || $nodeMethodVariable->alwaysExecute()) {
-				$actionOptions = array_merge(array(
-					ActionVariable::GETTER_NODE_DATA => $data,
-					ActionVariable::GETTER_NAME => $variableId,
-					ActionVariable::GETTER_VALUE => $hasVariable ? $data[$variableId] : null,
-				), $actionOptions);
-				if ($newAttributeData = $nodeMethodVariable->callNodeGetterAction($node, $actionOptions)) {
-					if (is_array($newAttributeData)) {
-						$temp = $newAttributeData;
-					}
-				}
-			}
-		}
-		return $temp;
 	}
 }

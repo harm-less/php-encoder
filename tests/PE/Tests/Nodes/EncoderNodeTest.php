@@ -3,6 +3,8 @@
 namespace PE\Tests\Nodes;
 
 use PE\Enums\ActionVariable;
+use PE\Nodes\Children\NodeChildGetter;
+use PE\Nodes\Children\NodeChildSetter;
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeChild;
 use PE\Nodes\EncoderNodeVariable;
@@ -151,6 +153,11 @@ class EncoderNodeTest extends Samples
 		EncoderNode::addNodeType($this->nodeType());
 	}
 
+	public function testGetDefaultType() {
+		$node = $this->node();
+		$this->assertEquals('default', $node->getDefaultType());
+	}
+
 	public function testOverwrittenDefaultType() {
 		$hasDefaultTypeNode = $this->addHasDefaultTypeNode();
 		$this->addHasDefaultTypeTypeNode();
@@ -278,7 +285,7 @@ class EncoderNodeTest extends Samples
 
 	public function testChildNodeMethods() {
 		$node = EncoderNode::addNode($this->node());
-		$nodeChild = new EncoderNodeChild('node-child');
+		$nodeChild = new EncoderNodeChild('node-child', new NodeChildSetter('setterMethod'), new NodeChildGetter('getterMethod'));
 		$node->addChildNode($nodeChild);
 
 		$this->assertTrue($node->childNodeExists('node-child'));
@@ -303,17 +310,21 @@ class EncoderNodeTest extends Samples
 
 
 
+	public function testLoadObject() {
+		$loaderNode = $this->addClassLoaderNode(true);
+		$loaderNode->loadObject();
+		$this->assertTrue(class_exists('\\PE\\Samples\\Loader\\ClassLoader'));
+	}
 
+	public function testLoadObjectWhenNodeDoesNotOverrideSubclass() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Must be overwritten by subclasses');
+		$loaderNode = $this->addEncoderNodeLoaderNode(false);
+		$loaderNode->loadObject();
+	}
 
 	public function testLoadObjectWhenObjectFileNameReturnsNullToo() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Object for loading cannot be null');
 		$loaderNode = $this->addEncoderNodeLoaderNode();
-		$loaderNode->loadObject();
-	}
-
-	public function testLoadObject() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Must be overwritten by subclasses');
-		$loaderNode = $this->addEncoderNodeLoaderNode(false);
 		$loaderNode->loadObject();
 	}
 
@@ -322,40 +333,37 @@ class EncoderNodeTest extends Samples
 
 
 	public function testVariableMethods() {
-		$node = EncoderNode::addNode($this->node());;
+		$node = EncoderNode::addNode($this->node());
 		$nodeVariable = new EncoderNodeVariable('node-variable');
 		$node->addVariable($nodeVariable);
 
-		$this->assertTrue($node->variableExists('node-variable'));
-		$this->assertFalse($node->variableExists('unknown'));
+		$collection = $node->getVariableCollection();
+
+		$this->assertTrue($collection->variableExists('node-variable'));
+		$this->assertFalse($collection->variableExists('unknown'));
 
 		$this->assertEquals($nodeVariable, $node->getVariable('node-variable'));
 		$this->assertNull($node->getVariable('unknown'));
 
-		$this->assertEquals($nodeVariable, $node->getVariableById('node-variable'));
-		$this->assertNull($node->getVariableById('unknown'));
-
-		$this->assertEquals(array(), $node->getVariablesSetterActionByType('type'));
-		$this->assertEquals(array(), $node->getVariablesGetterActionByType('type'));
-		$this->assertEquals(array(), $node->getAlwaysExecutedVariables());
-
-		$this->assertEquals(array(
-			$nodeVariable
-		), $node->getVariables());
+		$this->assertEquals($nodeVariable, $collection->getVariableById('node-variable'));
+		$this->assertNull($collection->getVariableById('unknown'));
 	}
 
 	public function testApplyToVariable() {
 		$node = $this->addThingNode();
 		$object = $this->getThing();
 
-		$this->assertFalse($node->applyToVariable('unknown', array()));
+		$collection = $node->getVariableCollection();
+		$objectSetter = $collection->getVariableById('thingVar')->getObjectSetter();
 
-		$node->applyToVariable('thingVar', array(
-			ActionVariable::SETTER_OBJECT => $object,
-			ActionVariable::SETTER_VALUE => 'test'
-		));
+		$objectSetter->apply($object, 'test');
 
 		$this->assertEquals('test', $object->getThingVar());
+	}
+
+	public function testGetObjectClassName() {
+		$node = $this->addThingNode();
+		$this->assertEquals('\\PE\\Samples\\General\\Thing', $node->getObjectClassName());
 	}
 
 	public function testGetObjectType() {

@@ -1,6 +1,9 @@
 <?php
 
 namespace PE\Tests\Nodes;
+
+use PE\Nodes\Children\NodeChildGetter;
+use PE\Nodes\Children\NodeChildSetter;
 use PE\Nodes\EncoderNodeChild;
 use PE\Tests\Samples;
 
@@ -16,11 +19,12 @@ class EncoderNodeChildTest extends Samples {
 
 	/**
 	 * @param string $nodeName
-	 * @param $options
+	 * @param NodeChildSetter $setter
+	 * @param NodeChildGetter $getter
 	 * @return EncoderNodeChild
 	 */
-	protected function nodeChild($nodeName = self::DEFAULT_NODE_NAME, $options = self::DEFAULT_CHILD_OPTIONS) {
-		return new EncoderNodeChild($nodeName, $options);
+	protected function nodeChild($nodeName = self::DEFAULT_NODE_NAME, NodeChildSetter $setter = null, NodeChildGetter $getter = null) {
+		return new EncoderNodeChild($nodeName, $setter, $getter);
 	}
 
 	public function testConstructor() {
@@ -28,6 +32,15 @@ class EncoderNodeChildTest extends Samples {
 		$this->assertNotNull($nodeChild);
 		$this->assertTrue($nodeChild instanceof EncoderNodeChild);
 		$this->assertEquals(self::DEFAULT_NODE_NAME, $nodeChild->getChildNodeName());
+		$this->assertNull($nodeChild->getSetter());
+		$this->assertNull($nodeChild->getGetter());
+
+		// with setter and getter
+		$setter = new NodeChildSetter('setterMethod');
+		$getter = new NodeChildGetter('getterMethod');
+		$nodeChild = $this->nodeChild('name', $setter, $getter);
+		$this->assertEquals($setter, $nodeChild->getSetter());
+		$this->assertEquals($getter, $nodeChild->getGetter());
 	}
 
 	public function testSetChildNodeName() {
@@ -47,17 +60,12 @@ class EncoderNodeChildTest extends Samples {
 		$nodeChild->setChildNodeName(null);
 	}
 
-	public function testSetAfterChildren() {
+	public function testIsArray() {
 		$nodeChild = $this->nodeChild();
-		$this->assertTrue($nodeChild->setAfterChildren());
-		$this->assertFalse($nodeChild->setAfterChildren(false));
-		$this->assertTrue($nodeChild->setAfterChildren(true));
-	}
-	public function testSetAfterAttributes() {
-		$nodeChild = $this->nodeChild();
-		$this->assertTrue($nodeChild->setAfterAttributes());
-		$this->assertFalse($nodeChild->setAfterAttributes(false));
-		$this->assertTrue($nodeChild->setAfterAttributes(true));
+		$this->assertTrue($nodeChild->isArray());
+		$this->assertTrue($nodeChild->isArray('true'));
+		$this->assertFalse($nodeChild->isArray(false));
+		$this->assertFalse($nodeChild->isArray());
 	}
 
 	public function testAddChildrenToObject() {
@@ -69,15 +77,14 @@ class EncoderNodeChildTest extends Samples {
 		));
 		$this->assertEquals(array($house), $farm->getBuildings());
 	}
-	public function testAddChildrenToObjectWithoutMethod() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeChildException', 'Setter method (' . self::DEFAULT_NODE_NAME . ') for class "PE\Samples\General\Thing" does not exist');
-		$nodeChild = $this->nodeChild();
+	public function testAddChildrenToObjectWithNonExistentMethod() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeChildException', 'Setter method (children) for class "PE\Samples\General\Thing" does not exist');
+		$nodeChild = $this->nodeChild(self::DEFAULT_NODE_NAME, new NodeChildSetter(null));
 		$nodeChild->addChildrenToObject($this->getThing(), array());
 	}
 	public function testAddChildrenToObjectWhenMethodDoesNotExist() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeChildException', 'Trying to add children to "PE\Samples\General\Thing" with method "methodName", but this method does not exist');
-		$nodeChild = $this->nodeChild();
-		$nodeChild->setSetterMethod('methodName');
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeChildException', 'Trying to add children to "PE\Samples\General\Thing" with method "unknown", but this method does not exist');
+		$nodeChild = $this->nodeChild(self::DEFAULT_NODE_NAME, new NodeChildSetter('unknown'));
 		$nodeChild->addChildrenToObject($this->getThing(), array());
 	}
 }

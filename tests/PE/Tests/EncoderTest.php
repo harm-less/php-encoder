@@ -12,6 +12,7 @@ use PE\Samples\Specials\OptionalVariables;
 use PE\Samples\Specials\RequiredConstructorVariables;
 use PE\Samples\Specials\AccessorMethodActionTypeNode;
 use PE\Samples\Specials\SingleChild;
+use PE\Samples\Specials\VariableTypes;
 
 class EncoderTest extends Samples {
 
@@ -197,7 +198,7 @@ class EncoderTest extends Samples {
 		));
 	}
 	public function testDecodeObjectWithRequiredConstructorVariablesButOneRequiredVariableIsNotProperlySetup() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" cannot process its value (awesomeType). Presumably because the NodeType does not recognize the variable');
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Variable "name" for "\PE\Samples\Specials\RequiredConstructorVariables" is required but there is no EncoderNodeVariable available to retrieve the value for node "required-constructor-variables" (Node type: "required-constructors-variables") at index "0"');
 		$encoder = $this->encoder();
 		$this->addRequiredConstructorVariablesNode(false);
 
@@ -236,6 +237,28 @@ class EncoderTest extends Samples {
 		$obj = $decoded['optional-variables'];
 		$this->assertEquals('Hello world', $obj->getName());
 		$this->assertEquals('other hello world', $obj->getOtherVariable());
+	}
+
+	public function testDecodeObjectAllVariableTypes() {
+		$this->addVariableTypesNode();
+		$decoded = $this->encoder()->decode(array(
+			'variable-type' => array(
+				'required' => 'Hello world',
+				'optional' => 'Hello other world'
+			)
+		));
+
+		/** @var VariableTypes $obj */
+		$obj = $decoded['variable-type'];
+		$this->assertEquals('Hello world | setter pre', $obj->getRequired());
+		$this->assertEquals('Hello other world | setter pre | setter post', $obj->getOptional());
+
+		$encoded = $this->encoder()->encode($obj);
+		$encodedProcessed = $encoded['processed'];
+		$this->assertEquals('Hello world | setter pre | getter post', $encodedProcessed['variable-type']['required']);
+		$this->assertEquals('getter pre', $encodedProcessed['variable-type']['pre-required']);
+		$this->assertEquals('Hello other world | setter pre | setter post | required pre | optional pre | getter post', $encodedProcessed['variable-type']['optional']);
+		$this->assertEquals('getter pre', $encodedProcessed['variable-type']['pre-optional']);
 	}
 
 	public function testDecodeWithSetAfterChildrenFalse() {
@@ -399,7 +422,7 @@ class EncoderTest extends Samples {
 		$this->encoder()->encode($this->getNoGetterMethod());
 	}
 	public function testEncodeWithoutVariableGetterMethod() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderException', 'Getter method "getNonExistent" does not exist in object "PE\Samples\Erroneous\NoVariableGetterMethod" for node type "default" (PE\Nodes\Erroneous\NoVariableGetterMethodNode) and variable with id "nonExistent".');
+		$this->setExpectedException('\\PE\\Exceptions\\VariableTypeException', 'Method "getNonExistent" does not exist for class "PE\Samples\Erroneous\NoVariableGetterMethod" does not exist');
 
 		$this->addVariableNoGetterMethodNode();
 

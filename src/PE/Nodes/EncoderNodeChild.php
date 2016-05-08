@@ -3,17 +3,36 @@
 namespace PE\Nodes;
 
 use PE\Exceptions\EncoderNodeChildException;
+use PE\Nodes\Children\NodeChildGetter;
+use PE\Nodes\Children\NodeChildSetter;
 
-class EncoderNodeChild extends EncoderNodeVariable {
+class EncoderNodeChild {
 
+	/**
+	 * @var string
+	 */
 	private $childNodeName;
-	private $isArray = true;
-	private $setAfterChildren = true;
-	private $setAfterAttributes = true;
 
-	function __construct($nodeName, $options = null) {
-		parent::__construct('', $options);
+	/**
+	 * @var NodeChildSetter Setter of the child objects
+	 */
+	private $setter;
+
+	/**
+	 * @var NodeChildGetter Setter of the child objects
+	 */
+	private $getter;
+
+	/**
+	 * @var bool
+	 */
+	private $isArray = true;
+
+	function __construct($nodeName, NodeChildSetter $setter = null, NodeChildGetter $getter = null) {
 		$this->setChildNodeName($nodeName);
+
+		if ($setter) $this->setter($setter);
+		if ($getter) $this->getter($getter);
 	}
 
 	public function setChildNodeName($childNodeName) {
@@ -26,26 +45,41 @@ class EncoderNodeChild extends EncoderNodeVariable {
 		return $this->childNodeName;
 	}
 
-	// @todo Figure out if this feature is still necessary. Because if you use a single node, can't we simply assume it isn't an array?
+	/**
+	 * @param NodeChildSetter $setter
+	 */
+	protected function setter(NodeChildSetter $setter) {
+		$this->setter = $setter;
+	}
+	/**
+	 * @return NodeChildSetter
+	 */
+	public function getSetter() {
+		return $this->setter;
+	}
+
+	/**
+	 * @param NodeChildGetter $getter
+	 */
+	protected function getter(NodeChildGetter $getter) {
+		$this->getter = $getter;
+	}
+	/**
+	 * @return NodeChildGetter
+	 */
+	public function getGetter() {
+		return $this->getter;
+	}
+
+	/**
+	 * @param null $bool
+	 * @return bool
+	 */
 	public function isArray($bool = null) {
 		if ($bool !== null) {
-			$this->isArray = $bool;
+			$this->isArray = (bool) $bool;
 		}
 		return $this->isArray;
-	}
-
-	public function setAfterChildren($bool = null) {
-		if ($bool !== null) {
-			$this->setAfterChildren = $bool;
-		}
-		return $this->setAfterChildren;
-	}
-
-	public function setAfterAttributes($bool = null) {
-		if ($bool !== null) {
-			$this->setAfterAttributes = $bool;
-		}
-		return $this->setAfterAttributes;
 	}
 
 	/**
@@ -56,13 +90,13 @@ class EncoderNodeChild extends EncoderNodeVariable {
 	 * @return bool Returns true if the action succeeded and false when it couldn't find the child
 	 */
 	public function addChildrenToObject($target, $values) {
-		$methodName = $this->getSetterMethod();
+		$methodName = $this->getSetter()->getMethod();
 		if ($methodName === null) {
 			throw new EncoderNodeChildException(sprintf('Setter method (%s) for class "%s" does not exist', $this->getChildNodeName(), get_class($target)));
 		}
 		else if (method_exists($target, $methodName)) {
 			foreach ($values as $value) {
-				$target->$methodName($this->processValue($value));
+				$target->$methodName($value);
 			}
 		}
 		else {

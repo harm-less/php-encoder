@@ -5,6 +5,9 @@ namespace PE\Nodes\Specials;
 use PE\Enums\ActionVariable;
 use PE\Nodes\EncoderNode;
 use PE\Nodes\EncoderNodeVariable;
+use PE\Variables\Types\NodeAccessor;
+use PE\Variables\Types\PostNodeGetter;
+use PE\Variables\Types\PostNodeSetter;
 
 class AccessorMethodActionTypeNodeNode extends EncoderNode {
 
@@ -13,18 +16,9 @@ class AccessorMethodActionTypeNodeNode extends EncoderNode {
 
 		$this->addVariable(new EncoderNodeVariable('special'));
 
-		$this->addVariable(new EncoderNodeVariable('node', array(
-			'setterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'addNodeToSpecial',
-				'variables' => array(ActionVariable::SETTER_NAME)
-			),
-			'getterAction' => array(
-				'type' => EncoderNodeVariable::ACTION_TYPE_NODE,
-				'method' => 'getNodeFromSpecial',
-				'variables' => array(ActionVariable::GETTER_NAME)
-			)
-		)));
+		$special = $this->addVariable(new EncoderNodeVariable('node', false));
+		$special->postNodeSetter(new PostNodeSetter('addNodeToSpecial', array(NodeAccessor::VARIABLE_NAME)));
+		$special->postNodeGetter(new PostNodeGetter('getNodeFromSpecial', array(NodeAccessor::VARIABLE_NAME)));
 	}
 
 	public function addNodeToSpecial($data, $setterName) {
