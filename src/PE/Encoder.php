@@ -276,7 +276,7 @@ class Encoder implements IEncoder {
 
 			$nodeIndex++;
 		}
-		$variableCollection->objectVariablesAreValidWithData($decodedChildren, true);
+		$proxyNode->getVariableCollection()->objectVariablesAreValidWithData($decodedChildren, true);
 
 		if ($isSingleNode) {
 			return $objects[0];
