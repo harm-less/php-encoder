@@ -229,10 +229,10 @@ class EncoderNodeVariable {
 
 
 	/**
-	 * @param ObjectAccessor $setter
-	 * @return ObjectAccessor
+	 * @param ObjectSetter|null $setter
+	 * @return ObjectSetter
 	 */
-	public function objectSetter(ObjectAccessor $setter) {
+	public function objectSetter(ObjectSetter $setter = null) {
 		$setter->setVariable($this);
 		$this->objectSetter = $setter;
 		return $setter;
@@ -255,10 +255,10 @@ class EncoderNodeVariable {
 
 
 	/**
-	 * @param ObjectAccessor $getter
-	 * @return ObjectAccessor
+	 * @param ObjectGetter|null $getter
+	 * @return ObjectGetter
 	 */
-	public function objectGetter(ObjectAccessor $getter) {
+	public function objectGetter(ObjectGetter $getter = null) {
 		$getter->setVariable($this);
 		$this->objectGetter = $getter;
 		return $getter;
