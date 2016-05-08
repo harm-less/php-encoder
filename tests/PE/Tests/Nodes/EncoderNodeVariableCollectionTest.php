@@ -5,6 +5,8 @@ namespace PE\Tests\Nodes;
 use PE\Nodes\EncoderNodeVariable;
 use PE\Nodes\EncoderNodeVariableCollection;
 use PE\Tests\AbstractPETest;
+use PE\Variables\Types\ObjectGetter;
+use PE\Variables\Types\ObjectSetter;
 use PE\Variables\Types\PostNodeGetter;
 use PE\Variables\Types\PostNodeSetter;
 use PE\Variables\Types\PreNodeGetter;
@@ -46,6 +48,12 @@ class EncoderNodeVariableCollectionTest extends AbstractPETest {
 
 		$var2ObjectSetter = $collection->getVariableById('var2')->getObjectSetter();
 		$this->assertEquals(array('key' => 'value'), $var2ObjectSetter->processValue('{"key":"value"}'));
+	}
+
+	public function testAddVariablesWithSameId() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeVariableCollectionException', 'Trying to add a EncoderNodeVariable but a variable with id "var" already exists');
+		$this->collectionAddVariable(new EncoderNodeVariable('var'));
+		$this->collectionAddVariable(new EncoderNodeVariable('var'));
 	}
 
 	public function testGetVariable() {
@@ -98,14 +106,6 @@ class EncoderNodeVariableCollectionTest extends AbstractPETest {
 
 
 
-
-	protected function collectionAddVariableDefault() {
-		$variable = $this->collectionAddVariable(new EncoderNodeVariable('var'));
-		$variable->setType(EncoderNodeVariable::TYPE_BOOL);
-		return $variable;
-	}
-
-
 	public function testGetVariablesNodeSetterAndGetter() {
 		$collection = $this->variableCollection();
 
@@ -132,11 +132,11 @@ class EncoderNodeVariableCollectionTest extends AbstractPETest {
 		$this->assertEquals(array($variable2, $variable), $preSettersSorted);
 
 		// pre getter
-		$preSetters = $collection->getPreNodeGetterVariables(false);
-		$this->assertEquals(array($variable, $variable2), $preSetters);
+		$preGetters = $collection->getPreNodeGetterVariables(false);
+		$this->assertEquals(array($variable, $variable2), $preGetters);
 
-		$preSettersSorted = $collection->getPreNodeGetterVariables();
-		$this->assertEquals(array($variable2, $variable), $preSettersSorted);
+		$preGettersSorted = $collection->getPreNodeGetterVariables();
+		$this->assertEquals(array($variable2, $variable), $preGettersSorted);
 
 
 		// post setter
@@ -147,11 +147,38 @@ class EncoderNodeVariableCollectionTest extends AbstractPETest {
 		$this->assertEquals(array($variable3, $variable2), $preSettersSorted);
 
 		// post getter
-		$preSetters = $collection->getPostNodeGetterVariables(false);
-		$this->assertEquals(array($variable2, $variable3), $preSetters);
+		$preGetters = $collection->getPostNodeGetterVariables(false);
+		$this->assertEquals(array($variable2, $variable3), $preGetters);
 
-		$preSettersSorted = $collection->getPostNodeGetterVariables();
-		$this->assertEquals(array($variable3, $variable2), $preSettersSorted);
+		$preGettersSorted = $collection->getPostNodeGetterVariables();
+		$this->assertEquals(array($variable3, $variable2), $preGettersSorted);
+	}
+
+	public function testGetVariablesObjectSetterAndGetter() {
+		$collection = $this->variableCollection();
+
+		$variable = $this->collectionAddVariable(new EncoderNodeVariable('var'));
+		$variable->objectSetter(new ObjectSetter('objectSetter'));
+		$variable->objectGetter(new ObjectGetter('objectGetter'));
+		$variable->setOrder(2);
+		$variable2 = $this->collectionAddVariable(new EncoderNodeVariable('var2'));
+		$variable2->objectSetter(new ObjectSetter('objectSetter2'));
+		$variable2->objectGetter(new ObjectGetter('objectGetter2'));
+		$variable2->setOrder(1);
+
+		// pre setter
+		$setters = $collection->getObjectSetterVariables(false);
+		$this->assertEquals(array($variable, $variable2), $setters);
+
+		$settersSorted = $collection->getObjectSetterVariables();
+		$this->assertEquals(array($variable2, $variable), $settersSorted);
+
+		// pre getter
+		$getters = $collection->getObjectGetterVariables(false);
+		$this->assertEquals(array($variable, $variable2), $getters);
+
+		$gettersSorted = $collection->getObjectGetterVariables();
+		$this->assertEquals(array($variable2, $variable), $gettersSorted);
 	}
 
 	public function testVariablesAreValidWithData() {
@@ -165,7 +192,7 @@ class EncoderNodeVariableCollectionTest extends AbstractPETest {
 	}
 
 	public function testVariablesAreNotValidWithData() {
-		$this->setExpectedException('PE\\Exceptions\\EncoderNodeVariableException', 'Variable "var" must be unique but value "Test" is given at least twice');
+		$this->setExpectedException('PE\\Exceptions\\EncoderNodeVariableCollectionException', 'Variable "var" must be unique but value "Test" is given at least twice');
 		$collection = $this->variableCollection();
 
 		$variable = $this->collectionAddVariable(new EncoderNodeVariable('var'));
@@ -181,5 +208,11 @@ class EncoderNodeVariableCollectionTest extends AbstractPETest {
 	protected function collectionAddVariable($variable = null) {
 		$collection = $this->variableCollection();
 		return $collection->addVariable($variable ? $variable : new EncoderNodeVariable('var'));
+	}
+
+	protected function collectionAddVariableDefault() {
+		$variable = $this->collectionAddVariable(new EncoderNodeVariable('var'));
+		$variable->setType(EncoderNodeVariable::TYPE_BOOL);
+		return $variable;
 	}
 }

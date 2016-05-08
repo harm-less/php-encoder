@@ -24,7 +24,7 @@ class EncoderNodeChildTest extends Samples {
 	 * @return EncoderNodeChild
 	 */
 	protected function nodeChild($nodeName = self::DEFAULT_NODE_NAME, NodeChildSetter $setter = null, NodeChildGetter $getter = null) {
-		return new EncoderNodeChild($nodeName, $setter);
+		return new EncoderNodeChild($nodeName, $setter, $getter);
 	}
 
 	public function testConstructor() {
@@ -32,6 +32,15 @@ class EncoderNodeChildTest extends Samples {
 		$this->assertNotNull($nodeChild);
 		$this->assertTrue($nodeChild instanceof EncoderNodeChild);
 		$this->assertEquals(self::DEFAULT_NODE_NAME, $nodeChild->getChildNodeName());
+		$this->assertNull($nodeChild->getSetter());
+		$this->assertNull($nodeChild->getGetter());
+
+		// with setter and getter
+		$setter = new NodeChildSetter('setterMethod');
+		$getter = new NodeChildGetter('getterMethod');
+		$nodeChild = $this->nodeChild('name', $setter, $getter);
+		$this->assertEquals($setter, $nodeChild->getSetter());
+		$this->assertEquals($getter, $nodeChild->getGetter());
 	}
 
 	public function testSetChildNodeName() {
@@ -49,6 +58,14 @@ class EncoderNodeChildTest extends Samples {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeChildException', 'Node name cannot be null or empty');
 		$nodeChild = $this->nodeChild();
 		$nodeChild->setChildNodeName(null);
+	}
+
+	public function testIsArray() {
+		$nodeChild = $this->nodeChild();
+		$this->assertTrue($nodeChild->isArray());
+		$this->assertTrue($nodeChild->isArray('true'));
+		$this->assertFalse($nodeChild->isArray(false));
+		$this->assertFalse($nodeChild->isArray());
 	}
 
 	public function testAddChildrenToObject() {

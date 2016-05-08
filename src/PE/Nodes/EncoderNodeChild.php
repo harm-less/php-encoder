@@ -23,6 +23,9 @@ class EncoderNodeChild {
 	 */
 	private $getter;
 
+	/**
+	 * @var bool
+	 */
 	private $isArray = true;
 
 	function __construct($nodeName, NodeChildSetter $setter = null, NodeChildGetter $getter = null) {
@@ -68,10 +71,13 @@ class EncoderNodeChild {
 		return $this->getter;
 	}
 
-	// @todo Figure out if this feature is still necessary. Because if you use a single node, can't we simply assume it isn't an array?
+	/**
+	 * @param null $bool
+	 * @return bool
+	 */
 	public function isArray($bool = null) {
 		if ($bool !== null) {
-			$this->isArray = $bool;
+			$this->isArray = (bool) $bool;
 		}
 		return $this->isArray;
 	}

@@ -3,7 +3,6 @@
 namespace PE\Nodes;
 
 use PE\Exceptions\EncoderNodeVariableCollectionException;
-use PE\Exceptions\EncoderNodeVariableException;
 use PE\Variables\Types\NodeAccessor;
 use PE\Variables\Types\ObjectAccessor;
 
@@ -28,10 +27,10 @@ class EncoderNodeVariableCollection {
 	 */
 	public function addVariable(EncoderNodeVariable $variable) {
 		$id = $variable->getId();
-		if (!$this->variableExists($id)) {
-			$this->variables[$id] = $variable;
+		if ($this->variableExists($id)) {
+			throw new EncoderNodeVariableCollectionException(sprintf('Trying to add a EncoderNodeVariable but a variable with id "%s" already exists', $id));
 		}
-		$this->_cacheHardReset();
+		$this->variables[$id] = $variable;
 		return $variable;
 	}
 
@@ -208,22 +207,6 @@ class EncoderNodeVariableCollection {
 		return $this->_cache[$method][$parameters];
 	}
 
-	/**
-	 * @param string $method
-	 * @return bool
-	 */
-	protected function _cacheReset($method) {
-		if (array_key_exists($method, $this->_cache)) {
-			unset($this->_cache[$method]);
-			return true;
-		}
-		return false;
-	}
-
-	protected function _cacheHardReset() {
-		$this->_cache = array();
-	}
-
 
 	/**
 	 * @param $dataArray
@@ -244,7 +227,7 @@ class EncoderNodeVariableCollection {
 						$variableValue = $data[$variableId];
 						if (array_search($variableValue, $unique[$variableId]) !== false) {
 							if ($throwErrorIfFails) {
-								throw new EncoderNodeVariableException(sprintf('Variable "%s" must be unique but value "%s" is given at least twice', $variableId, $variableValue));
+								throw new EncoderNodeVariableCollectionException(sprintf('Variable "%s" must be unique but value "%s" is given at least twice', $variableId, $variableValue));
 							}
 							else {
 								return false;

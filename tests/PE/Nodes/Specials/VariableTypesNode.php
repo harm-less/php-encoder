@@ -8,6 +8,7 @@ use PE\Samples\Specials\VariableTypes;
 use PE\Variables\Types\NodeAccessor;
 use PE\Variables\Types\PostNodeGetter;
 use PE\Variables\Types\PostNodeSetter;
+use PE\Variables\Types\PreNodeGetter;
 use PE\Variables\Types\PreNodeSetter;
 
 class VariableTypesNode extends EncoderNode {
@@ -30,6 +31,13 @@ class VariableTypesNode extends EncoderNode {
 			NodeAccessor::VARIABLE_OBJECT,
 			NodeAccessor::VARIABLE_PARENT
 		)));
+
+		$required->preNodeGetter(new PreNodeGetter('preNodeRequiredGetter', array(
+			NodeAccessor::VARIABLE_NODE,
+			NodeAccessor::VARIABLE_NAME,
+			NodeAccessor::VARIABLE_OBJECT,
+			NodeAccessor::VARIABLE_PARENT
+		)));
 		$required->postNodeGetter(new PostNodeGetter('postNodeRequiredGetter', array(
 			NodeAccessor::VARIABLE_NODE,
 			NodeAccessor::VARIABLE_NAME,
@@ -37,6 +45,7 @@ class VariableTypesNode extends EncoderNode {
 			NodeAccessor::VARIABLE_OBJECT,
 			NodeAccessor::VARIABLE_PARENT
 		)));
+
 
 		$optional = $this->addVariable(new EncoderNodeVariable('optional'));
 		$optional->preNodeSetter(new PreNodeSetter('preNodeOptionalSetter', array(
@@ -49,6 +58,13 @@ class VariableTypesNode extends EncoderNode {
 			NodeAccessor::VARIABLE_NODE,
 			NodeAccessor::VARIABLE_NAME,
 			NodeAccessor::VARIABLE_VALUE,
+			NodeAccessor::VARIABLE_OBJECT,
+			NodeAccessor::VARIABLE_PARENT
+		)));
+
+		$optional->preNodeGetter(new PreNodeGetter('preNodeOptionalGetter', array(
+			NodeAccessor::VARIABLE_NODE,
+			NodeAccessor::VARIABLE_NAME,
 			NodeAccessor::VARIABLE_OBJECT,
 			NodeAccessor::VARIABLE_PARENT
 		)));
@@ -69,6 +85,12 @@ class VariableTypesNode extends EncoderNode {
 		$nodeData['required'] = $nodeData['required'] . ' | setter post';
 		return $nodeData;
 	}
+
+	public function preNodeRequiredGetter($nodeData, VariableTypesNode $variableTypesNode, $name, VariableTypes $variableTypes, $parent) {
+		$variableTypes->setOptional($variableTypes->getOptional() . ' | required pre');
+		$nodeData['pre-required'] = 'getter pre';
+		return $nodeData;
+	}
 	public function postNodeRequiredGetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, VariableTypes $variableTypes, $parent) {
 		$nodeData['required'] = $nodeData['required'] . ' | getter post';
 		return $nodeData;
@@ -76,11 +98,17 @@ class VariableTypesNode extends EncoderNode {
 
 
 	public function preNodeOptionalSetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, $parent) {
-		$nodeData['optional'] = $nodeData['optional'] . ' | setter  pre';
+		$nodeData['optional'] = $nodeData['optional'] . ' | setter pre';
 		return $nodeData;
 	}
 	public function postNodeOptionalSetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, VariableTypes $variableTypes, $parent) {
-		$nodeData['optional'] = $nodeData['optional'] . ' | setter  post';
+		$nodeData['optional'] = $nodeData['optional'] . ' | setter post';
+		return $nodeData;
+	}
+
+	public function preNodeOptionalGetter($nodeData, VariableTypesNode $variableTypesNode, $name, VariableTypes $variableTypes, $parent) {
+		$variableTypes->setOptional($variableTypes->getOptional() . ' | optional pre');
+		$nodeData['pre-optional'] = 'getter pre';
 		return $nodeData;
 	}
 	public function postNodeOptionalGetter($nodeData, VariableTypesNode $variableTypesNode, $name, $value, VariableTypes $variableTypes, $parent) {

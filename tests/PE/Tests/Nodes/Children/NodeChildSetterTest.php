@@ -29,6 +29,11 @@ class NodeChildSetterTest extends Samples
 		$this->assertTrue($setter instanceof NodeChildSetter);
 	}
 
+	public function testGetMethod() {
+		$childSetter = $this->nodeChildSetter();
+		$this->assertEquals('method', $childSetter->getMethod());
+	}
+
 	public function testSetAfterChildren() {
 		$nodeChildSetter = $this->nodeChildSetter();
 

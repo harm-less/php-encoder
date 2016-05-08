@@ -202,9 +202,6 @@ class Encoder implements IEncoder {
 
 					$objectSetter = $objectSetterVariable->getObjectSetter();
 					$processedRequiredValue = $objectSetter->processValue($requiredValue);
-					if ($processedRequiredValue === null) {
-						throw new EncoderException(sprintf('Variable "%s" for "%s" cannot process its value (%s). Presumably because the NodeType does not recognize the variable', $processedVariable, $nodeClassName, $requiredValue));
-					}
 
 					$requiredVariableValues[$processedVariable] = $processedRequiredValue;
 					unset($nodeDataItem[$processedVariable]);
@@ -276,7 +273,7 @@ class Encoder implements IEncoder {
 
 			$nodeIndex++;
 		}
-		$proxyNode->variablesAreValid($decodedChildren, true);
+		$variableCollection->objectVariablesAreValidWithData($decodedChildren, true);
 
 		if ($isSingleNode) {
 			return $objects[0];
@@ -344,14 +341,7 @@ class Encoder implements IEncoder {
 
         $optionNodeIndex = $node->getNodeName() . '[' . $childObjectIterationIndex . ']';
 
-		// get all the variables values from the object
 		$attributesRaw = array();
-		foreach ($objectGetterVariables as $objectGetterVariable) {
-			$variableId = $objectGetterVariable->getId();
-
-			$objectGetter = $objectGetterVariable->getObjectGetter();
-			$attributesRaw[$variableId] = $objectGetter->apply($object);
-		}
 
 		$postNodeStaticOptions = array(
 			NodeAccessor::VARIABLE_NODE => $node,
@@ -361,6 +351,30 @@ class Encoder implements IEncoder {
 			NodeAccessor::VARIABLE_NODE_ITERATION_INDEX => $nodeIterationIndex,
 			NodeAccessor::VARIABLE_CHILD_OBJECT_ITERATION_INDEX => $childObjectIterationIndex,
 		);
+
+		$preNodeGetterVariables = $variableCollection->getPreNodeGetterVariables();
+		foreach ($preNodeGetterVariables as $preNodeGetterVariable) {
+			$variableId = $preNodeGetterVariable->getId();
+			$postNodeGetter = $preNodeGetterVariable->getPreNodeGetter();
+			$actionOptions = array_merge($postNodeStaticOptions, array(
+				NodeAccessor::VARIABLE_NODE_DATA => $attributesRaw,
+				NodeAccessor::VARIABLE_NAME => $variableId,
+			));
+			if ($newAttributeData = $postNodeGetter->apply($actionOptions)) {
+				if (is_array($newAttributeData)) {
+					$attributesRaw = $newAttributeData;
+				}
+			}
+		}
+
+		// get all the variables values from the object
+		foreach ($objectGetterVariables as $objectGetterVariable) {
+			$variableId = $objectGetterVariable->getId();
+
+			$objectGetter = $objectGetterVariable->getObjectGetter();
+			$attributesRaw[$variableId] = $objectGetter->apply($object);
+		}
+
 		$postNodeGetterVariables = $variableCollection->getPostNodeGetterVariables();
 		foreach ($postNodeGetterVariables as $postNodeGetterVariable) {
 			$variableId = $postNodeGetterVariable->getId();

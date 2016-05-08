@@ -153,6 +153,11 @@ class EncoderNodeTest extends Samples
 		EncoderNode::addNodeType($this->nodeType());
 	}
 
+	public function testGetDefaultType() {
+		$node = $this->node();
+		$this->assertEquals('default', $node->getDefaultType());
+	}
+
 	public function testOverwrittenDefaultType() {
 		$hasDefaultTypeNode = $this->addHasDefaultTypeNode();
 		$this->addHasDefaultTypeTypeNode();
@@ -305,17 +310,21 @@ class EncoderNodeTest extends Samples
 
 
 
+	public function testLoadObject() {
+		$loaderNode = $this->addClassLoaderNode(true);
+		$loaderNode->loadObject();
+		$this->assertTrue(class_exists('\\PE\\Samples\\Loader\\ClassLoader'));
+	}
 
+	public function testLoadObjectWhenNodeDoesNotOverrideSubclass() {
+		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Must be overwritten by subclasses');
+		$loaderNode = $this->addEncoderNodeLoaderNode(false);
+		$loaderNode->loadObject();
+	}
 
 	public function testLoadObjectWhenObjectFileNameReturnsNullToo() {
 		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Object for loading cannot be null');
 		$loaderNode = $this->addEncoderNodeLoaderNode();
-		$loaderNode->loadObject();
-	}
-
-	public function testLoadObject() {
-		$this->setExpectedException('\\PE\\Exceptions\\EncoderNodeException', 'Must be overwritten by subclasses');
-		$loaderNode = $this->addEncoderNodeLoaderNode(false);
 		$loaderNode->loadObject();
 	}
 
@@ -350,6 +359,11 @@ class EncoderNodeTest extends Samples
 		$objectSetter->apply($object, 'test');
 
 		$this->assertEquals('test', $object->getThingVar());
+	}
+
+	public function testGetObjectClassName() {
+		$node = $this->addThingNode();
+		$this->assertEquals('\\PE\\Samples\\General\\Thing', $node->getObjectClassName());
 	}
 
 	public function testGetObjectType() {

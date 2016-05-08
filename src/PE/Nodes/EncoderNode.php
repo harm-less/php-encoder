@@ -498,29 +498,6 @@ class EncoderNode {
 		return $this->variables;
 	}
 
-	/**
-	 * @param array $nodeDataArray
-	 * @param bool $throwErrorIfFails Set to true if you want it to throw an error if it fails
-	 * @return bool Returns true if all requirements are met
-	 *
-	 * @see EncoderNodeVariable::variablesAreValidWithData()
-	 */
-	public function variablesAreValid($nodeDataArray, $throwErrorIfFails = false) {
-		return $this->variables->objectVariablesAreValidWithData($nodeDataArray, $throwErrorIfFails);
-	}
-
-	/**
-	 * @param NodeAccessor $nodeAccessor NodeAccessor you want to apply to
-	 * @param array $parameters Array of all the information required for the several methods needing it
-	 * @return bool|mixed
-	 *
-	 * @see EncoderNodeVariable::applyToSetter()
-	 */
-	public function applyToNode(NodeAccessor $nodeAccessor, $parameters) {
-		$parameters[NodeAccessor::VARIABLE_NODE] = $this;
-		return $nodeAccessor->apply($parameters);
-	}
-
 
 
 
