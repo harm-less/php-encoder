@@ -233,7 +233,7 @@ class EncoderNodeVariable {
 	 * @return ObjectSetter
 	 */
 	public function objectSetter(ObjectSetter $setter = null) {
-		$setter->setVariable($this);
+		if ($setter) $setter->setVariable($this);
 		$this->objectSetter = $setter;
 		return $setter;
 	}
@@ -259,7 +259,7 @@ class EncoderNodeVariable {
 	 * @return ObjectGetter
 	 */
 	public function objectGetter(ObjectGetter $getter = null) {
-		$getter->setVariable($this);
+		if ($getter) $getter->setVariable($this);
 		$this->objectGetter = $getter;
 		return $getter;
 	}

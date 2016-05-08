@@ -130,6 +130,10 @@ class EncoderNodeVariableTest extends Samples {
 		$this->assertEquals($objectSetter, $variable->getObjectSetter());
 		$this->assertTrue($variable->hasObjectSetter());
 		$this->assertEquals($variable, $objectSetter->getVariable());
+
+		// disable the object setter
+		$variable->objectSetter(null);
+		$this->assertNull($variable->getObjectSetter());
 	}
 
 	public function testObjectGetter() {
@@ -141,5 +145,9 @@ class EncoderNodeVariableTest extends Samples {
 		$this->assertEquals($objectGetter, $variable->getObjectGetter());
 		$this->assertTrue($variable->hasObjectGetter());
 		$this->assertEquals($variable, $objectGetter->getVariable());
+
+		// disable the object setter
+		$variable->objectGetter(null);
+		$this->assertNull($variable->getObjectGetter());
 	}
 }
